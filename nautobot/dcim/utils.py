@@ -114,6 +114,12 @@ def get_all_network_driver_mappings():
 
     # add mappings from optional NETWORK_DRIVERS setting
     network_drivers_config = get_settings_or_config("NETWORK_DRIVERS")
+    print(network_drivers_config)
+    if not isinstance(network_drivers_config, dict):
+        raise ValueError(
+            f"Expected NETWORK_DRIVERS to be a dictionary, but got {type(network_drivers_config)}: {network_drivers_config}"
+        )
+
     for tool_name, mappings in network_drivers_config.items():
         for normalized_name, mapped_name in mappings.items():
             network_driver_mappings.setdefault(normalized_name, {})

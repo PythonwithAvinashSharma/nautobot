@@ -566,7 +566,7 @@ td span.hover_copy:hover .hover_copy_button {
 }
 
 .powered-by-nautobot {
-    background: url('/static/img/nautobot_icon_blue.svg');
+    background: url('/static/img/hcl-blue.svg');
     background-repeat: no-repeat;
     background-size: 16px 16px;
     background-position: center bottom;
@@ -690,7 +690,7 @@ td span.hover_copy:hover .hover_copy_button {
 
 /* Change color of dropdown anchor element when dropdown is opened */
 .navbar-fixed-left .navbar-nav > .dropdown > a[aria-expanded="true"] {
-    color: #ff8000; /* Color when expanded */
+    color: #a784ff; /* Color when expanded */
 }
 
 /* Reset focus color when dropdown is closed */
@@ -700,7 +700,7 @@ td span.hover_copy:hover .hover_copy_button {
 
 /* Re-add hover color after dropdown is closed */
 .navbar-fixed-left .navbar-nav > .dropdown > a[aria-expanded="false"]:hover {
-    color: #ff8000;
+    color: #a784ff;
 }
 
 .navbar-fixed-left .navbar-nav > .dropdown > a > .mdi-chevron-down {
@@ -711,7 +711,7 @@ td span.hover_copy:hover .hover_copy_button {
 .navbar-fixed-left .navbar-nav > .dropdown > a[aria-expanded="true"] > .mdi-chevron-down::before {
     transition: transform 300ms ease;
     transform: rotate(-180deg);
-    color: #ff8000; /* Color when expanded */
+    color: #a784ff; /* Color when expanded */
 }
 
 /* Change arrow direction, color when the dropdown is closed */
@@ -796,7 +796,7 @@ td span.hover_copy:hover .hover_copy_button {
 
 /* Change dropdown link color when item is active (after clicking) */
 .navbar-fixed-left .navbar-nav > .dropdown > .nav-dropdown-menu > li.active > a {
-    color: #ff8000 !important;
+    color: #a784ff !important;
     text-decoration: none;
 }
 
