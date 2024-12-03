@@ -93,19 +93,7 @@ EXEMPT_VIEW_PERMISSIONS = []
 # Number of seconds to cache ContentType lookups. Set to 0 to disable caching.
 # CONTENT_TYPE_CACHE_TIMEOUT = int(os.getenv("NAUTOBOT_CONTENT_TYPE_CACHE_TIMEOUT", "0"))
 
-# Celery Beat heartbeat file path - will be touched by Beat each time it wakes up as a proof-of-health.
-# CELERY_BEAT_HEARTBEAT_FILE = os.getenv(
-#     "NAUTOBOT_CELERY_BEAT_HEARTBEAT_FILE",
-#     os.path.join(tempfile.gettempdir(), "nautobot_celery_beat_heartbeat"),
-# )
 
-# Celery broker URL used to tell workers where queues are located
-#
-# CELERY_BROKER_URL = os.getenv("NAUTOBOT_CELERY_BROKER_URL", parse_redis_connection(redis_database=0))
-
-# Optional configuration dict for Celery to use custom SSL certificates to connect to Redis.
-#
-# CELERY_BROKER_USE_SSL = None
 
 # Database configuration. See the Django documentation for a complete list of available parameters:
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
@@ -398,7 +386,7 @@ STORAGE_BACKEND = None
 STORAGE_CONFIG = {}
 # Plugins
 METRICS_DISABLED_APPS = []
-PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir"]
+PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config"]
 PLUGINS_CONFIG = {
    "nautobot_plugin_nornir": {
        "use_config_context": {"secrets": False, "connection_options": True},
@@ -434,7 +422,29 @@ PLUGINS_CONFIG = {
     }
                
         }
-    }   
+    },
+    "nautobot_golden_config": {
+        "per_feature_bar_width": 0.15,
+        "per_feature_width": 13,
+        "per_feature_height": 4,
+        "enable_backup": True,
+        "enable_compliance": True,
+        "enable_intended": True,
+        "enable_sotagg": True,
+        "enable_plan": True,
+        "enable_deploy": True,
+        "enable_postprocessing": False,
+        "sot_agg_transposer": None,
+        "postprocessing_callables": [],
+        "postprocessing_subscribed": [],
+        "jinja_env": {
+            "undefined": "jinja2.StrictUndefined",
+            "trim_blocks": True,
+            "lstrip_blocks": False,
+        },
+        # "default_deploy_status": "Not Approved",
+        # "get_custom_compliance": "my.custom_compliance.func"
+    },
 }
 NETWORK_DRIVERS= {
 
@@ -602,47 +612,6 @@ CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True  # avoid potential errors in a multi
 #     "docs": os.getenv("NAUTOBOT_BRANDING_URLS_DOCS", None),
 #     "help": os.getenv("NAUTOBOT_BRANDING_URLS_HELP", "https://github.com/nautobot/nautobot/wiki"),
 # }
-
-# Options to pass to the Celery broker transport, for example when using Celery with Redis Sentinel.
-#
-# CELERY_BROKER_TRANSPORT_OPTIONS = {}
-
-# Default celery queue name that will be used by workers and tasks if no queue is specified
-# CELERY_TASK_DEFAULT_QUEUE = os.getenv("NAUTOBOT_CELERY_TASK_DEFAULT_QUEUE", "default")
-
-# Global task time limits (seconds)
-# Exceeding the soft limit will result in a SoftTimeLimitExceeded exception,
-# while exceeding the hard limit will result in a SIGKILL.
-#
-# CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("NAUTOBOT_CELERY_TASK_SOFT_TIME_LIMIT", str(5 * 60)))
-# CELERY_TASK_TIME_LIMIT = int(os.getenv("NAUTOBOT_CELERY_TASK_TIME_LIMIT", str(10 * 60)))
-
-# How many tasks a worker is allowed to reserve for its own consumption and execution.
-# If set to zero (not recommended) a single worker can reserve all tasks even if other workers are free.
-# For short running tasks (such as webhooks) you may want to set this to a larger number to increase throughput.
-# Conversely, for long running tasks (such as SSoT or Golden-Config Jobs at scale) you may want to set this to 1
-# so that a worker executing a long-running task will not prefetch other tasks, which would block their execution
-# until the long-running task completes.
-# https://docs.celeryq.dev/en/stable/userguide/optimizing.html#prefetch-limits
-# CELERY_WORKER_PREFETCH_MULTIPLIER = int(os.getenv("NAUTOBOT_CELERY_WORKER_PREFETCH_MULTIPLIER", "4"))
-
-# Ports for prometheus metric HTTP server running on the celery worker.
-# Normally this should be set to a single port, unless you have multiple workers running on a single machine, i.e.
-# sharing the same available ports. In that case you need to specify a range of ports greater than or equal to the
-# highest amount of workers you are running on a single machine (comma-separated, like "8080,8081,8082"). You can then
-# use the `target_limit` parameter to the Prometheus `scrape_config` to ensure you are not getting duplicate metrics in
-# that case. Set this to an empty string to disable it.
-# CELERY_WORKER_PROMETHEUS_PORTS = []
-# if os.getenv("NAUTOBOT_CELERY_WORKER_PROMETHEUS_PORTS"):
-#     CELERY_WORKER_PROMETHEUS_PORTS = [
-#         int(value) for value in os.getenv("NAUTOBOT_CELERY_WORKER_PROMETHEUS_PORTS").split(",")
-#     ]
-# If enabled stdout and stderr of running jobs will be redirected to the task logger.
-# CELERY_WORKER_REDIRECT_STDOUTS = is_truthy(os.getenv("NAUTOBOT_CELERY_WORKER_REDIRECT_STDOUTS", "True"))
-
-# The log level of log messages generated by redirected job stdout and stderr.
-# Can be one of `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`.
-# CELERY_WORKER_REDIRECT_STDOUTS_LEVEL = os.getenv("NAUTOBOT_CELERY_WORKER_REDIRECT_STDOUTS_LEVEL", "WARNING")
 
 # Number of days to retain changelog entries. Set to 0 to retain changes indefinitely. Defaults to 90 if not set here.
 #
@@ -838,32 +807,7 @@ ROOT_URLCONF = "nautobot.core.urls"
 # be provided as a dictionary.
 #
 # NAPALM_ARGS = {}
-CELERY_BEAT_HEARTBEAT_FILE = os.getenv(
-    "NAUTOBOT_CELERY_BEAT_HEARTBEAT_FILE",
-    os.path.join(tempfile.gettempdir(), "nautobot_celery_beat_heartbeat"),
-)
-CELERY_BROKER_URL = os.getenv("NAUTOBOT_CELERY_BROKER_URL", parse_redis_connection(redis_database=0))
-CELERY_RESULT_BACKEND = "nautobot.core.celery.backends.NautobotDatabaseBackend"
-CELERY_RESULT_EXTENDED = True
-CELERY_RESULT_EXPIRES = None
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_SEND_SENT_EVENT = True
-CELERY_WORKER_REDIRECT_STDOUTS = is_truthy(os.getenv("NAUTOBOT_CELERY_WORKER_REDIRECT_STDOUTS", "True"))
-CELERY_WORKER_REDIRECT_STDOUTS_LEVEL = os.getenv("NAUTOBOT_CELERY_WORKER_REDIRECT_STDOUTS_LEVEL", "WARNING")
-CELERY_WORKER_SEND_TASK_EVENTS = True
-CELERY_TASK_DEFAULT_QUEUE = os.getenv("NAUTOBOT_CELERY_TASK_DEFAULT_QUEUE", "default")
-CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("NAUTOBOT_CELERY_TASK_SOFT_TIME_LIMIT", str(5 * 60)))
-CELERY_WORKER_PROMETHEUS_PORTS = []
-if os.getenv("NAUTOBOT_CELERY_WORKER_PROMETHEUS_PORTS"):
-    CELERY_WORKER_PROMETHEUS_PORTS = [
-        int(value) for value in os.getenv("NAUTOBOT_CELERY_WORKER_PROMETHEUS_PORTS").split(_CONFIG_SETTING_SEPARATOR)
-    ]
-CELERY_ACCEPT_CONTENT = ["nautobot_json"]
-CELERY_RESULT_ACCEPT_CONTENT = ["nautobot_json"]
-CELERY_TASK_SERIALIZER = "nautobot_json"
-CELERY_RESULT_SERIALIZER = "nautobot_json"
-CELERY_BEAT_SCHEDULER = "nautobot.core.celery.schedulers:NautobotDatabaseScheduler"
-REDIS_LOCK_TIMEOUT = int(os.getenv("NAUTOBOT_REDIS_LOCK_TIMEOUT", "600"))
+
 # Default number of objects to display per page of the UI and REST API. Default is 50
 #
 # if "NAUTOBOT_PAGINATE_COUNT" in os.environ and os.environ["NAUTOBOT_PAGINATE_COUNT"] != "":
@@ -1124,6 +1068,147 @@ CONSTANCE_CONFIG_FIELDSETS = {
     "User Interface": ["SUPPORT_MESSAGE"],
     "Debugging": ["ALLOW_REQUEST_PROFILING"],
 }
+
+
+
+#
+# From django-cors-headers
+#
+
+# If True, all origins will be allowed. Other settings restricting allowed origins will be ignored.
+# Defaults to False. Setting this to True can be dangerous, as it allows any website to make
+# cross-origin requests to yours. Generally you'll want to restrict the list of allowed origins with
+# CORS_ALLOWED_ORIGINS or CORS_ALLOWED_ORIGIN_REGEXES.
+CORS_ALLOW_ALL_ORIGINS = is_truthy(os.getenv("NAUTOBOT_CORS_ALLOW_ALL_ORIGINS", "False"))
+
+# A list of strings representing regexes that match Origins that are authorized to make cross-site
+# HTTP requests. Defaults to [].
+CORS_ALLOWED_ORIGIN_REGEXES = []
+
+# A list of origins that are authorized to make cross-site HTTP requests. Defaults to [].
+CORS_ALLOWED_ORIGINS = []
+
+#
+# GraphQL
+#
+
+GRAPHENE = {
+    "SCHEMA": "nautobot.core.graphql.schema_init.schema",
+    "DJANGO_CHOICE_FIELD_ENUM_V3_NAMING": True,  # any field with a name of type will break in Graphene otherwise.
+}
+GRAPHQL_CUSTOM_FIELD_PREFIX = "cf"
+GRAPHQL_RELATIONSHIP_PREFIX = "rel"
+GRAPHQL_COMPUTED_FIELD_PREFIX = "cpf"
+
+
+#
+# Caching
+#
+
+# The django-redis cache is used to establish concurrent locks using Redis.
+CACHES = {
+    "default": {
+        "BACKEND": os.getenv(
+            "NAUTOBOT_CACHES_BACKEND",
+            "django_prometheus.cache.backends.redis.RedisCache" if METRICS_ENABLED else "django_redis.cache.RedisCache",
+        ),
+        "LOCATION": parse_redis_connection(redis_database=1),
+        "TIMEOUT": int(os.getenv("NAUTOBOT_CACHES_TIMEOUT", "300")),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "",
+        },
+    }
+}
+
+# Number of seconds to cache ContentType lookups. Set to 0 to disable caching.
+CONTENT_TYPE_CACHE_TIMEOUT = int(os.getenv("NAUTOBOT_CONTENT_TYPE_CACHE_TIMEOUT", "0"))
+
+#
+# Celery (used for background processing)
+#
+
+# Celery Beat heartbeat file path - will be touched by Beat each time it wakes up as a proof-of-health.
+CELERY_BEAT_HEARTBEAT_FILE = os.getenv(
+    "NAUTOBOT_CELERY_BEAT_HEARTBEAT_FILE",
+    os.path.join(tempfile.gettempdir(), "nautobot_celery_beat_heartbeat"),
+)
+
+# Celery broker URL used to tell workers where queues are located
+CELERY_BROKER_URL = os.getenv("NAUTOBOT_CELERY_BROKER_URL", parse_redis_connection(redis_database=0))
+
+# Celery results backend URL to tell workers where to publish task results - DO NOT CHANGE THIS
+CELERY_RESULT_BACKEND = "nautobot.core.celery.backends.NautobotDatabaseBackend"
+
+# Enables extended task result attributes (name, args, kwargs, worker, retries, queue, delivery_info) to be written to backend.
+CELERY_RESULT_EXTENDED = True
+
+# A value of None or 0 means results will never expire (depending on backend specifications).
+CELERY_RESULT_EXPIRES = None
+
+# Instruct celery to report the started status of a job, instead of just `pending`, `finished`, or `failed`
+CELERY_TASK_TRACK_STARTED = True
+
+# If enabled, a `task-sent` event will be sent for every task so tasks can be tracked before they're consumed by a worker.
+CELERY_TASK_SEND_SENT_EVENT = True
+
+# How many tasks a worker is allowed to reserve for its own consumption and execution.
+# If set to zero (not recommended) a single worker can reserve all tasks even if other workers are free.
+# For short running tasks (such as webhooks) you may want to set this to a larger number to increase throughput.
+# Conversely, for long running tasks (such as SSoT or Golden-Config Jobs at scale) you may want to set this to 1
+# so that a worker executing a long-running task will not prefetch other tasks, which would block their execution
+# until the long-running task completes.
+# https://docs.celeryq.dev/en/stable/userguide/optimizing.html#prefetch-limits
+CELERY_WORKER_PREFETCH_MULTIPLIER = int(os.getenv("NAUTOBOT_CELERY_WORKER_PREFETCH_MULTIPLIER", "4"))
+
+# If enabled stdout and stderr of running jobs will be redirected to the task logger.
+CELERY_WORKER_REDIRECT_STDOUTS = is_truthy(os.getenv("NAUTOBOT_CELERY_WORKER_REDIRECT_STDOUTS", "True"))
+
+# The log level of log messages generated by redirected job stdout and stderr.
+# Can be one of `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`.
+CELERY_WORKER_REDIRECT_STDOUTS_LEVEL = os.getenv("NAUTOBOT_CELERY_WORKER_REDIRECT_STDOUTS_LEVEL", "WARNING")
+
+# Send task-related events so that tasks can be monitored using tools like flower.
+# Sets the default value for the workers -E argument.
+CELERY_WORKER_SEND_TASK_EVENTS = True
+
+# Default celery queue name that will be used by workers and tasks if no queue is specified
+CELERY_TASK_DEFAULT_QUEUE = os.getenv("NAUTOBOT_CELERY_TASK_DEFAULT_QUEUE", "default")
+
+# Global task time limits (seconds)
+# Exceeding the soft limit will result in a SoftTimeLimitExceeded exception,
+# while exceeding the hard limit will result in a SIGKILL.
+CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("NAUTOBOT_CELERY_TASK_SOFT_TIME_LIMIT", str(5 * 60)))
+CELERY_TASK_TIME_LIMIT = int(os.getenv("NAUTOBOT_CELERY_TASK_TIME_LIMIT", str(10 * 60)))
+
+# Ports for prometheus metric HTTP server running on the celery worker.
+# Normally this should be set to a single port, unless you have multiple workers running on a single machine, i.e.
+# sharing the same available ports. In that case you need to specify a range of ports greater than or equal to the
+# highest amount of workers you are running on a single machine (comma-separated, like "8080,8081,8082"). You can then
+# use the `target_limit` parameter to the Prometheus `scrape_config` to ensure you are not getting duplicate metrics in
+# that case. Set this to an empty string to disable it.
+CELERY_WORKER_PROMETHEUS_PORTS = []
+if os.getenv("NAUTOBOT_CELERY_WORKER_PROMETHEUS_PORTS"):
+    CELERY_WORKER_PROMETHEUS_PORTS = [
+        int(value) for value in os.getenv("NAUTOBOT_CELERY_WORKER_PROMETHEUS_PORTS").split(_CONFIG_SETTING_SEPARATOR)
+    ]
+
+# These settings define the custom nautobot serialization encoding as an accepted data encoding format
+# and register that format for task input and result serialization
+CELERY_ACCEPT_CONTENT = ["nautobot_json"]
+CELERY_RESULT_ACCEPT_CONTENT = ["nautobot_json"]
+CELERY_TASK_SERIALIZER = "nautobot_json"
+CELERY_RESULT_SERIALIZER = "nautobot_json"
+
+CELERY_BEAT_SCHEDULER = "nautobot.core.celery.schedulers:NautobotDatabaseScheduler"
+
+# Sets an age out timer of redis lock. This is NOT implicitly applied to locks, must be added
+# to a lock creation as `timeout=settings.REDIS_LOCK_TIMEOUT`
+REDIS_LOCK_TIMEOUT = int(os.getenv("NAUTOBOT_REDIS_LOCK_TIMEOUT", "600"))
+
+#
+# Custom branding (logo and title)
+#
 
 # How frequently to check for a new Nautobot release on GitHub, and the URL to check for this information.
 # Defaults to disabled (no URL) and check every 24 hours when enabled
