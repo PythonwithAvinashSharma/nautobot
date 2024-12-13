@@ -9,6 +9,7 @@ import tempfile
 from django.contrib.messages import constants as messages
 import django.forms
 from django.utils.safestring import mark_safe
+from datetime import timedelta
 
 from nautobot import __version__
 from nautobot.core.constants import CONFIG_SETTING_SEPARATOR as _CONFIG_SETTING_SEPARATOR
@@ -92,6 +93,7 @@ EXEMPT_VIEW_PERMISSIONS = []
 
 # Number of seconds to cache ContentType lookups. Set to 0 to disable caching.
 # CONTENT_TYPE_CACHE_TIMEOUT = int(os.getenv("NAUTOBOT_CONTENT_TYPE_CACHE_TIMEOUT", "0"))
+CONFIG_CONTEXT_DYNAMIC_GROUPS_ENABLED = is_truthy(os.getenv("NAUTOBOT_CONFIG_CONTEXT_DYNAMIC_GROUPS_ENABLED", "False"))
 
 
 
@@ -170,7 +172,7 @@ BRANDING_FILEPATHS = {
 }
 
 # Title to use in place of "Nautobot"
-BRANDING_TITLE = os.getenv("NAUTOBOT_BRANDING_TITLE", "HCL TECH")
+BRANDING_TITLE = os.getenv("NAUTOBOT_BRANDING_TITLE", "HCLTech Automation Platform")
 
 # Prepended to CSV, YAML and export template filenames (i.e. `nautobot_device.yml`)
 BRANDING_PREPENDED_FILENAME = os.getenv("NAUTOBOT_BRANDING_PREPENDED_FILENAME", "nautobot_")
@@ -386,10 +388,10 @@ STORAGE_BACKEND = None
 STORAGE_CONFIG = {}
 # Plugins
 METRICS_DISABLED_APPS = []
-PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config"]
+PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config", "nautobot_firewall_models", "nautobot_device_lifecycle_mgmt", "nautobot_chatops", "dashboard_plugin","nautobot_design_builder", "welcome_wizard", "nautobot_data_validation_engine", "slurpit_nautobot"]
 PLUGINS_CONFIG = {
    "nautobot_plugin_nornir": {
-       "use_config_context": {"secrets": False, "connection_options": True},
+       "use_config_context": {"secrets": True, "connection_options": True},
         # Optionally set global connection options.
         "connection_options": {
             "napalm": {
@@ -399,12 +401,13 @@ PLUGINS_CONFIG = {
             },
             "netmiko": {
                 "extras": {
-                   "global_delay_factor": 1,
+                    "timeout": 30,
+                    "global_delay_factor": 1,
                 },
             },
         },
         "nornir_settings": {
-            "credentials": "nautobot_plugin_nornir.plugins.credentials.env_vars.CredentialsEnvVars",
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.secrets.SecretsCredentials",
             "runner": {
                 "plugin": "threaded",
                 "options": {
@@ -414,13 +417,16 @@ PLUGINS_CONFIG = {
         },
     },
     "nautobot_plugin_device_onboarding": {
-       "NETWORK_DRIVERS":{
-           
-           "default":{
-        "netmiko": {"my_network_driver": "cisco_ios"},
-        "pyats": {"my_network_driver": "iosxe"}
-    }
-               
+        "debug": True,
+        "NETWORK_DRIVERS": {
+            "default": {
+                "netmiko": {"my_network_driver": "cisco_ios"},
+                "pyats": {"my_network_driver": "iosxe"},
+            },
+            "arista": {
+                "netmiko": {"my_network_driver": "arista_eos"},
+                "pyats": {"my_network_driver": "eos"},
+            },
         }
     },
     "nautobot_golden_config": {
@@ -442,17 +448,62 @@ PLUGINS_CONFIG = {
             "trim_blocks": True,
             "lstrip_blocks": False,
         },
-        # "default_deploy_status": "Not Approved",
-        # "get_custom_compliance": "my.custom_compliance.func"
+    "nautobot_firewall_models": {
+        "default_status": "Active",
+        "allowed_status": ["Active"],
+        "capirca_remark_pass": True,
+        "capirca_os_map": {
+            "cisco_ios": "cisco",
+            "arista_eos": "arista",
+        },
+    }, 
+    "nautobot_device_lifecycle_mgmt": {
+        "barchart_bar_width": float(os.environ.get("BARCHART_BAR_WIDTH", 0.1)),
+        "barchart_width": int(os.environ.get("BARCHART_WIDTH", 12)),
+        "barchart_height": int(os.environ.get("BARCHART_HEIGHT", 5)),
     },
+    },
+    "nautobot_chatops": {
+        "fallback_chatops_user": "chatbot",
+        "enable_aci": True,
+        "aci_creds": {x: os.environ[x] for x in os.environ if "APIC" in x},
+        "enable_ansible": True,
+        "tower_uri": os.getenv("NAUTOBOT_TOWER_URI"),
+        "tower_username": os.getenv("NAUTOBOT_TOWER_USERNAME"),
+        "tower_password": os.getenv("NAUTOBOT_TOWER_PASSWORD"),
+        "tower_,verify_ssl": is_truthy(os.getenv("NAUTOBOT_TOWER_VERIFY_SSL", "true")),
+        "enable_cloudvision": True,
+        "aristacv_cvaas_url": os.environ.get("ARISTACV_CVAAS_URL"),
+        "aristacv_cvaas_token": os.environ.get("ARISTACV_CVAAS_TOKEN"),
+        "aristacv_cvp_host": os.environ.get("ARISTACV_CVP_HOST"),
+        # "aristacv_cvp_insecure": is_truthy(os.environ.get("ARISTACV_CVP_INSECURE")),
+        "aristacv_cvp_password": os.environ.get("ARISTACV_CVP_PASSWORD"),
+        "aristacv_cvp_username": os.environ.get("ARISTACV_CVP_USERNAME"),
+        # "aristacv_on_prem": is_truthy(os.environ.get("ARISTACV_ON_PREM")),
+    },
+    "nautobot_design_builder": {
+        "protected_models": [("dcim", "location"), ("dcim", "device")],
+        "protected_superuser_bypass": False,
+    },
+    "welcome_wizard": {
+        "enable_devicetype-library": True,
+        "enable_welcome_banner": True,
+    },
+    "dashboard_plugin": {},
+    "nautobot_data_validation_engine": {},
 }
 NETWORK_DRIVERS= {
-
            "default":{
         "netmiko": {"my_network_driver": "cisco_ios"},
         "pyats": {"my_network_driver": "iosxe"}
     }
 }
+# DEVICE_USERNAME = os.getenv("DEVICE_USERNAME", "cisco")
+# DEVICE_PASS = os.getenv("DEVICE_PASS", "cisco")
+# DEVICE_LAB = os.getenv("DEVICE_LAB", "admin")
+# DEVICE_PASS = os.getenv("DEVICE_PASS", "C1sco12345")
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -474,27 +525,27 @@ TEMPLATES = [
                 "nautobot.core.context_processors.sso_auth",
             ],
         },
-    }
-   # {
-   #     "NAME": "jinja",
-   #     "BACKEND": "django_jinja.backend.Jinja2",
-   #     "DIRS": [],
-   #     "APP_DIRS": False,
-   #     "OPTIONS": {
-   #         "context_processors": [
-   #             "django.template.context_processors.debug",
-   #             "django.template.context_processors.request",
-   #             "django.template.context_processors.media",
-   #             "django.contrib.auth.context_processors.auth",
-   #            "django.contrib.messages.context_processors.messages",
-   #             "social_django.context_processors.backends",
-   #             "social_django.context_processors.login_redirect",
-   #             "nautobot.core.context_processors.settings",
-   #             "nautobot.core.context_processors.sso_auth",
-   #         ],
-   #         "environment": "jinja2.sandbox.SandboxedEnvironment",
-   #     },
-   # },
+    },
+   {
+       "NAME": "jinja",
+       "BACKEND": "django_jinja.backend.Jinja2",
+       "DIRS": [],
+       "APP_DIRS": False,
+       "OPTIONS": {
+           "context_processors": [
+               "django.template.context_processors.debug",
+               "django.template.context_processors.request",
+               "django.template.context_processors.media",
+               "django.contrib.auth.context_processors.auth",
+              "django.contrib.messages.context_processors.messages",
+               "social_django.context_processors.backends",
+               "social_django.context_processors.login_redirect",
+               "nautobot.core.context_processors.settings",
+               "nautobot.core.context_processors.sso_auth",
+           ],
+           "environment": "jinja2.sandbox.SandboxedEnvironment",
+       },
+   },
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -691,6 +742,8 @@ MIDDLEWARE = [
     "nautobot.core.middleware.ObjectChangeMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
+
+MIDDLEWARE.insert(0, "nautobot_design_builder.middleware.GlobalRequestMiddleware")
 # A list of strings representing regexes that match Origins that are authorized to make cross-site
 # HTTP requests. Defaults to [].
 #
@@ -796,8 +849,8 @@ ROOT_URLCONF = "nautobot.core.urls"
 
 # Credentials that Nautobot will uses to authenticate to devices when connecting via NAPALM.
 #
-# NAPALM_USERNAME = os.getenv("NAUTOBOT_NAPALM_USERNAME", "")
-# NAPALM_PASSWORD = os.getenv("NAUTOBOT_NAPALM_PASSWORD", "")
+NAPALM_USERNAME = os.getenv("NAUTOBOT_NAPALM_USERNAME", "admin")
+NAPALM_PASSWORD = os.getenv("NAUTOBOT_NAPALM_PASSWORD", "C1sco12345")
 
 # NAPALM timeout (in seconds). (Default: 30)
 #

@@ -1210,7 +1210,7 @@ url = "examples/example_app"
 [[package]]
 name = "example-app-with-view-override"
 version = "1.0.0"
-description = "Nautobot App for testing override_views feature."
+description = "HCLTech Automation platform for testing override_views feature."
 optional = false
 python-versions = "*"
 files = []

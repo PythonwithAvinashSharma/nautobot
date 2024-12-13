@@ -121,9 +121,10 @@ def get_all_network_driver_mappings():
         )
 
     for tool_name, mappings in network_drivers_config.items():
-        for normalized_name, mapped_name in mappings.items():
-            network_driver_mappings.setdefault(normalized_name, {})
-            network_driver_mappings[normalized_name][tool_name] = mapped_name
+        if isinstance(mappings, dict):
+            for normalized_name, mapped_name in mappings.items():
+                network_driver_mappings.setdefault(normalized_name, {})
+                network_driver_mappings[normalized_name][tool_name] = mapped_name
 
     return network_driver_mappings
 
