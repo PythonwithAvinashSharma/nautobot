@@ -388,7 +388,7 @@ STORAGE_BACKEND = None
 STORAGE_CONFIG = {}
 # Plugins
 METRICS_DISABLED_APPS = []
-PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config", "nautobot_firewall_models", "nautobot_device_lifecycle_mgmt", "nautobot_chatops", "dashboard_plugin","nautobot_design_builder", "welcome_wizard", "nautobot_data_validation_engine", "slurpit_nautobot"]
+PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config", "nautobot_firewall_models", "nautobot_device_lifecycle_mgmt", "nautobot_chatops", "dashboard_plugin","nautobot_design_builder", "welcome_wizard", "nautobot_data_validation_engine", "slurpit_nautobot", "nautobot_capacity_metrics"]
 PLUGINS_CONFIG = {
    "nautobot_plugin_nornir": {
        "use_config_context": {"secrets": True, "connection_options": True},
@@ -488,6 +488,33 @@ PLUGINS_CONFIG = {
     "welcome_wizard": {
         "enable_devicetype-library": True,
         "enable_welcome_banner": True,
+    },
+    "nautobot_capacity_metrics": {
+        "app_metrics": {
+            "gitrepositories": True,
+            "jobs": True,
+            "models": {
+                "dcim": {
+                    "Site": True,
+                    "Rack": True,
+                    "Device": True,
+                    "Interface": True,
+                    "Cable": True,
+                },
+                "ipam": {
+                    "IPAddress": True,
+                    "Prefix": True,
+                },
+                "extras": {
+                    "GitRepository": True
+                },
+            },
+            "queues": True,
+            "versions": {
+                "basic": True,
+                "plugins": True,
+            }
+        }
     },
     "dashboard_plugin": {},
     "nautobot_data_validation_engine": {},

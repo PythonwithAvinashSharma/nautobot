@@ -7,4 +7,5 @@ app_name = "dashboard_plugin"
 
 urlpatterns = [
     path("", views.dashboard_view, name="dashboard"),
+    path("", views.AddDashboardView, name="add_dashboard"),
 ]
