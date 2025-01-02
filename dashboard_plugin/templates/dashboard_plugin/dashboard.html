@@ -1,13 +1,242 @@
-<!-- dashboard_plugin/templates/dashboard_plugin/dashboard.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Device and KPI Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device, KPI Health & Networking Insights Dashboard</title>
+    <!-- Bootstrap and Chart.js -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+        .kpi-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 0;
+        }
+        .kpi-box {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            width: 22%;
+            color: #333;
+        }
+        .kpi-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #212121;
+        }
+        .kpi-title {
+            font-size: 18px;
+            color: #757575;
+        }
+        .card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            background-color: #ffffff;
+            padding: 20px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Device and KPI Health Dashboard</h1>
-    <p>Show your health and performance metrics here.</p>
+<h1>📡 Comprehensive Network Insights Dashboard</h1>
+<p class="text-center">Full visibility into devices, switches, IP usage, VLANs, and port status.</p>
+<!-- KPI Cards -->
+<div class="container">
+    <div class="kpi-container">
+        <div class="kpi-box">
+            <div class="kpi-title">Active Switches</div>
+            <div class="kpi-value" id="total-switches">28</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-title">Total IPs Used</div>
+            <div class="kpi-value" id="total-ips-used">215</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-title">Active Ports</div>
+            <div class="kpi-value" id="active-ports">82</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-title">Interface Health</div>
+            <div class="kpi-value" id="interface-health">98.2%</div>
+        </div>
+    </div>
+</div>
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <h3>📊 VLAN Usage</h3>
+                <canvas id="vlanUsageChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <h3>🗂️ IP Address Allocation</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <h3>🛠️ Port Status</h3>
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <h3>📈 Device Health Over Time</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <h3>📋 Switch Alerts</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Switch</th>
+                            <th>Status</th>
+                            <th>IP Address</th>
+                            <th>Last Seen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="switch-alerts"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <h3>🔌 Port Utilization by Type</h3>
+                <canvas id="barChartPortUtilization"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <h3>🖥️ Device Metrics</h3>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Model</th>
+                            <th>Uptime</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="device-metrics"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('total-switches').innerText = 28;
+    document.getElementById('total-ips-used').innerText = 215;
+    document.getElementById('active-ports').innerText = 82;
+    document.getElementById('interface-health').innerText = '98.2%';
+
+    new Chart(document.getElementById('vlanUsageChart'), {
+        type: 'bar',
+        data: {
+            labels: ['VLAN 10', 'VLAN 20', 'VLAN 30'],
+            datasets: [{
+                label: 'VLAN Usage %',
+                data: [80, 60, 45],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Subnet A', 'Subnet B', 'Subnet C'],
+            datasets: [{
+                data: [30, 40, 30],
+                backgroundColor: ['#4CAF50', '#FFEB3B', '#F44336']
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('doughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Inactive', 'Failed'],
+            datasets: [{
+                data: [80, 10, 10],
+                backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Device Health',
+                data: [90, 85, 80, 95, 92, 97],
+                backgroundColor: '#42A5F5',
+                borderColor: '#1E88E5'
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('barChartPortUtilization'), {
+        type: 'bar',
+        data: {
+            labels: ['GigabitEthernet', 'FastEthernet', 'SFP'],
+            datasets: [{
+                label: 'Port Utilization',
+                data: [70, 25, 5],
+                backgroundColor: ['#3cba9f', '#ffa500', '#c45850']
+            }]
+        }
+    });
+
+    const switches = [
+        { switch: 'Switch-A', status: 'Active', ip: '192.168.1.2', lastSeen: '2024-12-14 10:20:00' },
+        { switch: 'Switch-B', status: 'Inactive', ip: '192.168.1.3', lastSeen: '2024-12-14 09:45:00' },
+        { switch: 'Switch-C', status: 'Active', ip: '192.168.1.4', lastSeen: '2024-12-14 08:32:00' }
+    ];
+
+    switches.forEach(s => {
+        document.getElementById('switch-alerts').innerHTML += `
+            <tr><td>${s.switch}</td><td>${s.status}</td><td>${s.ip}</td><td>${s.lastSeen}</td></tr>`;
+    });
+
+    const devices = [
+        { id: 'Device01', model: 'RouterX', uptime: '342 hours', status: 'Active' },
+        { id: 'Device02', model: 'SwitchY', uptime: '1290 hours', status: 'Active' },
+        { id: 'Device03', model: 'ModemZ', uptime: '300 hours', status: 'Maintenance' }
+    ];
+
+    devices.forEach(device => {
+        document.getElementById('device-metrics').innerHTML += `
+            <tr>
+                <td>${device.id}</td>
+                <td>${device.model}</td>
+                <td>${device.uptime}</td>
+                <td>${device.status}</td>
+            </tr>`;
+    });
+</script>
 </body>
 </html>

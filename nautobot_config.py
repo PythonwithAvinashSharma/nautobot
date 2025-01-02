@@ -388,7 +388,8 @@ STORAGE_BACKEND = None
 STORAGE_CONFIG = {}
 # Plugins
 METRICS_DISABLED_APPS = []
-PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config", "nautobot_firewall_models", "nautobot_device_lifecycle_mgmt", "nautobot_chatops", "dashboard_plugin","nautobot_design_builder", "welcome_wizard", "nautobot_data_validation_engine", "slurpit_nautobot", "nautobot_capacity_metrics"]
+PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config", "nautobot_firewall_models", "nautobot_device_lifecycle_mgmt", "nautobot_chatops", 
+                "dashboard_plugin","nautobot_design_builder", "welcome_wizard", "nautobot_data_validation_engine", "slurpit_nautobot", "nautobot_capacity_metrics", "naas"]
 PLUGINS_CONFIG = {
    "nautobot_plugin_nornir": {
        "use_config_context": {"secrets": True, "connection_options": True},
@@ -517,7 +518,13 @@ PLUGINS_CONFIG = {
         }
     },
     "dashboard_plugin": {},
+    "naas": {},
     "nautobot_data_validation_engine": {},
+    # "netbox_topology_views": {
+    #     'static_image_directory': 'netbox_topology_views/img',
+    #     'allow_coordinates_saving': True,
+    #     'always_save_coordinates': True
+    # }
 }
 NETWORK_DRIVERS= {
            "default":{
@@ -536,7 +543,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             # Add your custom templates directory
-            os.path.join(BASE_DIR, "/nautobot/core/templates/")
+            os.path.join(BASE_DIR, "/nautobot/core/templates/"),
+            os.path.join(BASE_DIR, "/naas/templates/") 
             ],
         'APP_DIRS': True,
         "OPTIONS": {
