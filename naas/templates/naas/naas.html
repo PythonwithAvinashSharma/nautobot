@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+    <style>
+        /* General form container styling */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h3 {
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+            color: black;
+        }
+        
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #74a4d4;
+            border-radius: 4px;
+        }
+
+        .form-check {
+            margin-bottom: 10px;
+        }
+
+        .form-check-label {
+            margin-left: 5px;
+        }
+
+        .btn-primary {
+            
+            background-color: #5631bb;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        /* Collapsible styling for tags section */
+        /* Grid layout for tags */
+        .tags-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Adjust for desired size */
+            gap: 10px; /* Space between grid items */
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Individual tag item */
+        .tag-item {
+            display: flex;
+            align-items: center;
+            padding: 1px; /* Reduced padding */
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            background-color: #f9f9f9;
+            gap: 5px; /* Ensures a consistent gap between elements */
+        }
+
+        /* Checkbox styling */
+        .tag-item input[type="checkbox"] {
+            width: 100px;
+            margin-right: 1px; /* Space between checkbox and label */
+        }
+
+        /* Hover effect for tag items */
+        .tag-item:hover {
+            background-color: #e9ecef;
+        }
+
+        #selected-tags-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #selected-tags-list li {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #74a4d4;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #selected-tags-list li:hover {
+            background-color: #0056b3;
+        }
+
+        /* Tag selected state */
+        .tag-item.selected {
+            background-color: #0056b3; /* Highlight selected tags */
+            color: white;
+        }
+
+        /* Collapsible button active state */
+        .collapsible.active {
+            background-color: #74a4d4;
+            color: white;
+            font-weight: bold;
+        }
+
+        .tag-item input[type="checkbox"] {
+            margin-right: 5px; /* Reduced from 10px to 5px to minimize the gap */
+            vertical-align: middle; /* Ensures proper alignment with the text */
+        }
+    </style>
+
+    <div class="pull-right noprint">
+        {% if request.user.is_authenticated %}
+            <!-- Optional: Add configuration button or options if needed -->
+        {% endif %}
+    </div>
+
+    <h1>{% block title %}Site Onboarding{% endblock %}</h1>
+
+    <div class="row">
+        <div class="col-md-12">
+            <p class="text-center text-muted">Easily onboard new sites with VLANs, devices, and configurations.</p>
+
+            <div class="form-container">
+                <h3>🏗️ Site Onboarding Form</h3>
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Name Field -->
+                    <div class="mb-3">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        <div class="form-text text-danger">{{ form.name.errors }}</div>
+                    </div>
+
+                    <!-- Location Field -->
+                    <div class="mb-3">
+                        {{ form.location.label_tag }}
+                        {{ form.location }}
+                        <div class="form-text text-danger">{{ form.location.errors }}</div>
+                    </div>
+
+                    <!-- Site Tag Field -->
+                    <div class="mb-3">
+                        {{ form.site_tag.label_tag }}
+                        {{ form.site_tag }}
+                        <div class="form-text text-danger">{{ form.site_tag.errors }}</div>
+                    </div>
+
+                    <!-- Device Type Field -->
+                    <div class="mb-3">
+                        {{ form.device_type.label_tag }}
+                        {{ form.device_type }}
+                        <div class="form-text text-danger">{{ form.device_type.errors }}</div>
+                    </div>
+
+                    <!-- Tag Field -->
+                    <div class="mb-3">
+                        {{ form.tags.label_tag }}
+                    </div>
+                    <div class="tags-grid">
+                        {% for tag in form.tags %}
+                            <div class="tag-item">
+                                <input type="checkbox" id="{{ tag.id_for_label }}">
+                                <label for="{{ tag.id_for_label }}">{{ tag.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Selected Tags Section -->
+                    <div id="selected-tags-container" style="margin-top: 20px; display: none;">
+                        <h4>Selected Tags:</h4>
+                        <ul id="selected-tags-list"></ul>
+                    </div>
+
+                    <!-- Device Number Field -->
+                    <div class="mb-3">
+                        {{ form.device_number.label_tag }}
+                        {{ form.device_number }}
+                        <div class="form-text text-danger">{{ form.device_number.errors }}</div>
+                    </div>
+
+                    <!-- Number of Prefixes Masks Field -->
+                    <div class="mb-3">
+                        {{ form.num_prefixes_masks.label_tag }}
+                        {{ form.num_prefixes_masks }}
+                        <div class="form-text text-danger">{{ form.num_prefixes_masks.errors }}</div>
+                    </div>
+
+                    <!-- Racks Field -->
+                    <div class="mb-3">
+                        {{ form.racks.label_tag }}
+                        {{ form.racks }}
+                        <div class="form-text text-danger">{{ form.racks.errors }}</div>
+                    </div>
+
+                    <!-- VLAN Field -->
+                    <div class="mb-3">
+                        {{ form.vlan.label_tag }}
+                        {{ form.vlan }}
+                        <div class="form-text text-danger">{{ form.vlan.errors }}</div>
+                    </div>
+
+                    <!-- Prefix Field -->
+                    <div class="mb-3">
+                        {{ form.prefix.label_tag }}
+                        {{ form.prefix }}
+                        <div class="form-text text-danger">{{ form.prefix.errors }}</div>
+                    </div>
+
+                    <!-- VRF Field -->
+                    <div class="mb-3">
+                        {{ form.vrf.label_tag }}
+                        {{ form.vrf }}
+                        <div class="form-text text-danger">{{ form.vrf.errors }}</div>
+                    </div>
+
+                    <!-- Uplink Field -->
+                    <div class="mb-3">
+                        {{ form.uplink.label_tag }}
+                        {{ form.uplink }}
+                        <div class="form-text text-danger">{{ form.uplink.errors }}</div>
+                    </div>
+
+                    <!-- VLAN Description Field -->
+                    <div class="mb-3">
+                        {{ form.vlan_description.label_tag }}
+                        {{ form.vlan_description }}
+                        <div class="form-text text-danger">{{ form.vlan_description.errors }}</div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Submit to Catalog</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const collapsibles = document.querySelectorAll(".collapsible");
+    collapsibles.forEach(button => {
+        button.addEventListener("click", function () {
+            this.classList.toggle("active");
+            const content = this.nextElementSibling;
+            content.style.display = content.style.display === "block" ? "none" : "block";
+        });
+    });
+
+    const tagsGrid = document.querySelector(".tags-grid");
+    const selectedTagsContainer = document.getElementById("selected-tags-container");
+    const selectedTagsList = document.getElementById("selected-tags-list");
+    const tagsForm = document.querySelector("form");  // Ensure this is the form you are working with
+
+    tagsGrid.addEventListener("click", function (event) {
+        const tagItem = event.target.closest(".tag-item");
+
+        if (tagItem) {
+            const checkbox = tagItem.querySelector('input[type="checkbox"]');
+            const tagLabel = tagItem.querySelector("label").textContent.trim();
+
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+
+                if (checkbox.checked) {
+                    addTagToSelectedList(tagLabel, checkbox.id);
+                    addTagToHiddenInputs(tagLabel, checkbox.id);
+                } else {
+                    removeTagFromSelectedList(checkbox.id);
+                    removeTagFromHiddenInputs(checkbox.id);
+                }
+            }
+        }
+    });
+
+    function addTagToSelectedList(label, id) {
+        if (selectedTagsContainer.style.display === "none") {
+            selectedTagsContainer.style.display = "block";
+        }
+
+        if (!document.getElementById(`selected-${id}`)) {
+            const listItem = document.createElement("li");
+            listItem.id = `selected-${id}`;
+            listItem.textContent = label;
+
+            listItem.addEventListener("click", function () {
+                removeTagFromSelectedList(id);
+                uncheckTagCheckbox(id);
+                removeTagFromHiddenInputs(id);
+            });
+
+            selectedTagsList.appendChild(listItem);
+        }
+    }
+
+    function removeTagFromSelectedList(id) {
+        const listItem = document.getElementById(`selected-${id}`);
+        if (listItem) {
+            selectedTagsList.removeChild(listItem);
+
+            if (selectedTagsList.children.length === 0) {
+                selectedTagsContainer.style.display = "none";
+            }
+        }
+    }
+
+    function addTagToHiddenInputs(label, id) {
+        // Add hidden input for the selected tag
+        let hiddenInput = document.getElementById(`hidden-${id}`);
+        if (!hiddenInput) {
+            hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "selected_tags";  // This name will be used for the form submission
+            hiddenInput.id = `hidden-${id}`;
+            hiddenInput.value = label;
+            tagsForm.appendChild(hiddenInput);
+        }
+    }
+
+    function removeTagFromHiddenInputs(id) {
+        // Remove hidden input for the deselected tag
+        const hiddenInput = document.getElementById(`hidden-${id}`);
+        if (hiddenInput) {
+            tagsForm.removeChild(hiddenInput);
+        }
+    }
+
+    function uncheckTagCheckbox(id) {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.checked = false;
+        }
+    }
+});
+
+</script>

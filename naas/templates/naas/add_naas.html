@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Onboarding - NaaS</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f9;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #333;
+      margin-top: 20px;
+    }
+    .form-container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-top: 20px;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    .form-label {
+      font-weight: bold;
+      color: #333;
+    }
+    .form-control {
+      border-radius: 8px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <h1>🌐 Network as a Service - Site Onboarding</h1>
+    <p class="text-center text-muted">Easily onboard new sites with VLANs, devices, and configurations.</p>
+  
+    <div class="form-container">
+      <h3>🏗️ Site Onboarding Form</h3>
+      <form id="siteOnboardingForm">
+        
+        <!-- LOCATION -->
+        <div class="mb-3">
+          <label for="location" class="form-label">Location</label>
+          <select class="form-select" id="location" required></select>
+        </div>
+  
+        <!-- SITE NAME -->
+        <div class="mb-3">
+          <label for="siteName" class="form-label">Site Name</label>
+          <input type="text" class="form-control" id="siteName" placeholder="Enter the site name" required>
+        </div>
+  
+        <!-- SITE TAG -->
+        <div class="mb-3">
+          <label for="siteTag" class="form-label">Site Tag</label>
+          <input type="text" class="form-control" id="siteTag" placeholder="Enter the site tag" required>
+        </div>
+  
+        <!-- DEVICE TYPE -->
+        <div class="mb-3">
+          <label for="deviceType" class="form-label">Device Type</label>
+          <select class="form-select" id="deviceType" required></select>
+        </div>
+  
+        <!-- TAGS -->
+        <div class="mb-3">
+          <label for="tags" class="form-label">Tags</label>
+          <select class="form-select" id="tags" multiple required></select>
+          <small class="text-muted">Hold CTRL or CMD to select multiple options.</small>
+        </div>
+  
+        <!-- NUMBER OF DEVICES -->
+        <div class="mb-3">
+          <label for="numDevices" class="form-label">Number of Devices</label>
+          <input type="number" class="form-control" id="numDevices" placeholder="Enter the number of devices" min="0" required>
+        </div>
+  
+        <!-- NUMBER OF VLANs -->
+        <div class="mb-3">
+          <label for="numVlans" class="form-label">Number of VLANs</label>
+          <input type="number" class="form-control" id="numVlans" placeholder="Enter the number of VLANs" min="0" required>
+        </div>
+  
+        <!-- VLAN REQUIREMENTS -->
+        <div class="mb-3">
+          <label for="vlanRequirement" class="form-label">VLAN Requirement</label>
+          <select class="form-select" id="vlanRequirement" multiple required></select>
+          <small class="text-muted">Hold CTRL or CMD to select multiple options.</small>
+        </div>
+  
+        <!-- NUMBER OF PREFIXES/MASKS -->
+        <div class="mb-3">
+          <label for="numPrefixes" class="form-label">Number of Prefixes/Masks</label>
+          <input type="number" class="form-control" id="numPrefixes" placeholder="Enter the number of prefixes or masks" min="0" required>
+        </div>
+  
+        <!-- NUMBER OF RACKS -->
+        <div class="mb-3">
+          <label for="numRacks" class="form-label">Number of Racks</label>
+          <input type="number" class="form-control" id="numRacks" placeholder="Enter the number of racks" min="0" required>
+        </div>
+  
+        <!-- DEVICES PER RACK -->
+        <div class="mb-3">
+          <label for="devicesPerRack" class="form-label">Devices per Rack</label>
+          <input type="number" class="form-control" id="devicesPerRack" placeholder="Enter the number of devices per rack" min="0" required>
+        </div>
+  
+        <!-- VRF NAMES -->
+        <div class="mb-3">
+          <label for="vrfName" class="form-label">VRF Name</label>
+          <select class="form-select" id="vrfName" required></select>
+        </div>
+  
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">Submit to Catalog</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS Logic -->
+  <script>
+    async function fetchOptions(endpoint, elementId) {
+      try {
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        const selectElement = document.getElementById(elementId);
+        selectElement.innerHTML = data.map(option => `<option value="${option.value}">${option.label}</option>`).join('');
+      } catch (error) {
+        console.error(`Error fetching options for ${elementId}:`, error);
+      }
+    }
+
+    async function submitForm(event) {
+      event.preventDefault();
+      const formData = {
+        location: document.getElementById('location').value,
+        site_name: document.getElementById('siteName').value,
+        site_tag: document.getElementById('siteTag').value,
+        device_type: document.getElementById('deviceType').value,
+        tags: Array.from(document.getElementById('tags').selectedOptions).map(option => option.value),
+        num_devices: document.getElementById('numDevices').value,
+        num_vlans: document.getElementById('numVlans').value,
+        vlan_requirement: Array.from(document.getElementById('vlanRequirement').selectedOptions).map(option => option.value),
+        num_prefixes: document.getElementById('numPrefixes').value,
+        num_racks: document.getElementById('numRacks').value,
+        devices_per_rack: document.getElementById('devicesPerRack').value,
+        vrf_name: document.getElementById('vrfName').value
+      };
+      try {
+        const response = await fetch('/api/naas/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        if (response.ok) {
+          alert('Site onboarded successfully!');
+        } else {
+          const errors = await response.json();
+          console.error(errors);
+          alert('Failed to submit. Check console for errors.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+      }
+    }
+
+    document.getElementById('siteOnboardingForm').addEventListener('submit', submitForm);
+
+    // Fetch dropdown options on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchOptions('/api/locations/', 'location');
+      fetchOptions('/api/device-types/', 'deviceType');
+      fetchOptions('/api/tags/', 'tags');
+      fetchOptions('/api/vlan-requirements/', 'vlanRequirement');
+      fetchOptions('/api/vrf-names/', 'vrfName');
+    });
+  </script>
+</body>
+</html>
