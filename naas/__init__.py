@@ -1,13 +1,13 @@
 # naas/__init__.py
-"""App declaration for NAAS."""
+"""App declaration for NaaS."""
 
 from nautobot.apps import NautobotAppConfig
 
 __version__ = "1.0.0"
 
-class NAASConfig(NautobotAppConfig):
+class NaaSConfig(NautobotAppConfig):
     name = "naas"
-    verbose_name = "NAAS"
+    verbose_name = "NaaS"
     description = "NaaS can replace hardware-centric VPNs, load balancers, firewall appliances, and Multiprotocol Label Switching (MPLS) connections.."
     author = "Avinash Sharma"
     author_email = "avinash_sharma@hcltech.com"
@@ -24,4 +24,4 @@ class NAASConfig(NautobotAppConfig):
 
 
 
-config = NAASConfig
+config = NaaSConfig
