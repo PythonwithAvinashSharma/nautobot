@@ -3,7 +3,6 @@ from django.db import models
 from nautobot.core.models import BaseModel
 from nautobot.dcim.models import Location, DeviceType, Rack
 from nautobot.ipam.models import VLAN, Prefix, VRF
-
 from nautobot.extras.models import Tag
 from nautobot.core.constants import CHARFIELD_MAX_LENGTH
 
@@ -31,29 +30,25 @@ class SiteOnboarding(BaseModel):
     )
     device_number = models.PositiveIntegerField()
     num_prefixes_masks = models.PositiveIntegerField(default=0)
-    racks =  models.ForeignKey(
+    racks = models.ManyToManyField(
         to=Rack,
-        on_delete=models.PROTECT,
         related_name="site_onboardings",
-        help_text="The Racks associated with the site."
+        help_text="The racks associated with the site."
     )
-    vlan = models.ForeignKey(
+    vlans = models.ManyToManyField(
         to=VLAN,
-        on_delete=models.PROTECT,
         related_name="site_onboardings",
-        help_text="The VLAN associated with the site."
+        help_text="The VLANs associated with the site."
     )
-    prefix = models.ForeignKey(
+    prefixes = models.ManyToManyField(
         to=Prefix,
-        on_delete=models.PROTECT,
         related_name="site_onboardings",
-        help_text="The prefix associated with the site."
+        help_text="The prefixes associated with the site."
     )
-    vrf = models.ForeignKey(
+    vrfs = models.ManyToManyField(
         to=VRF,
-        on_delete=models.PROTECT,
         related_name="site_onboardings",
-        help_text="The VRF associated with the site."
+        help_text="The VRFs associated with the site."
     )
     uplink = models.CharField(
         max_length=CHARFIELD_MAX_LENGTH,
