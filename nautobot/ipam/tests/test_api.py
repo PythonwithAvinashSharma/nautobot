@@ -2,6 +2,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import json
 from random import shuffle
 from unittest import skip
+import uuid
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection
@@ -348,6 +349,8 @@ class PrefixTest(APIViewTestCases.APIViewTestCase):
         cls.create_data = [
             {
                 "prefix": "192.168.4.0/24",
+                "network": "192.168.4.0",  # not required, but possible to specify
+                "broadcast": "192.168.4.255",  # not required, but possible to specify
                 "status": cls.status.pk,
                 "rir": rir.pk,
                 "type": choices.PrefixTypeChoices.TYPE_POOL,
@@ -506,7 +509,8 @@ class PrefixTest(APIViewTestCases.APIViewTestCase):
             url, {"prefix_length": "hello", "status": self.status.pk}, format="json", **self.header
         )
         self.assertHttpStatus(response, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("prefix_length", response.data[0])
+        self.assertIn("prefix_length", response.data)
+        self.assertEqual(response.data["prefix_length"], "This field must be an integer.")
 
     def test_create_multiple_available_prefixes(self):
         """
@@ -1482,6 +1486,15 @@ class VLANGroupTest(APIViewTestCases.APIViewTestCase):
             f"Invalid VLAN Group requested: {some_other_vlan_group}. Only VLAN Group {self.vlan_group} is permitted.",
             response.data["detail"],
         )
+        invalid_id = uuid.uuid4()
+        data[0]["vlan_group"] = invalid_id  # Invalid UUID
+        response = self.client.post(url, data, format="json", **self.header)
+        self.assertHttpStatus(response, status.HTTP_204_NO_CONTENT)
+        self.assertIn("detail", response.data)
+        self.assertEqual(
+            f"VLAN Group with pk {invalid_id} does not exist.",
+            response.data["detail"],
+        )
 
     def test_create_available_vlans_with_permissions_constraint(self):
         url = reverse("ipam-api:vlangroup-available-vlans", kwargs={"pk": self.vlan_group.pk})
@@ -1703,24 +1716,24 @@ class VLANLocationAssignmentTest(APIViewTestCases.APIViewTestCase):
         # make sure there are 4 locations without vlans 1 and 2 for the create_data below
         for i in range(4):
             cls.locations[i].vlans.set([])
-        locations_without_vlans = cls.locations.exclude(vlans__in=[cls.vlans[0], cls.vlans[1]])
+        locations_without_vlans = cls.locations.filter(vlans__isnull=True)
 
         cls.create_data = [
+            {
+                "vlan": cls.vlans[0].pk,
+                "location": locations_without_vlans[0].pk,
+            },
             {
                 "vlan": cls.vlans[0].pk,
                 "location": locations_without_vlans[1].pk,
             },
             {
-                "vlan": cls.vlans[0].pk,
+                "vlan": cls.vlans[1].pk,
                 "location": locations_without_vlans[2].pk,
             },
             {
                 "vlan": cls.vlans[1].pk,
                 "location": locations_without_vlans[3].pk,
-            },
-            {
-                "vlan": cls.vlans[1].pk,
-                "location": locations_without_vlans[4].pk,
             },
         ]
 

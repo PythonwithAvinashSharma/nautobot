@@ -72,7 +72,7 @@ def get_network_driver_mapping_tool_names():
     Tool names are "ansible", "hier_config", "napalm", "netmiko", etc...
     """
     network_driver_names = NETUTILS_NETWORK_DRIVER_MAPPING_NAMES.copy()
-    network_driver_names.update(get_settings_or_config("NETWORK_DRIVERS").keys())
+    network_driver_names.update(get_settings_or_config("NETWORK_DRIVERS", fallback={}).keys())
 
     return sorted(network_driver_names)
 
@@ -113,13 +113,7 @@ def get_all_network_driver_mappings():
             network_driver_mappings[normalized_name][tool_name] = mapped_name
 
     # add mappings from optional NETWORK_DRIVERS setting
-    network_drivers_config = get_settings_or_config("NETWORK_DRIVERS")
-    print(network_drivers_config)
-    if not isinstance(network_drivers_config, dict):
-        raise ValueError(
-            f"Expected NETWORK_DRIVERS to be a dictionary, but got {type(network_drivers_config)}: {network_drivers_config}"
-        )
-
+    network_drivers_config = get_settings_or_config("NETWORK_DRIVERS", fallback={})
     for tool_name, mappings in network_drivers_config.items():
         if isinstance(mappings, dict):
             for normalized_name, mapped_name in mappings.items():
