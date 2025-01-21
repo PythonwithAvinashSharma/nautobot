@@ -240,6 +240,8 @@ SHELL_PLUS_DONT_LOAD = ["taggit"]
 # INTERNAL_IPS = ("127.0.0.1", "::1")
 PROMETHEUS_EXPORT_MIGRATIONS = False
 
+# Event Brokers
+EVENT_BROKERS = {}
 
 #
 # Django filters
@@ -743,6 +745,7 @@ INSTALLED_APPS = [
     "nautobot.cloud",
     "nautobot.dcim",
     "nautobot.ipam",
+    "nautobot.wireless",
     "nautobot.extras",
     "nautobot.tenancy",
     "nautobot.users",
