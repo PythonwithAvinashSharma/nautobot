@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form Configuration</title>
+</head>
+<body>
+    <h1>Form Configuration</h1>
+    <ul>
+         {% for key, value in form_data.items %}
+            {% if key != 'csrfmiddlewaretoken' %}
+                <li>{{ key }}: {{ value }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</body>
+</html>

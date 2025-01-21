@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VLAN Configuration</title>
+    <style>
+        /* General form container styling */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .form-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h3 {
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+            color: black;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        .btn-primary {
+            background-color: #5631bb;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .center-button {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h3>VLAN Configuration</h3>
+            <form method="post" action="{% url 'plugins:naas:vlan-config-preview' %}">
+                {% csrf_token %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Switch IP</th>
+                            <th>VLAN</th>
+                            <th>Admin State</th>
+                            <th>VLAN Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ form.switch_ip }}</td>
+                            <td>{{ form.vlan }}</td>
+                            <td>{{ form.admin_state }}</td>
+                            <td>{{ form.vlan_description }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="center-button">
+                    <button type="submit" class="btn-primary">See Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
