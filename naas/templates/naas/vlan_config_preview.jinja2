@@ -14,7 +14,7 @@
 vlan {{ form_data.vlan }}
  name "{{ form_data.vlan_description }}"
 !
-interface Vlan{{ form_data.vlan }}
+interface Vlan {{ form_data.vlan }}
  description "{{ form_data.vlan_description }}"
  ip address {{ form_data.switch_ip }}
  administration {{ form_data.admin_state }}

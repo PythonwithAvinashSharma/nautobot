@@ -12,10 +12,22 @@ menu_items = (
                 weight=10,
                 items=(
                     NavMenuItem(
-                        link="plugins:naas:naas",  # Replace with your view's URL name
+                        link="plugins:naas:site-onboarding",  # Replace with your view's URL name
                         name="SITES ONBOARDING",
                         weight=10,
-                        permissions=["plugins:naas.naas"],
+                        permissions=["plugins:naas.site-onboarding"],
+                    ),
+                ),
+            ),
+            NavMenuGroup(
+                name="VLAN CONFIGURATION",
+                weight=10,
+                items=(
+                    NavMenuItem(
+                        link="plugins:naas:vlan-config",  # Replace with your view's URL name
+                        name="VLAN CONFIGURATION",
+                        weight=10,
+                        permissions=["plugins:naas:vlan-config"],
                     ),
                 ),
             ),

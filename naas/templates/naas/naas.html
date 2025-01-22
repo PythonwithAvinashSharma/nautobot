@@ -3,146 +3,197 @@
 {% load helpers %}
 
 {% block content %}
-    <style>
-        /* General form container styling */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px;
-        }
+<style>
+    /* General form container styling */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px;
+    }
 
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
+    .form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
 
-        h3 {
-            font-size: 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: bold;
-            color: black;
-        }
+    h3 {
+        font-size: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: bold;
+        color: black;
+    }
 
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
 
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #74a4d4;
-            border-radius: 4px;
-        }
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #74a4d4;
+        border-radius: 4px;
+    }
 
-        .form-check {
-            margin-bottom: 10px;
-        }
+    /* Table styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .form-check-label {
-            margin-left: 5px;
-        }
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
 
-        .btn-primary {
-            background-color: #5631bb;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    th {
+        background-color: #f2f2f2;
+    }
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        
-        .center-button {
+    td {
+        vertical-align: top;
+    }
+
+    /* Ensure the select elements and input fields have appropriate widths */
+    select.form-control, input.form-control {
+        width: 100%;
+    }
+
+    /* Set minimum width for table columns */
+    th, td {
+        min-width: 150px;
+    }
+
+    /* Container for the checkbox and label */
+    .checkbox-container input[type="checkbox"] {
+        display: flex; /* Align items properly */
+        align-items: center; /* Center align items */
+        width: auto; /* Ensure it doesn't stretch unnecessarily */
+    }
+    input[type="checkbox"] {
+        all: unset; /* Reset all inherited and default styles */
+        appearance: checkbox; /* Reapply default checkbox appearance */
+    }
+    .checkbox-container {
+        display: flex; /* Align items in a row */
+        align-items: center; /* Vertically center the items */
+        justify-content: flex-start; /* Align items to the left */
+        gap: 10px; /* Reduce spacing between the checkbox and label */
+        margin-top: 20px; /* Add spacing above the container */
+    }
+
+    /* Ensure the checkbox and label have no unnecessary margins */
+    .checkbox-container input {
+        margin: 0; /* Remove default margin */
+        padding: 0; /* Remove padding if any */
+    }
+
+    .checkbox-container label {
+        font-weight: bold; /* Keep the text bold */
+        margin: 0; /* Remove default margin */
+        white-space: nowrap; /* Prevent the label from breaking onto the next line */
+    }
+
+    .btn-primary {
+        background-color: #5631bb;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .center-button {
         display: flex;
         justify-content: center;
-        }
+    }
 
-        /* Collapsible styling for tags section */
-        /* Grid layout for tags */
-        .tags-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Adjust for desired size */
-            gap: 10px; /* Space between grid items */
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
+    /* Collapsible styling for tags section */
+    /* Grid layout for tags */
+    .tags-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Adjust for desired size */
+        gap: 10px; /* Space between grid items */
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 
-        /* Individual tag item */
-        .tag-item {
-            display: flex;
-            align-items: center;
-            padding: 1px; /* Reduced padding */
-            border: 1px solid #ddd;
-            border-radius: 2px;
-            background-color: #f9f9f9;
-            gap: 5px; /* Ensures a consistent gap between elements */
-        }
+    /* Individual tag item */
+    .tag-item {
+        display: flex;
+        align-items: center;
+        padding: 1px; /* Reduced padding */
+        border: 1px solid #ddd;
+        border-radius: 2px;
+        background-color: #f9f9f9;
+        gap: 5px; /* Ensures a consistent gap between elements */
+    }
 
-        /* Checkbox styling */
-        .tag-item input[type="checkbox"] {
-            width: 100px;
-            margin-right: 1px; /* Space between checkbox and label */
-        }
+    /* Checkbox styling */
+    .tag-item input[type="checkbox"] {
+        width: 100px;
+        margin-right: 1px; /* Space between checkbox and label */
+    }
 
-        /* Hover effect for tag items */
-        .tag-item:hover {
-            background-color: #e9ecef;
-        }
+    /* Hover effect for tag items */
+    .tag-item:hover {
+        background-color: #e9ecef;
+    }
 
-        #selected-tags-list {
-            list-style-type: none;
-            padding: 0;
-        }
+    #selected-tags-list {
+        list-style-type: none;
+        padding: 0;
+    }
 
-        #selected-tags-list li {
-            display: inline-block;
-            margin: 5px;
-            padding: 5px 10px;
-            background-color: #74a4d4;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+    #selected-tags-list li {
+        display: inline-block;
+        margin: 5px;
+        padding: 5px 10px;
+        background-color: #74a4d4;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
 
-        #selected-tags-list li:hover {
-            background-color: #0056b3;
-        }
+    #selected-tags-list li:hover {
+        background-color: #0056b3;
+    }
 
-        /* Tag selected state */
-        .tag-item.selected {
-            background-color: #0056b3; /* Highlight selected tags */
-            color: white;
-        }
+    /* Tag selected state */
+    .tag-item.selected {
+        background-color: #0056b3; /* Highlight selected tags */
+        color: white;
+    }
 
-        /* Collapsible button active state */
-        .collapsible.active {
-            background-color: #74a4d4;
-            color: white;
-            font-weight: bold;
-        }
+    /* Collapsible button active state */
+    .collapsible.active {
+        background-color: #74a4d4;
+        color: white;
+        font-weight: bold;
+    }
 
-        .tag-item input[type="checkbox"] {
-            margin-right: 5px; /* Reduced from 10px to 5px to minimize the gap */
-            vertical-align: middle; /* Ensures proper alignment with the text */
-        }
-    </style>
+    .tag-item input[type="checkbox"] {
+        margin-right: 5px; /* Reduced from 10px to 5px to minimize the gap */
+        vertical-align: middle; /* Ensures proper alignment with the text */
+    }
+</style>
 
     <div class="pull-right noprint">
         {% if request.user.is_authenticated %}
-            <!-- Optional: Add configuration button or options if needed -->
         {% endif %}
     </div>
 
@@ -154,98 +205,44 @@
 
             <div class="form-container">
                 <h3>🏗️ Site Onboarding Form</h3>
-                <form method="post" class="needs-validation" novalidate>
+                <form method="post" action="{% url 'plugins:naas:site-onboarding' %}" class="needs-validation" novalidate>
                     {% csrf_token %}
 
-                    <!-- Name Field -->
-                    <div class="mb-3">
-                        {{ form.name.label_tag }}
-                        {{ form.name }}
-                        <div class="form-text text-danger">{{ form.name.errors }}</div>
-                    </div>
+                     <!-- Site Onboarding Fields -->
+                    {{ form.as_p }}
 
-                    <!-- Location Field -->
+                    <!-- Router Devices -->
                     <div class="mb-3">
-                        {{ form.location.label_tag }}
-                        {{ form.location }}
-                        <div class="form-text text-danger">{{ form.location.errors }}</div>
+                        <label for="router_quantity">Number of Routers</label>
+                        <input type="number" id="router_quantity" name="router_quantity" min="0" class="form-control">
                     </div>
+                    <div id="router-devices-container"></div>
 
-                    <!-- Site Tag Field -->
+                    <!-- Switch Devices -->
                     <div class="mb-3">
-                        {{ form.site_tag.label_tag }}
-                        {{ form.site_tag }}
-                        <div class="form-text text-danger">{{ form.site_tag.errors }}</div>
+                        <label for="switch_quantity">Number of Switches</label>
+                        <input type="number" id="switch_quantity" name="switch_quantity" min="0" class="form-control">
                     </div>
+                    <div id="switch-devices-container"></div>
 
-                    <!-- Device Type Field -->
+                    <!-- Prefix Masks -->
                     <div class="mb-3">
-                        {{ form.device_type.label_tag }}
-                        {{ form.device_type }}
-                        <div class="form-text text-danger">{{ form.device_type.errors }}</div>
+                        <label for="prefix_quantity">Number of Prefix Masks</label>
+                        <input type="number" id="prefix_quantity" name="prefix_quantity" min="0" class="form-control">
                     </div>
+                    <div id="prefix-masks-container"></div>
 
-                    <!-- Tag Field -->
+                    <!-- Tools -->
                     <div class="mb-3">
-                        {{ form.tags.label_tag }}
-                        {{ form.tags }}
-                        <div class="form-text text-danger">{{ form.tags.errors }}</div>
+                        <label for="tool_quantity">Number of Tools</label>
+                        <input type="number" id="tool_quantity" name="tool_quantity" min="0" class="form-control" placeholder="Optional">
                     </div>
+                    <div id="tool-container"></div>
 
-                    <!-- Device Number Field -->
-                    <div class="mb-3">
-                        {{ form.device_number.label_tag }}
-                        {{ form.device_number }}
-                        <div class="form-text text-danger">{{ form.device_number.errors }}</div>
-                    </div>
-
-                    <!-- Number of Prefixes Masks Field -->
-                    <div class="mb-3">
-                        {{ form.num_prefixes_masks.label_tag }}
-                        {{ form.num_prefixes_masks }}
-                        <div class="form-text text-danger">{{ form.num_prefixes_masks.errors }}</div>
-                    </div>
-
-                    <!-- Racks Field -->
-                    <div class="mb-3">
-                        {{ form.racks.label_tag }}
-                        {{ form.racks }}
-                        <div class="form-text text-danger">{{ form.racks.errors }}</div>
-                    </div>
-
-                    <!-- VLANs Field -->
-                    <div class="mb-3">
-                        {{ form.vlans.label_tag }}
-                        {{ form.vlans }}
-                        <div class="form-text text-danger">{{ form.vlans.errors }}</div>
-                    </div>
-
-                    <!-- Prefixes Field -->
-                    <div class="mb-3">
-                        {{ form.prefixes.label_tag }}
-                        {{ form.prefixes }}
-                        <div class="form-text text-danger">{{ form.prefixes.errors }}</div>
-                    </div>
-
-                    <!-- VRFs Field -->
-                    <div class="mb-3">
-                        {{ form.vrfs.label_tag }}
-                        {{ form.vrfs }}
-                        <div class="form-text text-danger">{{ form.vrfs.errors }}</div>
-                    </div>
-
-                    <!-- Uplink Field -->
-                    <div class="mb-3">
-                        {{ form.uplink.label_tag }}
-                        {{ form.uplink }}
-                        <div class="form-text text-danger">{{ form.uplink.errors }}</div>
-                    </div>
-
-                    <!-- VLAN Description Field -->
-                    <div class="mb-3">
-                        {{ form.vlan_description.label_tag }}
-                        {{ form.vlan_description }}
-                        <div class="form-text text-danger">{{ form.vlan_description.errors }}</div>
+                    <!-- Digital Twin Checkbox -->
+                    <div class="checkbox-container">
+                        <label for="digitalTwin">Digital Twin</label>
+                        <input type="checkbox" id="digitalTwin" name="digital_twin" />
                     </div>
 
                     <!-- Submit Button -->
@@ -256,103 +253,464 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const collapsibles = document.querySelectorAll(".collapsible");
-    collapsibles.forEach(button => {
-        button.addEventListener("click", function () {
-            this.classList.toggle("active");
-            const content = this.nextElementSibling;
-            content.style.display = content.style.display === "block" ? "none" : "block";
-        });
-    });
-
-    const tagsGrid = document.querySelector(".tags-grid");
-    const selectedTagsContainer = document.getElementById("selected-tags-container");
-    const selectedTagsList = document.getElementById("selected-tags-list");
-    const tagsForm = document.querySelector("form");  // Ensure this is the form you are working with
-
-    tagsGrid.addEventListener("click", function (event) {
-        const tagItem = event.target.closest(".tag-item");
-
-        if (tagItem) {
-            const checkbox = tagItem.querySelector('input[type="checkbox"]');
-            const tagLabel = tagItem.querySelector("label").textContent.trim();
-
-            if (checkbox) {
-                checkbox.checked = !checkbox.checked;
-
-                if (checkbox.checked) {
-                    addTagToSelectedList(tagLabel, checkbox.id);
-                    addTagToHiddenInputs(tagLabel, checkbox.id);
-                } else {
-                    removeTagFromSelectedList(checkbox.id);
-                    removeTagFromHiddenInputs(checkbox.id);
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const routerQuantityField = document.querySelector("#router_quantity");
+            const routerDevicesContainer = document.getElementById("router-devices-container");
+    
+            const switchQuantityField = document.querySelector("#switch_quantity");
+            const switchDevicesContainer = document.getElementById("switch-devices-container");
+    
+            const prefixQuantityField = document.querySelector("#prefix_quantity");
+            const prefixMasksContainer = document.getElementById("prefix-masks-container");
+    
+            const toolQuantityField = document.querySelector("#tool_quantity");
+            const toolContainer = document.getElementById("tool-container");
+    
+            let deviceTypes, racks, siteTags, routerTags, switchTags, prefixTags, prefixes, vlans, deviceTags;
+    
+            function parseJSON(jsonString) {
+                if (!jsonString || jsonString.trim() === '') {
+                    return [];
+                }
+                try {
+                    return JSON.parse(jsonString) || [];
+                } catch (e) {
+                    console.error("Error parsing JSON data: ", e);
+                    return [];
                 }
             }
-        }
-    });
+    
+            deviceTypes = parseJSON('{{ device_types_json|escapejs }}');
+            racks = parseJSON('{{ racks_json|escapejs }}');
+            siteTags = parseJSON('{{ site_tags_json|escapejs }}');
+            routerTags = parseJSON('{{ router_tags_json|escapejs }}');
+            switchTags = parseJSON('{{ switch_tags_json|escapejs }}');
+            prefixTags = parseJSON('{{ prefix_tags_json|escapejs }}');  // Use the passed tags for prefixes
+            prefixes = parseJSON('{{ prefixes_json|escapejs }}');
+            vlans = parseJSON('{{ vlans_json|escapejs }}');
+            deviceTags = parseJSON('{{ tags_json|escapejs }}');  // Use the passed tags for devices
+            cloudServiceTags = parseJSON('{{ cloud_service_tags_json|escapejs }}');  // Use the passed tags for cloud services
 
-    function addTagToSelectedList(label, id) {
-        if (selectedTagsContainer.style.display === "none") {
-            selectedTagsContainer.style.display = "block";
-        }
+            function initializeSelect2() {
+                $('.select2-site-tags').select2(); // Initialize Select2 for site tags
+                $('.select2-router-tags').select2(); // Initialize Select2 for router tags
+                $('.select2-switch-tags').select2(); // Initialize Select2 for switch tags
+                $('.select2-prefix-tags').select2(); // Initialize Select2 for prefix tags
+                $('.select2-tool-tags').select2(); // Initialize Select2 for tool tags
+            }
+    
+            function createDeviceTable(container, quantity, deviceTypeOptions, rackOptions, tagOptions, tagClass) {
+                container.innerHTML = "";
+                if (quantity > 0) {
+                    const table = document.createElement("table");
+                    table.classList.add("table", "table-bordered");
+    
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
+    
+                    const headers = ["Name", "Device Type", "Rack", "Tags", "Management IP Address", "Serial Number"];
+                    headers.forEach(headerText => {
+                        const th = document.createElement("th");
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+    
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+    
+                    const tbody = document.createElement("tbody");
+    
+                    for (let i = 0; i < quantity; i++) {
+                        const row = document.createElement("tr");
+    
+                        // Name
+                        const nameCell = document.createElement("td");
+                        const nameInput = document.createElement("input");
+                        nameInput.setAttribute("type", "text");
+                        nameInput.setAttribute("name", `device_name_${i}`);
+                        nameInput.classList.add("form-control");
+                        nameCell.appendChild(nameInput);
+                        row.appendChild(nameCell);
+    
+                        // Device Type
+                        const deviceTypeCell = document.createElement("td");
+                        const deviceTypeSelect = document.createElement("select");
+                        deviceTypeSelect.setAttribute("name", `device_type_${i}`);
+                        deviceTypeSelect.classList.add("form-control");
+                        deviceTypeOptions.forEach(optionData => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", optionData.pk);
+                            option.textContent = optionData.fields.model;
+                            deviceTypeSelect.appendChild(option);
+                        });
+                        deviceTypeCell.appendChild(deviceTypeSelect);
+                        row.appendChild(deviceTypeCell);
+    
+                        // Rack
+                        const rackCell = document.createElement("td");
+                        const rackSelect = document.createElement("select");
+                        rackSelect.setAttribute("name", `rack_${i}`);
+                        rackSelect.classList.add("form-control");
+                        rackOptions.forEach(optionData => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", optionData.pk);
+                            option.textContent = optionData.fields.name;
+                            rackSelect.appendChild(option);
+                        });
+                        rackCell.appendChild(rackSelect);
+                        row.appendChild(rackCell);
+    
+                        // Tags
+                        const tagsCell = document.createElement("td");
+                        const tagsSelect = document.createElement("select");
+                        tagsSelect.setAttribute("name", `tags_${i}`);
+                        tagsSelect.setAttribute("multiple", "multiple");
+                        tagsSelect.classList.add("form-control", tagClass);
+                        tagOptions.forEach(optionData => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", optionData.pk);
+                            option.textContent = optionData.fields.name;
+                            tagsSelect.appendChild(option);
+                        });
+                        tagsCell.appendChild(tagsSelect);
+                        row.appendChild(tagsCell);
+    
+                        // Management IP Address
+                        const mgmtIpCell = document.createElement("td");
+                        const mgmtIpInput = document.createElement("input");
+                        mgmtIpInput.setAttribute("type", "text");
+                        mgmtIpInput.setAttribute("name", `mgmt_ip_${i}`);
+                        mgmtIpInput.classList.add("form-control");
+                        mgmtIpCell.appendChild(mgmtIpInput);
+                        row.appendChild(mgmtIpCell);
+    
+                        // Serial Number
+                        const serialNumberCell = document.createElement("td");
+                        const serialNumberInput = document.createElement("input");
+                        serialNumberInput.setAttribute("type", "text");
+                        serialNumberInput.setAttribute("name", `serial_number_${i}`);
+                        serialNumberInput.classList.add("form-control");
+                        serialNumberCell.appendChild(serialNumberInput);
+                        row.appendChild(serialNumberCell);
+    
+                        tbody.appendChild(row);
+                    }
+    
+                    table.appendChild(tbody);
+                    container.appendChild(table);
+    
+                    // Initialize Select2 for the new tags fields
+                    initializeSelect2();
+                }
+            }
+    
+            function createToolTable(container, quantity, tagOptions) {
+                container.innerHTML = "";
+                if (quantity > 0) {
+                    const table = document.createElement("table");
+                    table.classList.add("table", "table-bordered");
 
-        if (!document.getElementById(`selected-${id}`)) {
-            const listItem = document.createElement("li");
-            listItem.id = `selected-${id}`;
-            listItem.textContent = label;
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
 
-            listItem.addEventListener("click", function () {
-                removeTagFromSelectedList(id);
-                uncheckTagCheckbox(id);
-                removeTagFromHiddenInputs(id);
+                    const headers = ["Name", "IP", "Tags", "Status"];
+                    headers.forEach(headerText => {
+                        const th = document.createElement("th");
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement("tbody");
+
+                    for (let i = 0; i < quantity; i++) {
+                        const row = document.createElement("tr");
+
+                        // Name
+                        const nameCell = document.createElement("td");
+                        const nameSelect = document.createElement("select");
+                        nameSelect.setAttribute("name", `tool_name_${i}`);
+                        nameSelect.classList.add("form-control");
+                        const toolNames = ["Tool-Splunk", "Tool-Solarwinds", "Tool-CMDB", "Tool-DNS", "Tool-DHCP", "Tool-IPAM"];
+                        toolNames.forEach(toolName => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", toolName);
+                            option.textContent = toolName;
+                            nameSelect.appendChild(option);
+                        });
+                        nameCell.appendChild(nameSelect);
+                        row.appendChild(nameCell);
+
+                        // IP
+                        const ipCell = document.createElement("td");
+                        const ipInput = document.createElement("input");
+                        ipInput.setAttribute("type", "text");
+                        ipInput.setAttribute("name", `tool_ip_${i}`);
+                        ipInput.classList.add("form-control");
+                        ipCell.appendChild(ipInput);
+                        row.appendChild(ipCell);
+
+                        // Tags
+                        const tagsCell = document.createElement("td");
+                        const tagsSelect = document.createElement("select");
+                        tagsSelect.setAttribute("name", `tool_tags_${i}`);
+                        tagsSelect.setAttribute("multiple", "multiple");
+                        tagsSelect.classList.add("form-control", "select2-tool-tags");
+                        tagOptions.forEach(optionData => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", optionData.pk);
+                            option.textContent = optionData.fields.name;
+                            tagsSelect.appendChild(option);
+                        });
+                        tagsCell.appendChild(tagsSelect);
+                        row.appendChild(tagsCell);
+
+                        // Status
+                        const statusCell = document.createElement("td");
+                        const statusInput = document.createElement("input");
+                        statusInput.setAttribute("type", "text");
+                        statusInput.setAttribute("name", `tool_status_${i}`);
+                        statusInput.classList.add("form-control");
+                        statusCell.appendChild(statusInput);
+                        row.appendChild(statusCell);
+
+                        tbody.appendChild(row);
+                    }
+
+                    table.appendChild(tbody);
+                    container.appendChild(table);
+
+                    // Initialize Select2 for the new tags fields
+                    initializeSelect2();
+                }
+            }
+    
+            function handleQuantityChange(quantityField, container, deviceTypeOptions, rackOptions, tagOptions, tagClass) {
+                const quantity = parseInt(quantityField.value) || 0;
+                createDeviceTable(container, quantity, deviceTypeOptions, rackOptions, tagOptions, tagClass);
+            }
+
+            routerQuantityField.addEventListener("change", function () {
+                handleQuantityChange(routerQuantityField, routerDevicesContainer, deviceTypes, racks, deviceTags, 'select2-router-tags');
             });
 
-            selectedTagsList.appendChild(listItem);
-        }
-    }
+            switchQuantityField.addEventListener("change", function () {
+                handleQuantityChange(switchQuantityField, switchDevicesContainer, deviceTypes, racks, deviceTags, 'select2-switch-tags');
+            });
+    
+            prefixQuantityField.addEventListener("change", function () {
+                const selectedTags = $('.select2-prefix-tags').map(function() { return $(this).val(); }).get();
+                prefixMasksContainer.innerHTML = "";
+                const quantity = parseInt(prefixQuantityField.value) || 0;
 
-    function removeTagFromSelectedList(id) {
-        const listItem = document.getElementById(`selected-${id}`);
-        if (listItem) {
-            selectedTagsList.removeChild(listItem);
+                if (quantity > 0) {
+                    const table = document.createElement("table");
+                    table.classList.add("table", "table-bordered");
 
-            if (selectedTagsList.children.length === 0) {
-                selectedTagsContainer.style.display = "none";
-            }
-        }
-    }
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
 
-    function addTagToHiddenInputs(label, id) {
-        // Add hidden input for the selected tag
-        let hiddenInput = document.getElementById(`hidden-${id}`);
-        if (!hiddenInput) {
-            hiddenInput = document.createElement("input");
-            hiddenInput.type = "hidden";
-            hiddenInput.name = "selected_tags";  // This name will be used for the form submission
-            hiddenInput.id = `hidden-${id}`;
-            hiddenInput.value = label;
-            tagsForm.appendChild(hiddenInput);
-        }
-    }
+                    const headers = ["Prefix", "VLAN", "VLAN Name", "VLAN Type", "GW IP", "Tags"];
+                    headers.forEach(headerText => {
+                        const th = document.createElement("th");
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
 
-    function removeTagFromHiddenInputs(id) {
-        // Remove hidden input for the deselected tag
-        const hiddenInput = document.getElementById(`hidden-${id}`);
-        if (hiddenInput) {
-            tagsForm.removeChild(hiddenInput);
-        }
-    }
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
 
-    function uncheckTagCheckbox(id) {
-        const checkbox = document.getElementById(id);
-        if (checkbox) {
-            checkbox.checked = false;
-        }
-    }
-});
+                    const tbody = document.createElement("tbody");
 
-</script>
+                    for (let i = 0; i < quantity; i++) {
+                        const row = document.createElement("tr");
+
+                        // Prefix
+                        const prefixCell = document.createElement("td");
+                        const prefixSelect = document.createElement("select");
+                        prefixSelect.setAttribute("name", `prefix_${i}`);
+                        prefixSelect.classList.add("form-control");
+                        prefixes.forEach(prefix => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", prefix.pk);
+                            option.textContent = `${prefix.fields.network}/${prefix.fields.prefix_length}`;
+                            prefixSelect.appendChild(option);
+                        });
+                        prefixCell.appendChild(prefixSelect);
+                        row.appendChild(prefixCell);
+
+                        // VLAN
+                        const vlanCell = document.createElement("td");
+                        const vlanSelect = document.createElement("select");
+                        vlanSelect.setAttribute("name", `vlan_${i}`);
+                        vlanSelect.classList.add("form-control");
+                        vlans.forEach(vlan => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", vlan.pk);
+                            option.textContent = vlan.fields.name;  // Use name instead of vid
+                            vlanSelect.appendChild(option);
+                        });
+                        vlanCell.appendChild(vlanSelect);
+                        row.appendChild(vlanCell);
+
+                        // VLAN Name
+                        const vlanNameCell = document.createElement("td");
+                        const vlanNameInput = document.createElement("input");
+                        vlanNameInput.setAttribute("type", "text");
+                        vlanNameInput.setAttribute("name", `vlan_name_${i}`);
+                        vlanNameInput.classList.add("form-control");
+                        vlanNameCell.appendChild(vlanNameInput);
+                        row.appendChild(vlanNameCell);
+
+                        // VLAN Type
+                        const vlanTypeCell = document.createElement("td");
+                        const vlanTypeSelect = document.createElement("select");
+                        vlanTypeSelect.setAttribute("name", `vlan_type_${i}`);
+                        vlanTypeSelect.classList.add("form-control");
+                        const vlanTypes = ['Data', 'Video', 'Audio'];
+                        vlanTypes.forEach(type => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", type);
+                            option.textContent = type;
+                            vlanTypeSelect.appendChild(option);
+                        });
+                        vlanTypeCell.appendChild(vlanTypeSelect);
+                        row.appendChild(vlanTypeCell);
+
+                        // GW IP
+                        const gwIpCell = document.createElement("td");
+                        const gwIpInput = document.createElement("input");
+                        gwIpInput.setAttribute("type", "text");
+                        gwIpInput.setAttribute("name", `gw_ip_${i}`);
+                        gwIpInput.classList.add("form-control");
+                        gwIpCell.appendChild(gwIpInput);
+                        row.appendChild(gwIpCell);
+
+                        // Tags
+                        const tagsCell = document.createElement("td");
+                        const tagsSelect = document.createElement("select");
+                        tagsSelect.setAttribute("name", `prefix_tags_${i}`);
+                        tagsSelect.setAttribute("multiple", "multiple");
+                        tagsSelect.classList.add("form-control", "select2-prefix-tags");
+                        prefixTags.forEach(tag => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", tag.pk);
+                            option.textContent = tag.fields.name;
+                            tagsSelect.appendChild(option);
+                        });
+                        tagsCell.appendChild(tagsSelect);
+                        row.appendChild(tagsCell);
+
+                        tbody.appendChild(row);
+                    }
+
+                    table.appendChild(tbody);
+                    prefixMasksContainer.appendChild(table);
+
+                    // Initialize Select2 for the new tags fields
+                    initializeSelect2();
+                    $('.select2-prefix-tags').each(function(index) {
+                        $(this).val(selectedTags[index]).trigger('change');
+                    });
+                }
+            });
+    
+            toolQuantityField.addEventListener("change", function () {
+                const selectedTags = $('.select2-tool-tags').map(function() { return $(this).val(); }).get();
+                toolContainer.innerHTML = "";
+                const quantity = parseInt(toolQuantityField.value) || 0;
+
+                if (quantity > 0) {
+                    const table = document.createElement("table");
+                    table.classList.add("table", "table-bordered");
+
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
+
+                    const headers = ["Name", "IP", "Tags", "Status"];
+                    headers.forEach(headerText => {
+                        const th = document.createElement("th");
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement("tbody");
+
+                    for (let i = 0; i < quantity; i++) {
+                        const row = document.createElement("tr");
+
+                        // Name
+                        const nameCell = document.createElement("td");
+                        const nameSelect = document.createElement("select");
+                        nameSelect.setAttribute("name", `tool_name_${i}`);
+                        nameSelect.classList.add("form-control");
+                        const toolNames = ["Tool-Splunk", "Tool-Solarwinds", "Tool-CMDB", "Tool-DNS", "Tool-DHCP", "Tool-IPAM"];
+                        toolNames.forEach(toolName => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", toolName);
+                            option.textContent = toolName;
+                            nameSelect.appendChild(option);
+                        });
+                        nameCell.appendChild(nameSelect);
+                        row.appendChild(nameCell);
+
+                        // IP
+                        const ipCell = document.createElement("td");
+                        const ipInput = document.createElement("input");
+                        ipInput.setAttribute("type", "text");
+                        ipInput.setAttribute("name", `tool_ip_${i}`);
+                        ipInput.classList.add("form-control");
+                        ipCell.appendChild(ipInput);
+                        row.appendChild(ipCell);
+
+                        // Tags
+                        const tagsCell = document.createElement("td");
+                        const tagsSelect = document.createElement("select");
+                        tagsSelect.setAttribute("name", `tool_tags_${i}`);
+                        tagsSelect.setAttribute("multiple", "multiple");
+                        tagsSelect.classList.add("form-control", "select2-tool-tags");
+                        cloudServiceTags.forEach(tag => {
+                            const option = document.createElement("option");
+                            option.setAttribute("value", tag.pk);
+                            option.textContent = tag.fields.name;
+                            tagsSelect.appendChild(option);
+                        });
+                        tagsCell.appendChild(tagsSelect);
+                        row.appendChild(tagsCell);
+
+                        // Status
+                        const statusCell = document.createElement("td");
+                        const statusInput = document.createElement("input");
+                        statusInput.setAttribute("type", "text");
+                        statusInput.setAttribute("name", `tool_status_${i}`);
+                        statusInput.classList.add("form-control");
+                        statusCell.appendChild(statusInput);
+                        row.appendChild(statusCell);
+
+                        tbody.appendChild(row);
+                    }
+
+                    table.appendChild(tbody);
+                    toolContainer.appendChild(table);
+
+                    // Initialize Select2 for the new tags fields
+                    initializeSelect2();
+                    $('.select2-tool-tags').each(function(index) {
+                        $(this).val(selectedTags[index]).trigger('change');
+                    });
+                }
+            });
+            // Initialize Select2 for tags in the main form
+            initializeSelect2();
+            $('.select2-site-tags').val($('#id_site_tags').val()).trigger('change');
+        });
+    </script>
+
+{% endblock %}

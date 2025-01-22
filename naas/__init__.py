@@ -23,5 +23,4 @@ class NaaSConfig(NautobotAppConfig):
         super().ready()
 
 
-
 config = NaaSConfig
