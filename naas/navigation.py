@@ -4,7 +4,7 @@ from nautobot.apps.ui import NavMenuTab, NavMenuGroup, NavMenuItem, NavMenuAddBu
 
 menu_items = (
     NavMenuTab(
-        name="NaaS",  # Custom top-level tab name
+        name="NW Catalog",  # Custom top-level tab name
         weight=60,  # Adjust weight to control its position in the navigation bar
         groups=(
             NavMenuGroup(
@@ -21,13 +21,25 @@ menu_items = (
             ),
             NavMenuGroup(
                 name="VLAN CONFIGURATION",
-                weight=10,
+                weight=20,
                 items=(
                     NavMenuItem(
                         link="plugins:naas:vlan-config",  # Replace with your view's URL name
                         name="VLAN CONFIGURATION",
                         weight=10,
                         permissions=["plugins:naas:vlan-config"],
+                    ),
+                ),
+            ),
+            NavMenuGroup(
+                name="Switch Configuration",
+                weight=30,
+                items=(
+                    NavMenuItem(
+                        link="plugins:naas:switches",  # Replace with your view's URL name
+                        name="Catalog",
+                        weight=10,
+                        permissions=["plugins:naas:switches"],
                     ),
                 ),
             ),

@@ -2,101 +2,336 @@
 {% load static %}
 {% load helpers %}
 
+{% block header %}
+<link rel="stylesheet"href="{% static 'naas/vlan-config.css' %}">
+{% endblock %}
+
 {% block content %}
+
 <head>
     <meta charset="UTF-8">
     <title>VLAN Configuration</title>
-    <style>
-        /* General form container styling */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px;
-        }
-
-        .form-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-
-        h3 {
-            font-size: 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: bold;
-            color: black;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #f2f2f2;
-            text-align: left;
-        }
-
-        .btn-primary {
-            background-color: #5631bb;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        
-        .center-button {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
         <div class="form-container">
             <h3>VLAN Configuration</h3>
-            <form method="post" action="{% url 'plugins:naas:vlan-config-preview' %}">
-                {% csrf_token %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Switch IP</th>
-                            <th>VLAN</th>
-                            <th>Admin State</th>
-                            <th>VLAN Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{ form.switch_ip }}</td>
-                            <td>{{ form.vlan }}</td>
-                            <td>{{ form.admin_state }}</td>
-                            <td>{{ form.vlan_description }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="center-button">
-                    <button type="submit" class="btn-primary">See Configuration</button>
-                </div>
-            </form>
+            <div class="servicenow-integration">
+                <h4><img src="/static/naas/media/servicenow-logo-icon.png" alt="ServiceNow" style="width: 24px; height: 24px;"> ServiceNow</h4>
+                <label for="cr_number">CR Number</label>
+                <input type="text" id="cr_number" class="form-control" placeholder="Enter CR Number">
+                <button type="button" id="fetchCrDetails" class="btn-primary">Fetch CR Details</button>
+            </div>
+            <div id="crDetails"></div>
+            <div class="vlan-configuration"></div>
+                <form method="post" action="{% url 'plugins:naas:vlan-config-preview' %}" id="vlanForm">
+                    {% csrf_token %}
+                    <div id="vlanBlocksContainer">
+                        {% for row_form in form.rows %}
+                        <div class="vlan-block">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="switch_ip_{{ forloop.counter0 }}">Switch IP</label>
+                                    <input type="text" name="switch_ip_{{ forloop.counter0 }}" 
+                                        value="{{ row_form.switch_ip.value|default:'' }}" 
+                                        class="form-control" required placeholder="Enter Switch IP">
+                                    <div class="error-message" id="switch_ip_error_{{ forloop.counter0 }}"></div>
+                                    {{ row_form.switch_ip.errors }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="vlan_{{ forloop.counter0 }}">VLAN</label>
+                                    <select name="vlan_{{ forloop.counter0 }}" class="form-control vlan-select" required>
+                                        {% for vlan in row_form.vlan.field.queryset %}
+                                        <option value="{{ vlan.pk }}" {% if vlan.pk == row_form.vlan.value %}selected{% endif %}>{{ vlan }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="error-message" id="vlan_error_{{ forloop.counter0 }}"></div>
+                                    {{ row_form.vlan.errors }}
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="admin_state_{{ forloop.counter0 }}">Admin State</label>
+                                    <select name="admin_state_{{ forloop.counter0 }}" class="form-control" required>
+                                        <option value="no shutdown" {% if row_form.admin_state.value == 'no shutdown' %}selected{% endif %}>No Shutdown</option>
+                                        <option value="shutdown" {% if row_form.admin_state.value == 'shutdown' %}selected{% endif %}>Shutdown</option>
+                                    </select>
+                                    <div class="error-message" id="admin_state_error_{{ forloop.counter0 }}"></div>
+                                    {{ row_form.admin_state.errors }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="subnet_{{ forloop.counter0 }}">Subnet</label>
+                                    <select name="subnet_{{ forloop.counter0 }}" class="form-control subnet-select">
+                                        {% for subnet in row_form.subnet.field.queryset %}
+                                        <option value="{{ subnet.pk }}" {% if subnet.pk == row_form.subnet.value %}selected{% endif %}>{{ subnet }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="error-message" id="subnet_error_{{ forloop.counter0 }}"></div>
+                                    {{ row_form.subnet.errors }}
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="gateway_ip_{{ forloop.counter0 }}">Gateway IP</label>
+                                    <input type="text" name="gateway_ip_{{ forloop.counter0 }}" 
+                                        value="{{ row_form.gateway_ip.value|default:'' }}" 
+                                        class="form-control" placeholder="Enter Gateway IP">
+                                    <div class="error-message" id="gateway_ip_error_{{ forloop.counter0 }}"></div>
+                                    {{ row_form.gateway_ip.errors }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="mtu_size_{{ forloop.counter0 }}">MTU Size</label>
+                                    <input type="number" name="mtu_size_{{ forloop.counter0 }}" 
+                                        value="{{ row_form.mtu_size.value|default:'' }}" 
+                                        class="form-control" placeholder="Enter MTU Size">
+                                    <div class="error-message" id="mtu_size_error_{{ forloop.counter0 }}"></div>
+                                    {{ row_form.mtu_size.errors }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="vlan_description_{{ forloop.counter0 }}">VLAN Description</label>
+                                <input type="text" name="vlan_description_{{ forloop.counter0 }}" 
+                                    value="{{ row_form.vlan_description.value|default:'' }}" 
+                                    class="form-control" placeholder="Enter VLAN Description">
+                                <div class="error-message" id="vlan_description_error_{{ forloop.counter0 }}"></div>
+                                {{ row_form.vlan_description.errors }}
+                            </div>
+                            <button type="button" class="btn-remove remove-block">Remove</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="button-container">
+                        <button type="button" class="btn-secondary" id="addBlock">Add Block</button>
+                        <button type="submit" class="btn-primary" id="seeConfigButton">See Configuration</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </body>
 
+<script>
+    document.getElementById('addBlock').addEventListener('click', function() {
+        const container = document.getElementById('vlanBlocksContainer');
+        const newBlock = container.querySelector('.vlan-block').cloneNode(true);
+        
+        // Clear input values
+        newBlock.querySelectorAll('input, select').forEach(input => {
+            input.value = '';
+            if (input.tagName === 'SELECT') {
+                input.selectedIndex = 0;
+            }
+            // Update input names to match new index
+            const newIndex = container.children.length;
+            const oldName = input.getAttribute('name');
+            if (oldName) {
+                input.setAttribute('name', oldName.replace(/\d+/, newIndex));
+            }
+        });
+        
+        // Add remove button functionality
+        newBlock.querySelector('.remove-block').addEventListener('click', function() {
+            if (container.children.length > 1) {
+                this.closest('.vlan-block').remove();
+                updateBlockIndices();
+            }
+        });
+        
+        container.appendChild(newBlock);
+    });
+    
+    // Add remove functionality to existing blocks
+    document.querySelectorAll('.remove-block').forEach(button => {
+        button.addEventListener('click', function() {
+            const container = document.getElementById('vlanBlocksContainer');
+            if (container.children.length > 1) {
+                this.closest('.vlan-block').remove();
+                updateBlockIndices();
+            }
+        });
+    });
+    
+    function updateBlockIndices() {
+        const container = document.getElementById('vlanBlocksContainer');
+        Array.from(container.children).forEach((block, index) => {
+            block.querySelectorAll('input, select').forEach(input => {
+                const oldName = input.getAttribute('name');
+                if (oldName) {
+                    input.setAttribute('name', oldName.replace(/\d+/, index));
+                }
+            });
+        });
+    }
+
+    // Form validation
+    document.getElementById('vlanForm').addEventListener('submit', function(event) {
+        let isValid = true;
+        document.querySelectorAll('.vlan-block').forEach((block, index) => {
+            const switchIp = block.querySelector(`[name="switch_ip_${index}"]`);
+            const vlan = block.querySelector(`[name="vlan_${index}"]`);
+            const adminState = block.querySelector(`[name="admin_state_${index}"]`);
+            const subnet = block.querySelector(`[name="subnet_${index}"]`);
+            const gatewayIp = block.querySelector(`[name="gateway_ip_${index}"]`);
+            const mtuSize = block.querySelector(`[name="mtu_size_${index}"]`);
+            const vlanDescription = block.querySelector(`[name="vlan_description_${index}"]`);
+
+            // Clear previous error messages
+            block.querySelectorAll('.error-message').forEach(error => error.textContent = '');
+
+            if (!switchIp.value) {
+                block.querySelector(`#switch_ip_error_${index}`).textContent = 'Switch IP is required.';
+                isValid = false;
+            }
+            if (!vlan.value) {
+                block.querySelector(`#vlan_error_${index}`).textContent = 'VLAN is required.';
+                isValid = false;
+            }
+            if (!adminState.value) {
+                block.querySelector(`#admin_state_error_${index}`).textContent = 'Admin State is required.';
+                isValid = false;
+            }
+            if (!subnet.value) {
+                block.querySelector(`#subnet_error_${index}`).textContent = 'Subnet is required.';
+                isValid = false;
+            }
+            // if (!gatewayIp.value) {
+            //     block.querySelector(`#gateway_ip_error_${index}`).textContent = 'Gateway IP is required.';
+            //     isValid = false;
+            // }
+            if (!mtuSize.value) {
+                mtuSize.value = '1500';  // Set default value if not provided
+            }
+            if (!vlanDescription.value) {
+                block.querySelector(`#vlan_description_error_${index}`).textContent = 'VLAN Description is required.';
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            event.preventDefault();
+        } else {
+            saveFormData();
+        }
+    });
+
+    // Save form data to session storage
+    function saveFormData() {
+        const formData = {};
+        document.querySelectorAll('.vlan-block').forEach((block, index) => {
+            formData[`switch_ip_${index}`] = block.querySelector(`[name="switch_ip_${index}"]`).value;
+            formData[`vlan_${index}`] = block.querySelector(`[name="vlan_${index}"]`).value;
+            formData[`admin_state_${index}`] = block.querySelector(`[name="admin_state_${index}"]`).value;
+            formData[`subnet_${index}`] = block.querySelector(`[name="subnet_${index}"]`).value;
+            formData[`gateway_ip_${index}`] = block.querySelector(`[name="gateway_ip_${index}"]`).value;
+            formData[`mtu_size_${index}`] = block.querySelector(`[name="mtu_size_${index}"]`).value;
+            formData[`vlan_description_${index}`] = block.querySelector(`[name="vlan_description_${index}"]`).value;
+        });
+        sessionStorage.setItem('vlanFormData', JSON.stringify(formData));
+    }
+
+    // Load form data from session storage
+    function loadFormData() {
+        const formData = JSON.parse(sessionStorage.getItem('vlanFormData'));
+        if (formData) {
+            Object.keys(formData).forEach(key => {
+                const input = document.querySelector(`[name="${key}"]`);
+                if (input) {
+                    input.value = formData[key];
+                }
+            });
+        }
+    }
+
+    // Clear session storage on page load
+    function clearSessionStorage() {
+        sessionStorage.removeItem('vlanFormData');
+    }
+
+
+    document.getElementById('fetchCrDetails').addEventListener('click', function() {
+        const crNumber = document.getElementById('cr_number').value;
+        fetch(`/plugins/naas/fetch-change-request/${crNumber}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const crDetails = document.getElementById('crDetails');
+                if (data.status === 'success') {
+                    // Replace newline characters with <br> tags for HTML rendering
+                    // const formattedDescription = data.description.replace(/\n/g, '<br>');
+                    // crDetails.innerHTML = `<p>${formattedDescription}</p>`;
+                    // crDetails.style.display = 'block';
+
+                    // Populate form fields with parsed data
+                    const parsedData = data.parsed_data || {};
+                    if (parsedData.switch_ip) {
+                        document.querySelector('[name="switch_ip_0"]').value = parsedData.switch_ip;
+                    }
+                    if (parsedData.vlan) {
+                        const vlanSelect = document.querySelector('[name="vlan_0"]');
+                        for (let option of vlanSelect.options) {
+                            const optionText = option.textContent.trim();
+                            const vlanPattern = new RegExp(`VLAN_\\d+\\s*\\(${parsedData.vlan}\\)`, 'i');
+                            if (vlanPattern.test(optionText)) {
+                                option.selected = true;
+                                // Trigger change event to fetch subnets
+                                const event = new Event('change');
+                                vlanSelect.dispatchEvent(event);
+                                break;
+                            }
+                        }
+                    }
+                    if (parsedData.gateway_ip) {
+                        document.querySelector('[name="gateway_ip_0"]').value = parsedData.gateway_ip;
+                    }
+                    if (parsedData.description) {
+                        document.querySelector('[name="vlan_description_0"]').value = parsedData.description;
+                    }
+                    if (parsedData.mtu) {
+                        document.querySelector('[name="mtu_size_0"]').value = parsedData.mtu;
+                    }
+                } else {
+                    crDetails.innerHTML = `<p class="error-message">${data.message}</p>`;
+                    crDetails.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching CR details:', error);
+                document.getElementById('crDetails').innerHTML = '<p class="error-message">Error fetching CR details.</p>';
+                document.getElementById('crDetails').style.display = 'block';
+            });
+    });
+
+    // Handle VLAN change event to fetch subnets
+    document.querySelectorAll('.vlan-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const vlanId = this.value;
+            const subnetSelect = this.closest('.vlan-block').querySelector('.subnet-select');
+            fetch(`/plugins/naas/get-subnets/${vlanId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    subnetSelect.innerHTML = '';
+                    if (data.subnets) {
+                        data.subnets.forEach(subnet => {
+                            const option = document.createElement('option');
+                            option.value = subnet.id;
+                            option.textContent = subnet.prefix;
+                            subnetSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching subnets:', error));
+        });
+    });
+
+    // Load form data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        clearSessionStorage();
+        loadFormData();
+    });
+</script>
+</script>
 {% endblock %}
