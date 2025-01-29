@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static 'naas/vlan-config.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Add VLAN To Port</h1>
+    <div class="form-container">
+        <div class="servicenow-integration">
+            <h4><img src="{% static 'naas/media/servicenow-logo-icon.png' %}" alt="ServiceNow" style="width: 24px; height: 24px;"> ServiceNow</h4>
+            <label for="cr_number">CR Number</label>
+            <input type="text" id="cr_number" class="form-control" placeholder="Enter CR Number">
+            <button type="button" id="fetchCrDetails" class="btn-primary">Fetch CR Details</button>
+        </div>
+
+        <div id="crDetails"></div>
+
+        <form method="post" action="{% url 'plugins:naas:aci_vlan_to_port_preview' %}">
+            {% csrf_token %}
+            <div class="vlan-configuration">
+                <div class="form-group">
+                    <label for="fabricName">Fabric Name:</label>
+                    <input type="text" id="fabricName" name="fabricName" required>
+                </div>
+                <div class="form-group">
+                    <label for="podId">Pod ID:</label>
+                    <input type="text" id="podId" name="podId" required>
+                </div>
+                <div class="form-group">
+                    <label for="nodeId">Node ID:</label>
+                    <input type="text" id="nodeId" name="nodeId" required>
+                </div>
+                <div class="form-group">
+                    <label for="tenant">Tenant:</label>
+                    <input type="text" id="tenant" name="tenant" required>
+                </div>
+                <div class="form-group">
+                    <label for="ap">AP:</label>
+                    <input type="text" id="ap" name="ap" required>
+                </div>
+                <div class="form-group">
+                    <label for="epg">EPG:</label>
+                    <input type="text" id="epg" name="epg" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fromPort">From Port:</label>
+                        <input type="number" id="fromPort" name="fromPort" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="toPort">To Port:</label>
+                        <input type="number" id="toPort" name="toPort" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="vlan">VLAN:</label>
+                    <input type="number" id="vlan" name="vlan" required>
+                </div>
+                <div class="form-group">
+                    <label for="mode">Mode:</label>
+                    <input type="text" id="mode" name="mode" required>
+                </div>
+                <button type="submit" class="btn btn-primary">See Configuration</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('fetchCrDetails').addEventListener('click', function() {
+        const crNumber = document.getElementById('cr_number').value;
+        fetch(`/plugins/naas/fetch-change-request/${crNumber}/`)
+            .then(response => {
+                console.log('Response:', response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Populate form fields with parsed data
+                    const parsedData = data.parsed_data || {};
+                    if (parsedData.fabric_name) {
+                        document.querySelector('[name="fabricName"]').value = parsedData.fabric_name;
+                    }
+                    if (parsedData.pod_id) {
+                        document.querySelector('[name="podId"]').value = parsedData.pod_id;
+                    }
+                    if (parsedData.node_id) {
+                        document.querySelector('[name="nodeId"]').value = parsedData.node_id;
+                    }
+                    if (parsedData.tenant) {
+                        document.querySelector('[name="tenant"]').value = parsedData.tenant;
+                    }
+                    if (parsedData.ap) {
+                        document.querySelector('[name="ap"]').value = parsedData.ap;
+                    }
+                    if (parsedData.epg) {
+                        document.querySelector('[name="epg"]').value = parsedData.epg;
+                    }
+                    if (parsedData.vlan) {
+                        document.querySelector('[name="vlan"]').value = parsedData.vlan;
+                    }
+                    if (parsedData.mode) {
+                        document.querySelector('[name="mode"]').value = parsedData.mode;
+                    }
+                    if (parsedData.from_port) {
+                        document.querySelector('[name="fromPort"]').value = parsedData.from_port;
+                    }
+                    if (parsedData.to_port) {
+                        document.querySelector('[name="toPort"]').value = parsedData.to_port;
+                    }
+                } else {
+                    console.error('Error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching CR details:', error);
+            });
+    });
+</script>
+{% endblock %}

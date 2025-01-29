@@ -1,0 +1,13 @@
+<!-- filepath: /home/ubuntu/nautobot-dev/nautobot/naas/templates/naas/aci_vlan_to_port.jinja2 -->
+<fvAEPg dn="uni/tn-{{ var.tenant }}/ap-{{ var.ap }}/epg-{{ var.epg }}">
+    {% for i in var.port_range %}
+    <fvRsPathAtt 
+        encap="vlan-{{ var.vlan }}"
+        instrImedcy="lazy"
+        mode="{{ var.mode }}"
+        primaryEncap="unknown"
+        tDn="topology/pod-{{ var.podId }}/paths-{{ var.nodeId }}/pathep-[eth1/{{ i }}]"
+        userdom="all"
+    />
+    {% endfor %}
+</fvAEPg>

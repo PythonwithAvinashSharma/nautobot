@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    .container {
+        padding: 24px;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .header {
+        margin-bottom: 24px;
+    }
+    
+    .header h1 {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 0 8px 0;
+    }
+    
+    .header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    @media (min-width: 768px) {
+        .grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    
+    .card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.2s;
+        cursor: pointer;
+        background: white;
+    }
+    
+    .card:hover {
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    
+    .card-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .card-content {
+        padding: 16px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+        margin: 0 0 4px 0;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    /* Manufacturer-specific styles */
+    .cisco {
+        background: #EFF6FF;
+        border-color: #BFDBFE;
+    }
+    
+    .arista {
+        background: #F3E8FF;
+        border-color: #E9D5FF;
+    }
+    
+    .hpe {
+        background: #ECFDF5;
+        border-color: #A7F3D0;
+    }
+    
+    .juniper {
+        background: #FCE7F3;
+        border-color: #FBCFE8;
+    }
+</style>
+<div class="container">
+    <div class="header">
+        <h1>Network Switches Overview</h1>
+        <p>View and manage network switches by manufacturer</p>
+    </div>
+    <div class="grid" id="manufacturerGrid"></div>
+</div>
+
+<script>
+    const manufacturers = [
+        {
+            name: 'CISCO',
+            class: 'cisco',
+            icon: 'fa-network-wired',
+            // switchCount: 892,
+            // activeUsers: 234,
+            // compliance: '98%'
+        },
+        {
+            name: 'ARISTA',
+            class: 'arista',
+            icon: 'fa-server',
+            // switchCount: 223,
+            // activeUsers: 98,
+            // compliance: '97%'
+        },
+        {
+            name: 'HPE',
+            class: 'hpe',
+            icon: 'fa-hdd',
+            // switchCount: 334,
+            // activeUsers: 123,
+            // compliance: '95%'
+        },
+        {
+            name: 'JUNIPER',
+            class: 'juniper',
+            icon: 'fa-sitemap',
+            // switchCount: 445,
+            // activeUsers: 156,
+            // compliance: '96%'
+        }
+    ];
+
+    function createManufacturerCard(manufacturer) {
+        return `
+            <div class="card" onclick="handleManufacturerClick('${manufacturer.name}')">
+                <div class="card-header ${manufacturer.class}">
+                    <div>
+                        <i class="fas ${manufacturer.icon}" style="font-size: 24px; margin-right: 8px;"></i>
+                        <h2 style="margin: 0; font-size: 20px; font-weight: 600; display: inline-block;">${manufacturer.name}</h2>
+                        <p style="margin: 0; color: #666">Network Solutions</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function handleManufacturerClick(manufacturerName) {
+        // Handle navigation or detail view display here
+        console.log(`Clicked on ${manufacturerName}`);
+        // Redirect to the detailed page based on the manufacturer name
+        window.location.href = `/plugins/naas/switches/${manufacturerName.toLowerCase()}_detailed/`;
+    }
+
+    function initializePage() {
+        const grid = document.getElementById('manufacturerGrid');
+        manufacturers.forEach(manufacturer => {
+            grid.innerHTML += createManufacturerCard(manufacturer);
+        });
+    }
+
+    // Initialize the page when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+
+
+<!-- // <div class="card-content">
+    //     <div class="stats-grid">
+    //         <div>
+    //             <p class="stat-label">Deployments</p>
+    //             <p class="stat-value">${manufacturer.switchCount}</p>
+    //         </div>
+    //         <div>
+    //             <p class="stat-label">Active Users</p>
+    //             <p class="stat-value">${manufacturer.activeUsers}</p>
+    //         </div>
+    //         <div>
+    //             <p class="stat-label">Compliance</p>
+    //             <p class="stat-value">${manufacturer.compliance}</p>
+    //         </div>
+    //     </div>
+    // </div> -->
+{% endblock %}

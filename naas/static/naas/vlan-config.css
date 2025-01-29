@@ -1,0 +1,176 @@
+
+/* General form container styling */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+    font-family: Arial, sans-serif;
+}
+
+.form-container {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow: hidden;
+}
+
+.servicenow-integration {
+    float: right;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #fff;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+#crDetails {
+    float: left;
+    width: 55%;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #fff;
+    margin-bottom: 20px;
+    min-height: 200px; /* Match height with ServiceNow block */
+    box-sizing: border-box;
+    display: none; /* Hidden by default */
+}
+
+#crDetails:not(:empty) {
+    display: block;
+}
+
+#fetchCrDetails {
+    background-color: #224f76;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+    transition: background-color 0.3s ease;
+    margin-top: 20px; /* Added margin */
+}
+
+#fetchCrDetails:hover {
+    background-color: #5a6268;
+}
+.vlan-configuration {
+    clear: both;
+    width: 100%;
+}
+
+h3 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+    color: #333;
+}
+
+
+.vlan-block {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.btn-primary {
+    background-color: #0d3558;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2a34a1;
+}
+
+.btn-secondary {
+    background-color: #0d3558;
+    border: none;
+    padding: 10px 20px;
+    font-size: 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #2a34a1;
+}
+
+.btn-remove {
+    background-color: #224f76;
+    border: none;
+    padding: 10px 20px;
+    font-size: 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.btn-remove:hover {
+    background-color: #5a6268;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.success-message {
+    color: #28a745;
+    font-size: 14px;
+    margin-top: 5px;
+}

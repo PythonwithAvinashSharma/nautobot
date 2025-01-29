@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+
+<style>
+    .container {
+        padding: 24px;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding: 0 16px;
+    }
+    
+    .back-link {
+        color: #4B6BFB;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .search-bar {
+        display: flex;
+        gap: 16px;
+    }
+    
+    .search-input {
+        padding: 8px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        width: 200px;
+    }
+    
+    .new-template-btn {
+        background: #4B6BFB;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+    }
+    
+    .card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+    }
+    
+    .card-header {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+    
+    .health-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+    
+    .health-good {
+        background: #ECFDF5;
+        color: #059669;
+    }
+    
+    .health-warning {
+        background: #FEF3C7;
+        color: #D97706;
+    }
+    
+    .card-content {
+        padding: 16px;
+    }
+    
+    .metrics {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    
+    .metric {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .metric-label {
+        color: #6B7280;
+        font-size: 14px;
+    }
+    
+    .metric-value {
+        font-size: 24px;
+        font-weight: 600;
+        color: #111827;
+    }
+    
+    .metric-active {
+        color: #059669;
+    }
+    
+    .last-updated {
+        color: #6B7280;
+        font-size: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .view-btn {
+        background: #4B6BFB;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        width: 100%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+<div class="container">
+    <div class="header">
+        <div>
+            <a href="{% url 'plugins:naas:switches' %}" class="back-link">← Back to Vendors</a>
+            <h1>CISCO Network Solutions</h1>
+            <p style="color: #6B7280">Manage and deploy network configurations and templates</p>
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search templates..." class="search-input">
+            <button class="new-template-btn">New Template</button>
+        </div>
+    </div>
+
+    <div class="grid" id="solutionsGrid"></div>
+</div>
+
+<script>
+    const solutions = [
+        {
+            name: 'ACI',
+            category: 'Data Center',
+            description: 'Application Centric Infrastructure',
+            // templates: 45,
+            // active: 234,
+            health: '95%',
+            healthClass: 'health-good',
+            lastUpdated: '2 hours ago',
+            url: '{% url "plugins:naas:aci_templates_list" %}'
+        },
+        {
+            name: 'DNAC',
+            category: 'Enterprise',
+            description: 'Digital Network Architecture Center',
+            // templates: 38,
+            // active: 156,
+            health: '87%',
+            healthClass: 'health-warning',
+            lastUpdated: '1 hour ago'
+        },
+        {
+            name: 'WAN',
+            category: 'Enterprise',
+            description: 'Wide Area Network Solutions',
+            // templates: 29,
+            // active: 189,
+            health: '97%',
+            healthClass: 'health-good',
+            lastUpdated: '30 minutes ago'
+        },
+        {
+            name: 'Nexus',
+            category: 'Data Center',
+            description: 'Data Center Switching',
+            // templates: 24,
+            // active: 167,
+            health: '85%',
+            healthClass: 'health-warning',
+            lastUpdated: '4 hours ago'
+        },
+        {
+            name: 'Catalyst',
+            category: 'Enterprise',
+            description: 'Enterprise Switching',
+            // templates: 20,
+            // active: 146,
+            health: '88%',
+            healthClass: 'health-warning',
+            lastUpdated: '1 hour ago'
+        }
+    ];
+
+    function createSolutionCard(solution) {
+        return `
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 style="margin: 0; font-size: 18px; font-weight: 600">${solution.name}</h2>
+                        <p style="margin: 4px 0 0 0; color: #6B7280">${solution.category}</p>
+                        <p style="margin: 4px 0 0 0; font-size: 14px">${solution.description}</p>
+                    </div>
+                    <span class="health-badge ${solution.healthClass}">${solution.health} Health</span>
+                </div>
+                <div class="card-content">
+                    <div class="last-updated">Last used ${solution.lastUpdated}</div>
+                    <a href="${solution.url || '#'}" class="view-btn">
+                        View Templates
+                        <span style="font-size: 18px">⚙️</span>
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    function initializePage() {
+        const grid = document.getElementById('solutionsGrid');
+        solutions.forEach(solution => {
+            grid.innerHTML += createSolutionCard(solution);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+<!-- <div class="metrics">
+    <div class="metric">
+        <span class="metric-label">Templates</span>
+        <span class="metric-value">${solution.templates}</span>
+    </div>
+    <div class="metric">
+        <span class="metric-label">Active</span>
+        <span class="metric-value metric-active">${solution.active}</span>
+    </div>
+</div> -->
+
+{% endblock %}
