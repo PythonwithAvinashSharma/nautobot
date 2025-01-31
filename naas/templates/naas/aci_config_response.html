@@ -1,0 +1,78 @@
+<!-- filepath: /home/ubuntu/nautobot-dev/nautobot/naas/templates/naas/vlan_config_response.html -->
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+<head>
+    <title>CISCO ACI Response</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        li {
+            line-height: 1.5;
+        }
+        .command-output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>CISCO ACI Response</h1>
+    <div class="{{ status_class }}">
+        <p>{{ message }}</p>
+    </div>
+    {% if status_class == 'success' %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Switch Configuration Output</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="command-output" id="commandOutput">
+                            <pre>{{ output }}</pre>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+{% endblock %}
