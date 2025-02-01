@@ -1,4 +1,5 @@
-<!-- filepath: /home/ubuntu/nautobot-dev/nautobot/naas/templates/naas/aci_vlan_to_port.jinja2 -->
+{# Debug print to verify variables #}
+{# tenant: {{ var.tenant }}, ap: {{ var.ap }}, epg: {{ var.epg }} #}
 <fvAEPg dn="uni/tn-{{ var.tenant }}/ap-{{ var.ap }}/epg-{{ var.epg }}">
     {% for i in var.port_range %}
     <fvRsPathAtt 

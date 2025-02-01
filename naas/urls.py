@@ -16,7 +16,8 @@ from .views import (site_onboarding_view,
                     aci_templates_list,
                     aci_vlan_to_port_form,
                     aci_vlan_to_port_submit,
-                    aci_vlan_to_port_preview)
+                    aci_vlan_to_port_preview,
+                    get_device_status_view)
 
 app_name= "naas"
 
@@ -39,5 +40,5 @@ urlpatterns = [
     path('aci-vlan-to-port/', aci_vlan_to_port_form, name='aci_vlan_to_port_form'),
     path('aci-vlan-to-port/preview/', aci_vlan_to_port_preview, name='aci_vlan_to_port_preview'),
     path('aci-vlan-to-port/submit/', aci_vlan_to_port_submit, name='aci_vlan_to_port_submit'),
-    
+    path('get-device-status/', get_device_status_view, name='get-device-status'),
 ]

@@ -1,36 +1,255 @@
+<!-- filepath: /home/ubuntu/nautobot-dev/nautobot/naas/templates/naas/vlan_config_preview.jinja2 -->
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .custom-btn {
+        background-color: #224f76; /* Elegant blue */
+        border: none; /* Remove border for a cleaner look */
+        color: #ffffff; /* White text for contrast */
+        padding: 10px 20px; /* Add some padding for a better feel */
+        font-size: 16px; /* Adjust font size for readability */
+        border-radius: 8px; /* Rounded corners */
+        transition: background-color 0.3s ease; /* Smooth hover effect */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for elegance */
+    }
+
+    .custom-btn:hover {
+        background-color: rgb(47, 52, 105); /* Slightly brighter blue on hover */
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+    }
+
+    .btn-group-custom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Push items to far sides */
+    }
+
+    .btn-group {
+        display: flex; /* Ensure buttons are in a row */
+        gap: 100px; /* Add space between buttons */
+    }
+</style>
 <div class="container">
-    <h1>ACI VLAN to Port Configuration Preview</h1>
+    <h1>VLAN Configuration Preview</h1>
     
-    <!-- Debug information -->
-    <div style="background-color: #f5f5f5; padding: 10px; margin: 10px 0;">
-        <p>Debug Info:</p>
-        <p>config_preview: {{ config_preview }}</p>
-        <p>config_data: {{ config_data }}</p>
-    </div>
-    
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h2 class="panel-title">Configuration Details</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Configuration Details</h2>
+                </div>
+                <div class="panel-body">
+                    {% for config in configs %}
+                    <div class="config-section">
+                        <h3>Configuration for Switch {{ config.switch_ip }}</h3>
+                        <pre class="config-preview">
+                        vlan {{ config.vlan }}
+                        name "{{ config.vlan_description }}"
+                        !
+                        interface Vlan {{ config.vlan }}
+                        description "{{ config.vlan_description }}"
+                        ip address {{ config.ip_with_subnet }}
+                        mtu {{ config.mtu_size }}
+                        {{ config.admin_state }}
+                        </pre>
+                        <div class="form-group">
+                            <label for="vlan_id_{{ config.sanitized_switch_ip }}">VLAN ID (optional):</label>
+                            <input type="text" class="form-control" id="vlan_id_{{ config.sanitized_switch_ip }}" placeholder="Enter VLAN ID">
+                        </div>
+                        <div class="btn-group-custom mb-3" role="group">
+                            <button 
+                                type="button" 
+                                class="btn custom-btn show-vlan-btn" 
+                                data-switch="{{ config.switch_ip }}"
+                            >
+                                Show VLAN
+                            </button>
+                            <button 
+                                type="button" 
+                                class="btn custom-btn show-interface-btn" 
+                                data-switch="{{ config.switch_ip }}"
+                            >
+                                Show IP Interface Brief
+                            </button>
+                        </div>
+                        <div class="status-output-section" id="status_{{ config.sanitized_switch_ip }}">
+                            <div class="vlan-output" style="display: none;">
+                                <h4>VLAN Status</h4>
+                                <pre class="status-preview"></pre>
+                            </div>
+                            <div class="interface-output" style="display: none;">
+                                <h4>Interface Status</h4>
+                                <pre class="status-preview"></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        <div class="panel-body">
-            <pre class="config-preview">
-                {% if config_preview %}
-                    {{ config_preview|safe }}
-                {% else %}
-                    No configuration preview available
-                {% endif %}
-            </pre>
+        <div class="col-md-4">
+            <div class="validator-block">
+                <h2>Validator Details</h2>
+                <form id="validatorForm">
+                    <div class="form-group">
+                        <label for="validator_name">Name</label>
+                        <input type="text" id="validator_name" name="validator_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="validator_email">Email</label>
+                        <input type="email" id="validator_email" name="validator_email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="validator_employee_id">Employee ID</label>
+                        <input type="text" id="validator_employee_id" name="validator_employee_id" class="form-control" required>
+                    </div>
+                    <button type="button" id="validateButton" class="btn btn-primary">Validate</button>
+                </form>
+                <div id="validatorDetails" style="display: none;">
+                    <p><strong>Name:</strong> <span id="validatorNameDisplay"></span></p>
+                    <p><strong>Email:</strong> <span id="validatorEmailDisplay"></span></p>
+                    <p><strong>Employee ID:</strong> <span id="validatorEmployeeIdDisplay"></span></p>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <form method="post" action="{% url 'plugins:naas:aci_vlan_to_port_submit' %}">
+
+    <form method="post" action="{% url 'plugins:naas:vlan-config-deploy' %}" id="deployForm" style="display: none; padding-top: 20px;">
         {% csrf_token %}
-        <input type="hidden" name="config_data" value="{{ config_data|safe }}">
+        <input type="hidden" name="configs" id="configs">
         <button type="submit" class="btn btn-primary">Deploy Configuration</button>
     </form>
-    <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back to Form</button>
+    <button type="button" class="btn btn-secondary" id="backToFormButton">Back to Form</button>
+    <script>
+        document.getElementById('configs').value = '{{ configs_json|safe }}';
+
+        document.getElementById('validateButton').addEventListener('click', function() {
+            const name = document.getElementById('validator_name').value;
+            const email = document.getElementById('validator_email').value;
+            const employeeId = document.getElementById('validator_employee_id').value;
+
+            if (name && email && employeeId) {
+                console.log('Validator Name:', name);
+                console.log('Validator Email:', email);
+                console.log('Validator Employee ID:', employeeId);
+
+                // Log validator details to the backend
+                fetch('/plugins/naas/log-validator-details/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ name: name, email: email, employee_id: employeeId })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Show the deploy form upon successful validation
+                        document.getElementById('deployForm').style.display = 'block';
+                        document.getElementById('validatorDetails').style.display = 'block';
+                        document.getElementById('validatorNameDisplay').textContent = name;
+                        document.getElementById('validatorEmailDisplay').textContent = email;
+                        document.getElementById('validatorEmployeeIdDisplay').textContent = employeeId;
+                        document.getElementById('validatorForm').style.display = 'none';
+                    } else {
+                        throw new Error('Validation failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+
+        document.querySelectorAll('.show-vlan-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const switchIp = this.dataset.switch;
+                const sanitizedIp = switchIp.replace(/\./g, '_');
+                const vlanId = document.getElementById(`vlan_id_${sanitizedIp}`).value;
+                const command = vlanId ? `show vlan ${vlanId}` : 'show vlan brief';
+                const outputSection = document.querySelector(`#status_${sanitizedIp} .vlan-output`);
+                
+                // Clear previous output
+                outputSection.querySelector('.status-preview').textContent = '';
+                outputSection.style.display = 'none';
+
+                fetch('/plugins/naas/get-device-status/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        switch_ip: switchIp,
+                        command: command,
+                        vlan_id: vlanId,  // Include VLAN ID in the payload
+                        username: 'hcl',  // Replace with actual username
+                        password: 'cisco'   // Replace with actual password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        outputSection.querySelector('.status-preview').textContent = data.vlan_output;
+                        outputSection.style.display = 'block';
+                    } else {
+                        alert('Error fetching VLAN status: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error fetching VLAN status');
+                });
+            });
+        });
+
+        document.querySelectorAll('.show-interface-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const switchIp = this.dataset.switch;
+                const sanitizedIp = switchIp.replace(/\./g, '_');
+                const vlanId = document.getElementById(`vlan_id_${sanitizedIp}`).value;
+                const command = vlanId ? `show ip interface vlan ${vlanId}` : 'show ip interface brief';
+                const outputSection = document.querySelector(`#status_${sanitizedIp} .interface-output`);
+                
+                // Clear previous output
+                outputSection.querySelector('.status-preview').textContent = '';
+                outputSection.style.display = 'none';
+
+                fetch('/plugins/naas/get-device-status/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        switch_ip: switchIp,
+                        command: command,
+                        vlan_id: vlanId,  // Include VLAN ID in the payload
+                        username: 'hcl',  // Replace with actual username
+                        password: 'cisco'   // Replace with actual password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        outputSection.querySelector('.status-preview').textContent = data.ip_interface_output;
+                        outputSection.style.display = 'block';
+                    } else {
+                        alert('Error fetching interface status: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error fetching interface status');
+                });
+            });
+        });
+
+        // Handle "Back to Form" button click
+        document.getElementById('backToFormButton').addEventListener('click', function() {
+            window.history.back();
+        });
+    </script>
 </div>
 {% endblock %}

@@ -6,12 +6,14 @@ from nautobot.dcim.models import Location, LocationType
 from nautobot.ipam.models import VLAN, Prefix
 from nautobot.extras.models import Tag
 from django.urls import reverse
+import urllib3
 from .forms import SiteOnboardingForm, DeviceForm, MultiVLANConfigurationForm, ACIConfigForm
 from django.http import JsonResponse
 from nautobot.cloud.models import CloudService
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from uuid import UUID
+import jinja2
 from django.template import loader
 from netmiko import ConnectHandler
 import requests
@@ -22,13 +24,20 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_GET, require_POST
 import logging
+from django.utils.safestring import mark_safe
 
 logger = logging.getLogger(__name__)
 
 
 # Define the active status value
-ACTIVE_STATUS_NAME = 'Active'  # Replace with the actual value for active status
-UNUSED_TAG_NAME = 'unused'  # Replace with the actual value for unused tag
+ACTIVE_STATUS_NAME = 'Active'  
+UNUSED_TAG_NAME = 'unused'
+APIC_IP = "sandboxapicdc.cisco.com"
+TEMPLATE_FILE = 'config_template.j2'
+RESULT_FILE = 'aci_results.xml'
+USR = "admin"
+PWD = "!v3G@!4@Y"
+
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +210,6 @@ def vlan_config_view(request):
     form = MultiVLANConfigurationForm()
     return render(request, 'naas/vlan_config.html', {'form': form})
 
-
 def vlan_config_preview(request):
     if request.method == 'POST':
         form = MultiVLANConfigurationForm(data=request.POST)
@@ -215,6 +223,8 @@ def vlan_config_preview(request):
                 subnet = str(row_data.get('subnet', ''))
                 ip_with_subnet = f"{gateway_ip}/{subnet.rsplit('/')[-1]}" if gateway_ip and subnet else ''
 
+                sanitized_switch_ip = row_data['switch_ip'].replace('.', '_')
+
                 config = {
                     'switch_ip': row_data['switch_ip'],
                     'vlan': vlan.vid,  # Use the VLAN's numeric ID
@@ -223,7 +233,8 @@ def vlan_config_preview(request):
                     'subnet': str(row_data.get('subnet', '')),
                     'gateway_ip': row_data.get('gateway_ip', ''),
                     'ip_with_subnet': ip_with_subnet,
-                    'mtu_size': row_data.get('mtu_size', '')
+                    'mtu_size': row_data.get('mtu_size', ''),
+                    'sanitized_switch_ip' :sanitized_switch_ip
                 }
                 configs.append(config)
             
@@ -455,7 +466,7 @@ def aci_config(request):
             }
 
             # Suppress warnings when restapi uses https with self-signed certificate
-            requests.packages.urllib3.disable_warnings()
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
             # Authenticate in APIC and save the security token
             response = requests.post(auth_url, data=json.dumps(payload), headers=headers, verify=False, timeout=10)
@@ -507,28 +518,25 @@ def aci_config(request):
 def aci_templates_list(request):
     return render(request, 'naas/aci_list_templates.html')
 
-# def aci_vlan_to_port_form(request):
-#     if request.method == 'POST':
-#         form = ACIConfigForm(request.POST)
-#         if form.is_valid():
-#             config_data = form.cleaned_data
-#             config_preview = loader.render_to_string('naas/aci_vlan_to_port.jinja2', {'var': config_data})
-#             return render(request, 'naas/aci_vlan_to_port_preview.html', {'config_preview': config_preview, 'config_data': config_data})
-#     else:
-#         form = ACIConfigForm()
-#     return render(request, 'naas/aci_vlan_to_port_form.html', {'form': form})
+def aci_vlan_to_port_form(request):
+    if request.method == 'POST':
+        form = ACIConfigForm(request.POST)
+        if form.is_valid():
+            config_data = form.cleaned_data
+            config_preview = loader.render_to_string('naas/aci_vlan_to_port.jinja2', {'var': config_data})
+            return render(request, 'naas/aci_vlan_to_port_preview.html', {'config_preview': config_preview, 'config_data': config_data})
+    else:
+        form = ACIConfigForm()
+    return render(request, 'naas/aci_vlan_to_port_form.html', {'form': form})
 
 def aci_vlan_to_port_preview(request):
     if request.method == 'POST':
         try:
-            # Print the POST data for debugging
             print("POST data:", request.POST)
             
-            # Convert to integers
             from_port = int(request.POST['fromPort'])
             to_port = int(request.POST['toPort'])
             
-            # Create config_data
             config_data = {
                 'tenant': request.POST['tenant'],
                 'ap': request.POST['ap'],
@@ -541,52 +549,293 @@ def aci_vlan_to_port_preview(request):
                 'nodeId': request.POST['nodeId']
             }
             
-            # Print config_data for debugging
             print("Config data:", config_data)
-
-            # Create the port range
-            port_list = list(range(from_port, to_port + 1))
             
-            # Create template context
             template_context = {
                 'var': {
                     **config_data,
-                    'port_range': port_list
+                    'port_range': list(range(from_port, to_port + 1))
                 }
             }
             
-            # Print template context for debugging
             print("Template context:", template_context)
-
-            # Render the configuration
+            
+            # Get the absolute path to the template
+            template_path = 'naas/aci_vlan_to_port.jinja2'
+            print(f"Looking for template at: {template_path}")
+            
+            try:
+                config_preview = loader.render_to_string(
+                    template_path,
+                    template_context
+                )
+                print("Rendered config_preview:", config_preview)
+                print("Length of config_preview:", len(config_preview))
+            except Exception as template_error:
+                print("Template rendering error:", str(template_error))
+                return HttpResponse(f"Template error: {str(template_error)}")
+            
             config_preview = loader.render_to_string(
-                'naas/aci_vlan_to_port.jinja2', 
+                template_path,
                 template_context
             )
-
-            print("Final config_preview being sent to template:\n", config_preview)
             
-            return render(
-            request, 
-            'naas/aci_vlan_to_port_preview.html', 
-            {
-                'config_preview': config_preview,  # Pass the raw Jinja output
+            # Try to force string conversion and strip any problematic characters
+            config_preview = str(config_preview).strip()
+            
+            # Add some test content to verify rendering
+            #config_preview = "START\n" + config_preview + "\nEND"
+            
+            context = {
+                'config_preview': config_preview,
                 'config_data': config_data
             }
-        )
-        except ValueError as e:
-            print("Error:", str(e))  # Debug print
-            return HttpResponse(f"Error: {str(e)}")
+            
+            return render(request, 'naas/aci_vlan_to_port_preview.html', context)
+            
         except Exception as e:
-            print("Unexpected error:", str(e))  # Debug print
-            return HttpResponse(f"Unexpected error: {str(e)}")
-
+            print(f"Error in view: {str(e)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            return HttpResponse(f"Error: {str(e)}")
+    
     return redirect('aci_vlan_to_port_form')
 
 def aci_vlan_to_port_submit(request):
     if request.method == 'POST':
-        config_data = request.POST
-        # Process the form data and integrate with ServiceNow or other services
-        # ...
-        return HttpResponse("Configuration deployed successfully.")
+        try:
+            config_preview = request.POST.get('config_preview')
+            config_data_str = request.POST.get('config_data')
+            print("Config data (raw):", config_data_str)
+            print("Config preview (XML):", config_preview)
+
+            # Parse the JSON string
+            try:
+                if config_data_str.startswith("{") and config_data_str.endswith("}"):
+                    config_data_str = config_data_str.replace("'", "\"")
+                config_data = json.loads(config_data_str)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {str(e)}")
+                return render(request, 'naas/aci_config_response.html', {
+                    'status_class': 'error',
+                    'message': f"Invalid JSON data: {str(e)}"
+                })
+
+            # Define the APIC IP and credentials
+            apic_ip = "sandboxapicdc.cisco.com"
+            usr = "admin"
+            pwd = "!v3G@!4@Y"
+
+            # Define URL and credentials for RESTAPI authentication
+            auth_url = f"https://{apic_ip}/api/aaaLogin.json"
+            headers = {'content-type': 'application/json'}
+            auth_payload = {
+                "aaaUser": {
+                    "attributes": {
+                        "name": usr,
+                        "pwd": pwd
+                    }
+                }
+            }
+
+            # Suppress warnings for self-signed certificates
+            requests.packages.urllib3.disable_warnings()
+
+            # Authenticate with APIC
+            auth_response = requests.post(auth_url, data=json.dumps(auth_payload), headers=headers, verify=False, timeout=10)
+            print("\n--- AUTH response is %s" % auth_response)
+            
+            if auth_response.status_code != 200:
+                return render(request, 'naas/aci_config_response.html', {
+                    'status_class': 'error',
+                    'message': "Authentication failed."
+                })
+
+            cookies = auth_response.cookies
+            headers = {'content-type': 'application/xml'}
+
+            # 1. Create Tenant if it doesn't exist
+            tenant_xml = f"""
+            <fvTenant name="{config_data['tenant']}">
+            </fvTenant>
+            """
+            tenant_url = f"https://{apic_ip}/api/mo/uni/tn-{config_data['tenant']}.xml"
+            tenant_response = requests.post(tenant_url, data=tenant_xml, cookies=cookies, headers=headers, verify=False, timeout=5)
+            print("Tenant creation response:", tenant_response.status_code)
+            
+            if tenant_response.status_code != 200:
+                return render(request, 'naas/aci_config_response.html', {
+                    'status_class': 'error',
+                    'message': f"Failed to create tenant. Error: {tenant_response.content.decode('utf-8')}"
+                })
+
+            # 2. Create Application Profile if it doesn't exist
+            ap_xml = f"""
+            <fvAp name="{config_data['ap']}">
+            </fvAp>
+            """
+            ap_url = f"https://{apic_ip}/api/mo/uni/tn-{config_data['tenant']}/ap-{config_data['ap']}.xml"
+            ap_response = requests.post(ap_url, data=ap_xml, cookies=cookies, headers=headers, verify=False, timeout=5)
+            print("AP creation response:", ap_response.status_code)
+            
+            if ap_response.status_code != 200:
+                return render(request, 'naas/aci_config_response.html', {
+                    'status_class': 'error',
+                    'message': f"Failed to create Application Profile. Error: {ap_response.content.decode('utf-8')}"
+                })
+
+            # 3. Create EPG if it doesn't exist
+            epg_xml = f"""
+            <fvAEPg name="{config_data['epg']}">
+                <fvRsDomAtt tDn="uni/phys-phys"/>
+            </fvAEPg>
+            """
+            epg_url = f"https://{apic_ip}/api/mo/uni/tn-{config_data['tenant']}/ap-{config_data['ap']}/epg-{config_data['epg']}.xml"
+            epg_response = requests.post(epg_url, data=epg_xml, cookies=cookies, headers=headers, verify=False, timeout=5)
+            print("EPG creation response:", epg_response.status_code)
+            
+            if epg_response.status_code != 200:
+                return render(request, 'naas/aci_config_response.html', {
+                    'status_class': 'error',
+                    'message': f"Failed to create EPG. Error: {epg_response.content.decode('utf-8')}"
+                })
+
+            # 4. Now deploy the port bindings
+            # Translate mode values in config_preview
+            if config_data['mode'] == 'access':
+                config_preview = config_preview.replace('mode="access"', 'mode="untagged"')
+            elif config_data['mode'] == 'trunk':
+                config_preview = config_preview.replace('mode="trunk"', 'mode="regular"')
+
+            # POST the port binding configuration
+            post_url = f"https://{apic_ip}/api/mo/uni/tn-{config_data['tenant']}/ap-{config_data['ap']}/epg-{config_data['epg']}.xml"
+            print("POST URL:", post_url)
+            
+            response = requests.post(
+                post_url, 
+                data=config_preview, 
+                cookies=cookies, 
+                headers=headers, 
+                verify=False, 
+                timeout=5
+            )
+
+            print("POST response status code:", response.status_code)
+            print("POST response content:", response.content.decode('utf-8'))
+
+            # Check for successful configuration
+            if response.status_code == 200 and '<imdata totalCount="0">' in response.content.decode('utf-8'):
+                return render(request, 'naas/aci_config_response.html', {
+                    'status_class': 'success',
+                    'message': "Configuration deployed successfully!",
+                    'output': response.content.decode('utf-8')
+                })
+            else:
+                return render(request, 'naas/aci_config_response.html', {
+                    'status_class': 'error',
+                    'message': f"Failed to deploy configuration. Error: {response.content.decode('utf-8')}"
+                })
+
+        except Exception as e:
+            print(f"Error in view: {str(e)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            return render(request, 'naas/aci_config_response.html', {
+                'status_class': 'error',
+                'message': f"Error: {str(e)}"
+            })
+
     return redirect('aci_vlan_to_port_form')
+
+def get_show_vlan(net_connect, vlan_id=None):
+    """Get show vlan output from device"""
+    command = f'show vlan {vlan_id}' if vlan_id else 'show vlan brief'
+    return net_connect.send_command(command)
+
+def get_show_ip_interface_brief(net_connect, vlan_id=None):
+    """Get show ip interface brief output from device"""
+    command = f'show ip interface vlan {vlan_id}' if vlan_id else 'show ip interface brief'
+    return net_connect.send_command(command)
+
+@csrf_exempt
+def get_device_status_view(request):
+    """View to handle device status retrieval request"""
+    if request.method == 'POST':
+        try:
+            # Parse incoming JSON data
+            data = json.loads(request.body)
+            switch_ip = data.get('switch_ip')
+            command = data.get('command')
+            vlan_id = data.get('vlan_id', None)
+            
+            # Use hardcoded or environment-based credentials
+            username = data.get('username', 'hcl')  # Consider using environment variables
+            password = data.get('password', 'cisco')
+            
+            # Retrieve device status
+            result = get_device_status(switch_ip, username, password, command, vlan_id)
+            
+            # Return appropriate response based on command
+            if result['status'] == 'success':
+                if command.startswith('show vlan'):
+                    return JsonResponse({
+                        'status': 'success',
+                        'vlan_output': result['output']
+                    })
+                elif command.startswith('show ip interface vlan') or command == 'show ip interface brief':
+                    return JsonResponse({
+                        'status': 'success',
+                        'ip_interface_output': result['output']
+                    })
+                else:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Invalid command'
+                    }, status=400)
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': result.get('error', 'Unknown error')
+                }, status=500)
+        
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON'
+            }, status=400)
+        
+        except Exception as e:
+            logger.error(f"Unexpected error in get_device_status_view: {e}")
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Internal server error'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed'
+    }, status=405)
+
+
+def get_device_status(ip, username, password, command, vlan_id=None):
+    """Get device status information"""
+    try:
+        with get_device_connection(ip, username, password) as net_connect:
+            if command.startswith('show vlan'):
+                output = get_show_vlan(net_connect, vlan_id)
+            elif command.startswith('show ip interface vlan') or command == 'show ip interface brief':
+                output = get_show_ip_interface_brief(net_connect, vlan_id)
+            else:
+                return {
+                    'status': 'error',
+                    'error': 'Invalid command'
+                }
+            return {
+                'status': 'success',
+                'output': output
+            }
+    except Exception as e:
+        return {
+            'status': 'error',
+            'error': str(e)
+        }

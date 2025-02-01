@@ -87,7 +87,7 @@ class MultiVLANConfigurationForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.rows = []
         data = kwargs.get('data', None)
-        
+        print("data", data)
         if data:
             # Get all unique row indices from the submitted data
             indices = set()
@@ -112,6 +112,7 @@ class MultiVLANConfigurationForm(forms.Form):
         else:
             # Create 3 empty rows for new form
             for _ in range(3):
+                print('____', _)
                 self.rows.append(VLANConfigurationForm())
 
     def is_valid(self):
