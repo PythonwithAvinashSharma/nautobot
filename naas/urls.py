@@ -17,7 +17,9 @@ from .views import (site_onboarding_view,
                     aci_vlan_to_port_form,
                     aci_vlan_to_port_submit,
                     aci_vlan_to_port_preview,
-                    get_device_status_view)
+                    get_device_status_view,
+                    create_epg_config,
+                    tenant_catalog_view)
 
 app_name= "naas"
 
@@ -41,4 +43,7 @@ urlpatterns = [
     path('aci-vlan-to-port/preview/', aci_vlan_to_port_preview, name='aci_vlan_to_port_preview'),
     path('aci-vlan-to-port/submit/', aci_vlan_to_port_submit, name='aci_vlan_to_port_submit'),
     path('get-device-status/', get_device_status_view, name='get-device-status'),
+    path('aci/templates/create-epg', create_epg_config, name='create_epg_config'),
+    path('aci/templates/tenant-catalog/', tenant_catalog_view, name='tenant_catalog'),
+
 ]

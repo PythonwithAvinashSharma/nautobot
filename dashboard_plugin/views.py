@@ -7,3 +7,24 @@ def dashboard_view(request):
 
 def AddDashboardView(request):
     return render(request, "dashboard_plugin/add_dashboard.html")
+
+def device_inventory(request):
+    return render(request, 'dashboard_plugin/device_inventory.html')
+
+def site_dashboard(request):
+    return render(request, 'dashboard_plugin/site_dashboard.html')
+
+def racks(request):
+    return render(request, 'dashboard_plugin/racks.html')
+
+def ip_addresses(request):
+    return render(request, 'dashboard_plugin/ip_addresses.html')
+
+def prefixes(request):
+    return render(request, 'dashboard_plugin/prefixes.html')
+
+def vlans(request):
+    return render(request, 'dashboard_plugin/vlans.html')
+
+def circuits(request):
+    return render(request, 'dashboard_plugin/circuits.html')

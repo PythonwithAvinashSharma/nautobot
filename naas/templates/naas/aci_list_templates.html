@@ -184,7 +184,7 @@
     const templates = [
         { id: 1, name: 'Add Private VLAN To Port', category: 'VLAN Management', lastModified: '2024-01-15' },
         { id: 2, name: 'Add Private VLAN To VPC', category: 'VLAN Management', lastModified: '2024-01-15' },
-        { id: 3, name: 'Add Tenant And Child Objects', category: 'Tenant Management', lastModified: '2024-01-16' },
+        { id: 3, name: 'Add EPG to Tenant', category: 'Tenant Management', lastModified: '2024-01-16' },
         { id: 4, name: 'Add VLAN To Port', category: 'VLAN Management', lastModified: '2024-01-16' },
         { id: 5, name: 'Add VLAN To VPC', category: 'VLAN Management', lastModified: '2024-01-17' },
         { id: 6, name: 'Tenant Management Node Management Address', category: 'Tenant Management', lastModified: '2024-01-17' },
@@ -199,7 +199,7 @@
         return `
             <tr>
                 <td>
-                    <a href="#" class="template-name" onclick="showConfigForm('${template.name}')">${template.name}</a>
+                    <a href="#" class="template-name" onclick="handleTemplateClick('${template.name}', ${template.id})">${template.name}</a>
                 </td>
                 <td><span class="category-badge">${template.category}</span></td>
                 <td>${template.lastModified}</td>
@@ -207,27 +207,26 @@
         `;
     }
 
-    function showConfigForm(templateName) {
+    function handleTemplateClick(templateName, templateId) {
+        // Handle Add Tenant And Child Objects template
+        if (templateId === 3) {
+            window.location.href = '{% url "plugins:naas:tenant_catalog" %}';
+            return;
+        }
+        
+        // Handle Add VLAN To Port template
         if (templateName === 'Add VLAN To Port') {
             window.location.href = '{% url "plugins:naas:aci_vlan_to_port_form" %}';
-        } else {
-            const configForm = document.getElementById('configForm');
-            const formTitle = configForm.querySelector('.form-title');
-            
-            // Update form title with template name
-            formTitle.textContent = `Configure ${templateName}`;
-            
-            // Show the form container
-            configForm.classList.add('active');
-            
-            // Scroll to the form
-            configForm.scrollIntoView({ behavior: 'smooth' });
-
-            // In a real implementation, you would:
-            // 1. Fetch the form fields for this specific template
-            // 2. Update the form action URL with the template name
-            // 3. Populate any template-specific default values
+            return;
         }
+
+        // Handle other templates with default behavior
+        const configForm = document.getElementById('configForm');
+        const formTitle = configForm.querySelector('.form-title');
+        
+        formTitle.textContent = `Configure ${templateName}`;
+        configForm.classList.add('active');
+        configForm.scrollIntoView({ behavior: 'smooth' });
     }
 
     function initializePage() {
@@ -243,5 +242,4 @@
 
     document.addEventListener('DOMContentLoaded', initializePage);
 </script>
-
 {% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+<style>
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #4B6BFB;
+        ring: 2px solid #EEF2FF;
+    }
+    .btn-secondary {
+        background: #6B7280;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+    }
+    
+    .btn-secondary:hover {
+        background: #4B5563;
+    }
+    
+    #yamlPreview {
+        font-family: monospace;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+</style>
+
+<div class="container">
+    <div class="header">
+        <a href="{% url 'plugins:naas:aci_templates_list' %}" class="back-link">← Back to Templates</a>
+        <h1>Add Tenant And Child Objects</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="config-container active">
+                <h2 class="form-title">Configure EPG</h2>
+                <div id="configStatus"></div>
+                
+                <form id="epgConfigForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label" for="tenant_name">Tenant Name</label>
+                        <input type="text" 
+                               id="tenant_name" 
+                               name="tenant_name" 
+                               class="form-control" 
+                               placeholder="Enter tenant name (e.g., tenant1_lab)"
+                               required>
+                    </div>
+                
+                    <div class="form-group">
+                        <label class="form-label" for="application_profile">Application Profile</label>
+                        <input type="text" 
+                               id="application_profile" 
+                               name="application_profile" 
+                               class="form-control" 
+                               placeholder="Enter application profile (e.g., AP1)"
+                               required>
+                    </div>
+                
+                    <div class="form-group">
+                        <label class="form-label" for="endpoint_group">Endpoint Group</label>
+                        <input type="text" 
+                               id="endpoint_group" 
+                               name="endpoint_group" 
+                               class="form-control" 
+                               placeholder="Enter endpoint group (e.g., EPG6)"
+                               required>
+                    </div>
+                
+                    <div class="form-group">
+                        <label class="form-label" for="bridge_domain">Bridge Domain</label>
+                        <input type="text" 
+                               id="bridge_domain" 
+                               name="bridge_domain" 
+                               class="form-control" 
+                               placeholder="Enter bridge domain (e.g., bd_3)"
+                               required>
+                    </div>
+                
+                    <div class="form-group">
+                        <label class="form-label" for="physical_domain">Physical Domain</label>
+                        <input type="text" 
+                               id="physical_domain" 
+                               name="physical_domain" 
+                               class="form-control" 
+                               placeholder="Enter physical domain (e.g., INT_BM)"
+                               required>
+                    </div>
+                
+                    <div class="form-group">
+                        <!--<button type="button" class="btn-secondary" onclick="updateYamlPreview()">Preview YAML</button> -->
+                        <button type="submit" class="btn-primary">Create EPG Configuration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- YAML Preview Section -->
+            <div class="form-group" id="yamlPreviewSection" style="display: none;">
+                <h2 class="form-title">YAML Preview</h2>
+                <pre id="yamlPreview" style="background: #f5f5f5; padding: 15px; border-radius: 4px; white-space: pre-wrap;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateYamlPreview() {
+    const formData = {
+        tenant_name: document.getElementById('tenant_name').value,
+        application_profile: document.getElementById('application_profile').value,
+        endpoint_group: document.getElementById('endpoint_group').value,
+        bridge_domain: document.getElementById('bridge_domain').value,
+        physical_domain: document.getElementById('physical_domain').value
+    };
+    
+    // Create YAML structure
+    const yamlStructure = `apic:
+  tenants:
+    - name: ${formData.tenant_name}
+      application_profiles:
+        - name: ${formData.application_profile}
+          endpoint_groups:
+            - name: ${formData.endpoint_group}
+              bridge_domain: ${formData.bridge_domain}
+              physical_domains:
+                - ${formData.physical_domain}`;
+    
+    // Display YAML preview
+    document.getElementById('yamlPreviewSection').style.display = 'block';
+    document.getElementById('yamlPreview').textContent = yamlStructure;
+}
+
+// Add live preview update on input changes
+const formInputs = document.querySelectorAll('#epgConfigForm input');
+formInputs.forEach(input => {
+    input.addEventListener('input', updateYamlPreview);
+});
+document.getElementById('epgConfigForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('{% url "plugins:naas:create_epg_config" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        const statusDiv = document.getElementById('configStatus');
+        
+        if (response.ok) {
+            statusDiv.innerHTML = `<div class="success">
+                Configuration created successfully! Pull request: <a href="${result.pr_url}" target="_blank">#${result.pr_number}</a>
+            </div>`;
+        } else {
+            statusDiv.innerHTML = `<div class="error">Error: ${result.error}</div>`;
+        }
+    } catch (error) {
+        document.getElementById('configStatus').innerHTML = `
+            <div class="error">An error occurred while creating the configuration.</div>
+        `;
+    }
+});
+</script>
+{% endblock %}

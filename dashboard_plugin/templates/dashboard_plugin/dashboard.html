@@ -1,242 +1,881 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device, KPI Health & Networking Insights Dashboard</title>
-    <!-- Bootstrap and Chart.js -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-        }
-        h1, h2, h3 {
-            text-align: center;
-            color: #333;
-            margin-top: 20px;
-        }
-        .kpi-container {
-            display: flex;
-            justify-content: space-around;
-            padding: 20px 0;
-        }
-        .kpi-box {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-            text-align: center;
-            width: 22%;
-            color: #333;
-        }
-        .kpi-value {
-            font-size: 36px;
-            font-weight: bold;
-            color: #212121;
-        }
-        .kpi-title {
-            font-size: 18px;
-            color: #757575;
-        }
-        .card {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            background-color: #ffffff;
-            padding: 20px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-<h1>📡 Comprehensive Network Insights Dashboard</h1>
-<p class="text-center">Full visibility into devices, switches, IP usage, VLANs, and port status.</p>
-<!-- KPI Cards -->
-<div class="container">
-    <div class="kpi-container">
-        <div class="kpi-box">
-            <div class="kpi-title">Active Switches</div>
-            <div class="kpi-value" id="total-switches">28</div>
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js"></script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .main-content {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Original styles... */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .chart-container {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .metric-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .metric-value {
+        font-size: 56px;
+        color: #2F855A;
+        font-weight: 400;
+        margin: 10px 0;
+    }
+
+    .metric-title {
+        color: #666;
+        font-size: 20px;
+    }
+
+    .progress-bar {
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: #9AE6B4;
+        border-radius: 2px;
+        width: 70%;
+    }
+
+    .dashboard-select {
+        margin-bottom: 20px;
+    }
+
+    .dashboard-select select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+    }
+
+    /* New Network Status styles */
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .status-card {
+        padding: 20px;
+        border-radius: 8px;
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .status-value {
+        font-size: 36px;
+        font-weight: 500;
+    }
+
+    .status-label {
+        font-size: 16px;
+        margin-top: 5px;
+    }
+
+    .device-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .device-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .device-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .device-name {
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .device-total {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .device-progress-bar {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        margin: 8px 0;
+        overflow: hidden;
+    }
+
+    .device-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 4px;
+        font-size: 14px;
+    }
+
+    .status-fill {
+        height: 100%;
+        border-radius: 4px;
+    }
+    .device-chart {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 15px;
+        position: relative;
+    }
+
+    .device-stats {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .stat-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stat-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+    }
+
+    /* Triggered Log Alerts Table */
+    .log-alerts {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin: 20px 0;
+    }
+
+    .log-alerts table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .log-alerts th, 
+    .log-alerts td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .log-alerts th {
+        background-color: #f8f9fa;
+        font-weight: 500;
+    }
+
+    .search-bar {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    /* LCM Dashboard styles */
+    .lcm-dashboard {
+        margin-bottom: 20px;
+    }
+
+    .lcm-dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .lcm-dashboard-header h2 {
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .lcm-dashboard-section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .lcm-dashboard-section h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .lcm-dashboard-section .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .lcm-dashboard-section .metric-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .lcm-dashboard-section .metric-value {
+        font-size: 36px;
+        color: #2F855A;
+        font-weight: 400;
+        margin: 8px 0;
+    }
+
+    .lcm-dashboard-section .metric-title {
+        color: #666;
+        font-size: 16px;
+    }
+
+    .lcm-dashboard-section .support-group-wise {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .lcm-dashboard-section .support-group-wise h4 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .lcm-dashboard-section .support-group-wise .support-group {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+    }
+
+    .lcm-dashboard-section .support-group-wise .support-group .indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    .lcm-dashboard-section .support-group-wise .support-group .label {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .lcm-dashboard-section .device-charts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .lcm-dashboard-section .device-chart {
+        width: 100%;
+        height: 150px;
+    }
+
+</style>
+
+<div class="main-content">
+    <div class="dashboard-select">
+        <select id="dashboardSelect" onchange="handleDashboardChange()">
+            <option value="00" selected>Main Dashboard</option>
+            <option value="01">Sites</option>
+            <option value="02">Device Inventory</option>
+            <option value="03">Racks</option>
+            <option value="04">Circuits</option>
+            <option value="05">VLANs</option>
+            <option value="06">IP Addresses</option>
+            <option value="07">Prefixes</option>
+        </select>
+    </div>
+
+    <div class="network-status-section">
+        <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 20px;">Network Status</h2>
+        
+        <div class="status-grid">
+            <div class="status-card" style="background-color: #DC2626;">
+                <div class="status-value">0</div>
+                <div class="status-label">Down</div>
+            </div>
+            <div class="status-card" style="background-color: #EA580C;">
+                <div class="status-value">3</div>
+                <div class="status-label">Critical</div>
+            </div>
+            <div class="status-card" style="background-color: #FBBF24;">
+                <div class="status-value">431</div>
+                <div class="status-label">Warning</div>
+            </div>
+            <div class="status-card" style="background-color: #E5E7EB;">
+                <div class="status-value">0</div>
+                <div class="status-label">Unknown</div>
+            </div>
+            <div class="status-card" style="background-color: #0D9488;">
+                <div class="status-value">20</div>
+                <div class="status-label">Other</div>
+            </div>
+            <div class="status-card" style="background-color: #16A34A;">
+                <div class="status-value">719</div>
+                <div class="status-label">Up</div>
+            </div>
         </div>
-        <div class="kpi-box">
-            <div class="kpi-title">Total IPs Used</div>
-            <div class="kpi-value" id="total-ips-used">215</div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-container">
+            <h3>Models Summary (Pie)</h3>
+            <canvas id="pieChart"></canvas>
         </div>
-        <div class="kpi-box">
-            <div class="kpi-title">Active Ports</div>
-            <div class="kpi-value" id="active-ports">82</div>
+        <div class="chart-container">
+            <h3>Models Summary (Bar)</h3>
+            <canvas id="barChart"></canvas>
         </div>
-        <div class="kpi-box">
-            <div class="kpi-title">Interface Health</div>
-            <div class="kpi-value" id="interface-health">98.2%</div>
+    </div>
+
+    <div class="log-alerts">
+        <h3 style="margin-bottom: 15px;">Triggered log alerts</h3>
+        <input type="text" class="search-bar" placeholder="Search..." id="logSearch">
+        <table>
+            <thead>
+                <tr>
+                    <th>S No.</th>
+                    <th>Name</th>
+                    <th>Time</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody id="logAlertsBody">
+                <!-- Log entries will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    <div class="metrics-grid">
+        <div class="metric-card" onclick="redirectToSiteDashboard()">
+            <div class="metric-title">Total Sites</div>
+            <div class="metric-value">35</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
         </div>
+        <div class="metric-card" onclick="redirectToRackDashboard()">
+            <div class="metric-title">Total Racks</div>
+            <div class="metric-value">219</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="metric-card" onclick="redirectToDeviceDashboard()">
+            <div class="metric-title">Total Devices</div>
+            <div class="metric-value">320</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="metric-card" onclick="redirectToCircuitsDashboard()">
+            <div class="metric-title">Total Circuits</div>
+            <div class="metric-value">150</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="metric-card" onclick="redirectToVLANsDashboard()">
+            <div class="metric-title">Total VLANs</div>
+            <div class="metric-value">75</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="metric-card" onclick="redirectToIPAddressDashboard()">
+            <div class="metric-title">Total IP Addresses</div>
+            <div class="metric-value">1.96k</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="metric-card" onclick="redirectToPrefixesDashboard()">
+            <div class="metric-title">Total Prefixes</div>
+            <div class="metric-value">1.18k</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="device-grid">
+        <!-- Device cards -->
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">Firewall</div>
+                <div class="device-total">53</div>
+            </div>
+            <canvas id="firewallChart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 48</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #DC2626;"></div>
+                    <div class="stat-label">DOWN: 3</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #FBBF24;"></div>
+                    <div class="stat-label">WARNING: 2</div>
+                </div>
+            </div>
+        </div>
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">Router</div>
+                <div class="device-total">468</div>
+            </div>
+            <canvas id="routerChart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 421</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #EA580C;"></div>
+                    <div class="stat-label">Critical: 1</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #DC2626;"></div>
+                    <div class="stat-label">DOWN: 2</div>
+                </div>
+            </div>
+        </div>
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">Switch</div>
+                <div class="device-total">824</div>
+            </div>
+            <canvas id="switchChart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 393</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #EA580C;"></div>
+                    <div class="stat-label">CRITICAL: 3</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #DC2626;"></div>
+                    <div class="stat-label">DOWN: 2</div>
+                </div>
+            </div>
+        </div>
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">UPS</div>
+                <div class="device-total">5</div>
+            </div>
+            <canvas id="upsChart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 5</div>
+                </div>
+            </div>
+        </div>
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">CISCO ISE</div>
+                <div class="device-total">10</div>
+            </div>
+            <canvas id="ciscoIseChart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 10</div>
+                </div>
+            </div>
+        </div>
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">Wireless CVG</div>
+                <div class="device-total">7</div>
+            </div>
+            <canvas id="wirelessCvgChart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 6</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #DC2626;"></div>
+                    <div class="stat-label">DOWN: 1</div>
+                </div>
+            </div>
+        </div>
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">F5</div>
+                <div class="device-total">16</div>
+            </div>
+            <canvas id="f5Chart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 16</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #DC2626;"></div>
+                    <div class="stat-label">DOWN: 1</div>
+                </div>
+                
+            </div>
+        </div>
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-name">TOOL SVR</div>
+                <div class="device-total">40</div>
+            </div>
+            <canvas id="toolSvrChart" class="device-chart"></canvas>
+            <div class="device-stats">
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #16A34A;"></div>
+                    <div class="stat-label">UP: 20</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #DC2626;"></div>
+                    <div class="stat-label">DOWN: 10</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-indicator" style="background-color: #FBBF24;"></div>
+                    <div class="stat-label">WARNING: 10</div>
+                </div>
+            </div>
+        </div>
+        <!-- Add other device cards similarly -->
     </div>
 </div>
-<!-- Main Content -->
-<div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <h3>📊 VLAN Usage</h3>
-                <canvas id="vlanUsageChart"></canvas>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <h3>🗂️ IP Address Allocation</h3>
-                <canvas id="pieChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <h3>🛠️ Port Status</h3>
-                <canvas id="doughnutChart"></canvas>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <h3>📈 Device Health Over Time</h3>
-                <canvas id="lineChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <h3>📋 Switch Alerts</h3>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Switch</th>
-                            <th>Status</th>
-                            <th>IP Address</th>
-                            <th>Last Seen</th>
-                        </tr>
-                    </thead>
-                    <tbody id="switch-alerts"></tbody>
-                </table>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <h3>🔌 Port Utilization by Type</h3>
-                <canvas id="barChartPortUtilization"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <h3>🖥️ Device Metrics</h3>
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Device ID</th>
-                            <th>Model</th>
-                            <th>Uptime</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="device-metrics"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+
 <script>
-    document.getElementById('total-switches').innerText = 28;
-    document.getElementById('total-ips-used').innerText = 215;
-    document.getElementById('active-ports').innerText = 82;
-    document.getElementById('interface-health').innerText = '98.2%';
-
-    new Chart(document.getElementById('vlanUsageChart'), {
-        type: 'bar',
-        data: {
-            labels: ['VLAN 10', 'VLAN 20', 'VLAN 30'],
-            datasets: [{
-                label: 'VLAN Usage %',
-                data: [80, 60, 45],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-            }]
-        }
-    });
-
-    new Chart(document.getElementById('pieChart'), {
+    // Initialize pie chart
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
         type: 'pie',
         data: {
-            labels: ['Subnet A', 'Subnet B', 'Subnet C'],
+            labels: ['Devices', 'IP Addresses', 'Prefixes', 'Racks', 'Sites', 'Circuits', 'VLANs'],
             datasets: [{
-                data: [30, 40, 30],
-                backgroundColor: ['#4CAF50', '#FFEB3B', '#F44336']
+                data: [320, 1958, 1184, 219, 35, 150, 75],
+                backgroundColor: [
+                    '#34D399', // Devices
+                    '#60A5FA', // IP Addresses
+                    '#FCD34D', // Prefixes
+                    '#A78BFA', // Racks
+                    '#F87171', // Sites
+                    '#FBBF24', // Circuits
+                    '#10B981'  // VLANs
+                ]
             }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
         }
     });
 
-    new Chart(document.getElementById('doughnutChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Active', 'Inactive', 'Failed'],
-            datasets: [{
-                data: [80, 10, 10],
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
-            }]
-        }
-    });
-
-    new Chart(document.getElementById('lineChart'), {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Device Health',
-                data: [90, 85, 80, 95, 92, 97],
-                backgroundColor: '#42A5F5',
-                borderColor: '#1E88E5'
-            }]
-        }
-    });
-
-    new Chart(document.getElementById('barChartPortUtilization'), {
+    // Initialize horizontal bar chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
         type: 'bar',
         data: {
-            labels: ['GigabitEthernet', 'FastEthernet', 'SFP'],
+            labels: ['Devices', 'IP Addresses', 'Prefixes', 'Racks', 'Sites', 'Circuits', 'VLANs'],
             datasets: [{
-                label: 'Port Utilization',
-                data: [70, 25, 5],
-                backgroundColor: ['#3cba9f', '#ffa500', '#c45850']
+                label: 'Total Count',
+                data: [320, 1958, 1184, 219, 35, 150, 75],
+                backgroundColor: [
+                    '#34D399', // Devices
+                    '#60A5FA', // IP Addresses
+                    '#FCD34D', // Prefixes
+                    '#A78BFA', // Racks
+                    '#F87171', // Sites
+                    '#FBBF24', // Circuits
+                    '#10B981'  // VLANs
+                ]
             }]
+        },
+        options: {
+            indexAxis: 'y', // Make the bar chart horizontal
+            responsive: true,
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
         }
     });
 
-    const switches = [
-        { switch: 'Switch-A', status: 'Active', ip: '192.168.1.2', lastSeen: '2024-12-14 10:20:00' },
-        { switch: 'Switch-B', status: 'Inactive', ip: '192.168.1.3', lastSeen: '2024-12-14 09:45:00' },
-        { switch: 'Switch-C', status: 'Active', ip: '192.168.1.4', lastSeen: '2024-12-14 08:32:00' }
+    // Handle dashboard change
+    function handleDashboardChange() {
+        const selectedDashboard = document.getElementById('dashboardSelect').value;
+        switch (selectedDashboard) {
+            case '00':
+                window.location.href = "{% url 'plugins:dashboard_plugin:dashboard' %}";
+                break;
+            case '01':
+                window.location.href = "{% url 'plugins:dashboard_plugin:site_dashboard' %}";
+                break;
+            case '02':
+                window.location.href = "{% url 'plugins:dashboard_plugin:device_inventory' %}";
+                break;
+            case '03':
+                // Add redirection for Racks
+                window.location.href = "{% url 'plugins:dashboard_plugin:racks' %}";
+                break;
+            case '04':
+                // Add redirection for Circuits
+                window.location.href = "{% url 'plugins:dashboard_plugin:circuits' %}";
+                break;
+            case '05':
+                // Add redirection for VLANs
+                window.location.href = "{% url 'plugins:dashboard_plugin:vlans' %}";
+                break;
+            case '06':
+                // Add redirection for IP Addresses
+                window.location.href = "{% url 'plugins:dashboard_plugin:ip_addresses' %}";
+                break;
+            case '07':
+                // Add redirection for Prefixes
+                window.location.href = "{% url 'plugins:dashboard_plugin:prefixes' %}";
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Redirect to Site Dashboard
+    function redirectToSiteDashboard() {
+        window.location.href = "{% url 'plugins:dashboard_plugin:site_dashboard' %}";
+    }
+    function redirectToRackDashboard() {
+        window.location.href = "{% url 'plugins:dashboard_plugin:racks' %}";
+    }
+    function redirectToDeviceDashboard() {
+        window.location.href = "{% url 'plugins:dashboard_plugin:device_inventory' %}";
+    }
+    function redirectToCircuitsDashboard() {
+        window.location.href = "{% url 'plugins:dashboard_plugin:circuits' %}";
+    }
+    function redirectToVLANsDashboard() {
+        window.location.href = "{% url 'plugins:dashboard_plugin:vlans' %}";
+    }
+    function redirectToIPAddressDashboard() {
+        window.location.href = "{% url 'plugins:dashboard_plugin:ip_addresses' %}";
+    }
+    function redirectToPrefixesDashboard() {
+        window.location.href = "{% url 'plugins:dashboard_plugin:prefixes' %}";
+    }
+    
+    function createDeviceChart(canvasId, data) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['UP', 'DOWN', 'WARNING', 'CRITICAL'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#16A34A', '#DC2626', '#FBBF24', '#EA580C'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    tooltip: {
+                        enabled: true
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    const deviceCharts = {
+        firewall: createDeviceChart('firewallChart', [48, 3, 2, 0]),
+        router: createDeviceChart('routerChart', [421, 3, 43, 1]),
+        switch: createDeviceChart('switchChart', [393, 2, 426, 3]),
+        ups: createDeviceChart('upsChart', [5, 0, 0, 0]),
+        ciscoIse: createDeviceChart('ciscoIseChart', [10, 0, 0, 0]),
+        wirelessCvg: createDeviceChart('wirelessCvgChart', [6, 1, 0, 0]),
+        f5: createDeviceChart('f5Chart', [15, 0, 1, 0]),
+        toolSvr: createDeviceChart('toolSvrChart', [18, 1, 1, 0])
+    };
+
+    const logAlerts = [
+        { id: 1, name: 'CPU USAGE', time: '2025-01-01 10:00:00', message: 'CPU usage exceeded 90%' },
+        { id: 2, name: 'MEMORY USAGE', time: '2025-01-04 10:05:00', message: 'Memory usage exceeded 80%' },
+        { id: 3, name: 'DISC SPACE', time: '2025-01-06 10:10:00', message: 'Disk space below 20%' },
+        { id: 4, name: 'LATENCY', time: '2025-01-08 10:15:00', message: 'Network latency above threshold' },
+        { id: 5, name: 'FAILED ATTEMPTS', time: '2025-01-09 10:20:00', message: 'High number of failed login attempts' }
     ];
 
-    switches.forEach(s => {
-        document.getElementById('switch-alerts').innerHTML += `
-            <tr><td>${s.switch}</td><td>${s.status}</td><td>${s.ip}</td><td>${s.lastSeen}</td></tr>`;
+    // Populate log alerts table
+    const logAlertsBody = document.getElementById('logAlertsBody');
+    logAlerts.forEach(alert => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${alert.id}</td>
+            <td>${alert.name}</td>
+            <td>${alert.time}</td>
+            <td>${alert.message}</td>
+        `;
+        logAlertsBody.appendChild(row);
     });
 
-    const devices = [
-        { id: 'Device01', model: 'RouterX', uptime: '342 hours', status: 'Active' },
-        { id: 'Device02', model: 'SwitchY', uptime: '1290 hours', status: 'Active' },
-        { id: 'Device03', model: 'ModemZ', uptime: '300 hours', status: 'Maintenance' }
-    ];
-
-    devices.forEach(device => {
-        document.getElementById('device-metrics').innerHTML += `
-            <tr>
-                <td>${device.id}</td>
-                <td>${device.model}</td>
-                <td>${device.uptime}</td>
-                <td>${device.status}</td>
-            </tr>`;
+    // Search functionality
+    document.getElementById('logSearch').addEventListener('input', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = logAlertsBody.getElementsByTagName('tr');
+        Array.from(rows).forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            const name = cells[1].textContent.toLowerCase();
+            const message = cells[3].textContent.toLowerCase();
+            if (name.includes(searchValue) || message.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     });
+
+    tippy('[data-tippy-content]', {
+        placement: 'top',
+        arrow: true
+    });
+
+    function showNWHardwareDetails() {
+            document.getElementById('nwHardwareSection').style.display = 'block';
+            document.getElementById('nwSoftwareSection').style.display = 'none';
+            
+            // Create device charts for NW Hardware
+            createDeviceChart('accessPointChart', [48, 3, 2]);
+            createDeviceChart('switchChart', [421, 3, 43, 3]);
+            createDeviceChart('wirelessControllerChart', [6, 1, 0, 0]);
+    }
+
+    function showNWSoftwareDetails() {
+        document.getElementById('nwSoftwareSection').style.display = 'block';
+        document.getElementById('nwHardwareSection').style.display = 'none';
+
+        // Create device charts for NW Software
+        createDeviceChart('nxOSChart', [4521, 357, 0, 0]);
+        createDeviceChart('iosXEChart', [1756, 0, 43, 1]);
+        createDeviceChart('iosXRChart', [512, 0, 0, 0]);
+    }
+
+    function createDeviceChart(canvasId, data) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['UP', 'Down', 'Warning', 'Critical'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#16A34A', '#DC2626', '#FBBF24', '#EA580C'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    tooltip: {
+                        enabled: true
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
 </script>
-</body>
-</html>
+{% endblock %}

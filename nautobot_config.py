@@ -136,6 +136,7 @@ if DATABASES["default"]["ENGINE"].endswith("mysql"):
 # symbols. Nautobot will not run without this defined. For more information, see
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-SECRET_KEY
 SECRET_KEY = os.getenv("NAUTOBOT_SECRET_KEY", "{{ secret_key }}")
+
 SANITIZER_PATTERNS = [
     # General removal of username-like and password-like tokens
     (re.compile(r"(https?://)?\S+\s*@", re.IGNORECASE), r"\1{replacement}@"),
@@ -381,6 +382,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = "/home/ubuntu/.nautobot/static"
 STATICFILES_DIRS = [
         os.path.join(BASE_DIR, "nautobot/nautobot/project-static"),
+        os.path.join(BASE_DIR, 'nautobot/dist'),
 ]
 MEDIA_ROOT =os.path.join(BASE_DIR, "nautobot/media")
 GIT_ROOT = os.getenv("NAUTOBOT_GIT_ROOT", os.path.join(BASE_DIR, "git").rstrip("/"))

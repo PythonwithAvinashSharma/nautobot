@@ -7,6 +7,7 @@ from nautobot.ipam.models import VLAN, Prefix
 from nautobot.extras.models import Tag
 from django.urls import reverse
 import urllib3
+from dotenv import load_dotenv
 from .forms import SiteOnboardingForm, DeviceForm, MultiVLANConfigurationForm, ACIConfigForm
 from django.http import JsonResponse
 from nautobot.cloud.models import CloudService
@@ -19,10 +20,13 @@ from netmiko import ConnectHandler
 import requests
 from requests.auth import HTTPBasicAuth
 import re
+import yaml
+import os
+from github import Github
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST,require_http_methods
 import logging
 from django.utils.safestring import mark_safe
 
@@ -839,3 +843,87 @@ def get_device_status(ip, username, password, command, vlan_id=None):
             'status': 'error',
             'error': str(e)
         }
+
+
+@require_http_methods(["POST"])
+@csrf_protect
+def create_epg_config(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Create YAML content with the new structure
+        yaml_content = {
+            "apic": {
+                "tenants": [
+                    {
+                        "name": data["tenant_name"],
+                        "application_profiles": [
+                            {
+                                "name": data["application_profile"],
+                                "endpoint_groups": [
+                                    {
+                                        "name": data["endpoint_group"],
+                                        "bridge_domain": data["bridge_domain"],
+                                        "physical_domains": [data["physical_domain"]]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    
+        # Convert to YAML string
+        yaml_str = yaml.dump(
+            yaml_content, 
+            default_flow_style=False,
+            allow_unicode=True, 
+            sort_keys=False        
+        )
+        
+        # GitHub integration
+        load_dotenv()
+        g = Github(os.getenv('GITHUB_TOKEN'))
+        #g = Github(GITHUB_TOKEN)
+        repo = g.get_repo("vyshaghpoc/nexusascode")
+        print(repo)
+        # Create a new branch
+        base_branch = repo.get_branch("main")
+        branch_name = f"add-epg-{data['endpoint_group'].lower()}"
+        ref = f"refs/heads/{branch_name}"
+        repo.create_git_ref(ref=ref, sha=base_branch.commit.sha)
+        
+        # Create file path
+        file_path = f"tenants/{data['tenant_name']}/data/epg/{data['endpoint_group'].lower()}.yaml"
+        
+        # Create commit and file
+        repo.create_file(
+            path=file_path,
+            message=f"Add {data['endpoint_group']} configuration",
+            content=yaml_str,
+            branch=branch_name
+        )
+
+        # Create pull request
+        pr = repo.create_pull(
+            title=f"Add {data['endpoint_group']} configuration",
+            body="Created via ACI Template UI",
+            head=branch_name,
+            base="main"
+        )
+
+        return JsonResponse({
+            'success': True,
+            'pr_url': pr.html_url,
+            'pr_number': pr.number
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+    
+def tenant_catalog_view(request):
+    return render(request, 'naas/aci_tenant_child_objects.html')
