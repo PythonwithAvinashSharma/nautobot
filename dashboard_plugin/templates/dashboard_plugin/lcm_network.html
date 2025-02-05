@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js"></script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 20px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .tab-buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .tab-button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        background: #e5e7eb;
+    }
+
+    .tab-button.active {
+        background: #f97316;
+        color: white;
+    }
+
+    .tab-button.active.software {
+        background: #16a34a;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .metric-card {
+        background: white;
+        padding: 24px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .metric-label {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .metric-value {
+        font-size: 36px;
+        font-weight: 500;
+    }
+
+    .metric-value.supported {
+        color: #16a34a;
+    }
+
+    .metric-value.end-of-support {
+        color: #dc2626;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .chart-card {
+        background: white;
+        padding: 24px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .chart-header {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 16px;
+    }
+
+    .devices-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .device-chart {
+        text-align: center;
+    }
+
+    .device-name {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .chart-container {
+        position: relative;
+        margin: 0 auto;
+        width: 200px;
+        height: 200px;
+    }
+    #supportGroupChart {
+        max-height: 350px; /* Leave some space for header */
+    }
+    #supportGroupChartSoftware {
+        max-height: 350px; /* Leave some space for header */
+    }
+    .center-container {
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+    }
+
+    .support-timeline {
+        max-width: 900px;
+        text-align: center;
+    }
+    .title {
+      color: #f87171;
+      font-size: 20px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .support-container {
+      display: flex;
+      gap: 20px;
+    }
+    .support-box {
+      flex: 1;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .support-box.red {
+      background-color: #fca5a5;
+    }
+    .support-box.yellow {
+      background-color: #fcd34d;
+    }
+    .year {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .count {
+      font-size: 32px;
+      font-weight: bold;
+    }
+</style>
+
+<div class="main-content">
+    <div class="dashboard-select">
+        <select id="dashboardSelect" onchange="handleDashboardChange()">
+            <option value="00">Main Dashboard</option>
+            <option value="01">Sites</option>
+            <option value="02">Device Inventory</option>
+            <option value="03">Racks</option>
+            <option value="04">Circuits</option>
+            <option value="05">VLANs</option>
+            <option value="06">IP Addresses</option>
+            <option value="07">Prefixes</option>
+            <option value="08" selected>LCM Netwrok Dashboard</option>
+        </select>
+    </div>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Network Connectivity: LCM Dashboard</h1>
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('hardware')">NW Hardware</button>
+                <button class="tab-button" onclick="showTab('software')">NW Software</button>
+            </div>
+        </div>
+
+        <div id="hardwareTab">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Device</div>
+                    <div class="metric-value">816</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Supported</div>
+                    <div class="metric-value supported">510</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">End of Support</div>
+                    <div class="metric-value end-of-support">306</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">Devices</div>
+                    <div class="devices-grid">
+                        <div class="device-chart">
+                            <div class="device-name">Access Point</div>
+                            <div class="chart-container">
+                                <canvas id="accessPointChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="device-chart">
+                            <div class="device-name">Switch</div>
+                            <div class="chart-container">
+                                <canvas id="switchChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="device-chart">
+                            <div class="device-name">Wireless Controller</div>
+                            <div class="chart-container">
+                                <canvas id="wirelessControllerChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">Support Group wise</div>
+                    <canvas id="supportGroupChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="softwareTab" style="display: none;">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Device</div>
+                    <div class="metric-value">1102</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Supported</div>
+                    <div class="metric-value supported">712</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">End of Support</div>
+                    <div class="metric-value end-of-support">390</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">Devices</div>
+                    <div class="devices-grid">
+                        <div class="device-chart">
+                            <div class="device-name">NX-OS</div>
+                            <div class="chart-container">
+                                <canvas id="nxOSChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="device-chart">
+                            <div class="device-name">IOS-XE</div>
+                            <div class="chart-container">
+                                <canvas id="iosXEChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="device-chart">
+                            <div class="device-name">IOS-XR</div>
+                            <div class="chart-container">
+                                <canvas id="iosXRChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">Support Group wise</div>
+                    <canvas id="supportGroupChartSoftware"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="center-container">
+        <div class="support-timeline">
+            <div class="title">End of Support till 2025</div>
+            <div class="support-container">
+                <div class="support-box red">
+                    <div class="year">2024</div>
+                    <div class="count">25</div>
+                </div>
+                <div class="support-box yellow">
+                    <div class="year">2025</div>
+                    <div class="count">40</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const hardwareData = {
+        devices: {
+            accessPoint: { supported: 3344, endOfSupport: 16 },
+            switch: { supported: 3360, endOfSupport: 40 },
+            wirelessController: { supported: 84, endOfSupport: 0 }
+        },
+        supportGroups: [
+            { name: 'LAN', value: 95 },
+            { name: 'WLAN', value: 85 },
+            { name: 'SD-WAN', value: 98 },
+            { name: 'WAN', value: 98 },
+            { name: 'SDN', value: 66.67 }
+        ]
+    };
+
+    const softwareData = {
+        devices: {
+            NXOS: { supported: 344, endOfSupport: 16 },
+            IOSXE: { supported: 360, endOfSupport: 40 },
+            IOSXR: { supported: 84, endOfSupport: 0 }
+        },
+        supportGroups: [
+            { name: 'LAN', value: 95 },
+            { name: 'WLAN', value: 85 },
+            { name: 'SD-WAN', value: 98 },
+            { name: 'WAN', value: 98 },
+            { name: 'SDN', value: 66.67 }
+        ]
+    };
+
+    // Create donut charts for devices
+    function createDeviceChart(canvasId, data) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Supported', 'End of Support'],
+                datasets: [{
+                    data: [data.supported, data.endOfSupport],
+                    backgroundColor: ['#16a34a', '#dc2626'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '70%',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Create horizontal bar chart for support groups
+    function createSupportGroupChart(canvasId, data) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(item => item.name),
+                datasets: [{
+                    data: data.map(item => item.value),
+                    backgroundColor: '#16a34a',
+                    barThickness: 20
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Tab switching
+    function showTab(tab) {
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+            button.classList.remove('software');
+        });
+        
+        const activeButton = document.querySelector(`.tab-button:nth-child(${tab === 'hardware' ? '1' : '2'})`);
+        activeButton.classList.add('active');
+        if (tab === 'software') {
+            activeButton.classList.add('software');
+        }
+
+        document.getElementById('hardwareTab').style.display = tab === 'hardware' ? 'block' : 'none';
+        document.getElementById('softwareTab').style.display = tab === 'software' ? 'block' : 'none';
+
+        if (tab === 'hardware') {
+            createDeviceChart('accessPointChart', hardwareData.devices.accessPoint);
+            createDeviceChart('switchChart', hardwareData.devices.switch);
+            createDeviceChart('wirelessControllerChart', hardwareData.devices.wirelessController);
+            createSupportGroupChart('supportGroupChart', hardwareData.supportGroups);
+        } else {
+            createDeviceChart('nxOSChart', softwareData.devices.NXOS);
+            createDeviceChart('iosXEChart', softwareData.devices.IOSXE);
+            createDeviceChart('iosXRChart', softwareData.devices.IOSXR);
+            createSupportGroupChart('supportGroupChartSoftware', softwareData.supportGroups);
+        }
+    }
+
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+        showTab('hardware');
+    });
+
+    function handleDashboardChange() {
+        const selectedDashboard = document.getElementById('dashboardSelect').value;
+        switch (selectedDashboard) {
+            case '00':
+                window.location.href = "{% url 'plugins:dashboard_plugin:dashboard' %}";
+                break;
+            case '01':
+                window.location.href = "{% url 'plugins:dashboard_plugin:site_dashboard' %}";
+                break;
+            case '02':
+                window.location.href = "{% url 'plugins:dashboard_plugin:device_inventory' %}";
+                break;
+            case '03':
+                // Add redirection for Racks
+                window.location.href = "{% url 'plugins:dashboard_plugin:racks' %}";
+                break;
+            case '04':
+                // Add redirection for Circuits
+                window.location.href = "{% url 'plugins:dashboard_plugin:circuits' %}";
+                break;
+            case '05':
+                // Add redirection for VLANs
+                window.location.href = "{% url 'plugins:dashboard_plugin:vlans' %}";
+                break;
+            case '06':
+                // Add redirection for IP Addresses
+                window.location.href = "{% url 'plugins:dashboard_plugin:ip_addresses' %}";
+                break;
+            case '07':
+                // Add redirection for Prefixes
+                window.location.href = "{% url 'plugins:dashboard_plugin:prefixes' %}";
+                break;
+            case '08':
+                // Add redirection for Prefixes
+                window.location.href = "{% url 'plugins:dashboard_plugin:lcm_network' %}";
+                break;
+            default:
+                break;
+        }
+    }
+</script>
+{% endblock %}

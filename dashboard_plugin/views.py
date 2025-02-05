@@ -28,3 +28,9 @@ def vlans(request):
 
 def circuits(request):
     return render(request, 'dashboard_plugin/circuits.html')
+
+def lcm_network(request):
+    return render(request, 'dashboard_plugin/lcm_network.html')
+
+def amsterdam_site(request):
+    return render(request, 'dashboard_plugin/amsterdam_site.html')

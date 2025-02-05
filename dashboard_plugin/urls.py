@@ -17,4 +17,7 @@ urlpatterns = [
     path("vlans/", views.vlans, name='vlans'),
     path("circuits/", views.circuits, name='circuits'),
 
+    path("lcm_network/", views.lcm_network, name='lcm_network'),
+    path("amsterdam_site/", views.amsterdam_site, name='amsterdam_site'),
+
 ]

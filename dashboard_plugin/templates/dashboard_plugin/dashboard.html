@@ -360,6 +360,7 @@
             <option value="05">VLANs</option>
             <option value="06">IP Addresses</option>
             <option value="07">Prefixes</option>
+            <option value="08">LCM Netwrok Dashboard</option>
         </select>
     </div>
 
@@ -723,6 +724,10 @@
             case '07':
                 // Add redirection for Prefixes
                 window.location.href = "{% url 'plugins:dashboard_plugin:prefixes' %}";
+                break;
+            case '08':
+                // Add redirection for Prefixes
+                window.location.href = "{% url 'plugins:dashboard_plugin:lcm_network' %}";
                 break;
             default:
                 break;
