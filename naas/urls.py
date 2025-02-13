@@ -19,7 +19,10 @@ from .views import (site_onboarding_view,
                     aci_vlan_to_port_preview,
                     get_device_status_view,
                     create_epg_config,
-                    tenant_catalog_view)
+                    tenant_catalog_view,
+                    get_ethernet_interfaces_view,
+                    configure_interface_view,
+                    get_interface_config_view)
 
 app_name= "naas"
 
@@ -30,6 +33,8 @@ urlpatterns = [
     path('vlan-config/', vlan_config_view, name='vlan-config'),
     path('vlan-config-preview/', vlan_config_preview, name='vlan-config-preview'),
     path('vlan-config-deploy/', vlan_config_deploy, name='vlan-config-deploy'),
+    path('get-ethernet-interfaces/', get_ethernet_interfaces_view, name='get-ethernet-interfaces'),
+    path('configure-interface/', configure_interface_view, name='configure-interface'),
     path('get-subnets/<str:vlan_id>/', get_subnets, name='get-subnets'),
     path('fetch-change-request/<str:cr_number>/', fetch_change_request, name='fetch-change-request'),
     path('log-validator-details/', log_validator_details, name='log_validator_details'),
@@ -45,5 +50,7 @@ urlpatterns = [
     path('get-device-status/', get_device_status_view, name='get-device-status'),
     path('aci/templates/create-epg', create_epg_config, name='create_epg_config'),
     path('aci/templates/tenant-catalog/', tenant_catalog_view, name='tenant_catalog'),
+    path('get-interface-config/', get_interface_config_view, name='get-interface-config'),
+    
 
 ]

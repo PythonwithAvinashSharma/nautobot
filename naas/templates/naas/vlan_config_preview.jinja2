@@ -2,125 +2,222 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<style>
-    .custom-btn {
-        background-color: #224f76; /* Elegant blue */
-        border: none; /* Remove border for a cleaner look */
-        color: #ffffff; /* White text for contrast */
-        padding: 10px 20px; /* Add some padding for a better feel */
-        font-size: 16px; /* Adjust font size for readability */
-        border-radius: 8px; /* Rounded corners */
-        transition: background-color 0.3s ease; /* Smooth hover effect */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for elegance */
-    }
+    <style>
+        .config-block {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
-    .custom-btn:hover {
-        background-color: rgb(47, 52, 105); /* Slightly brighter blue on hover */
-        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
-    }
+        .config-block h3 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+            display: inline-block;
+        }
 
-    .btn-group-custom {
-        display: flex;
-        align-items: center;
-        justify-content: space-between; /* Push items to far sides */
-    }
+        .config-preview {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
 
-    .btn-group {
-        display: flex; /* Ensure buttons are in a row */
-        gap: 100px; /* Add space between buttons */
-    }
-</style>
-<div class="container">
-    <h1>VLAN Configuration Preview</h1>
-    
-    <div class="row">
-        <div class="col-md-8">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h2 class="panel-title">Configuration Details</h2>
-                </div>
-                <div class="panel-body">
-                    {% for config in configs %}
-                    <div class="config-section">
-                        <h3>Configuration for Switch {{ config.switch_ip }}</h3>
-                        <pre class="config-preview">
-                        vlan {{ config.vlan }}
-                        name "{{ config.vlan_description }}"
-                        !
-                        interface Vlan {{ config.vlan }}
-                        description "{{ config.vlan_description }}"
-                        ip address {{ config.ip_with_subnet }}
-                        mtu {{ config.mtu_size }}
-                        {{ config.admin_state }}
-                        </pre>
+        .validator-section {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: none;
+        }
+
+        .action-buttons.visible {
+            display: block;
+            margin-top: 20px;
+        }
+
+        .custom-btn {
+            background-color: #224f76;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .custom-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .interface-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .interface-table th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+        }
+
+        .interface-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .status-output {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        #deployForm {
+            display: none;
+        }
+        .action-buttons-container {
+            display: none; /* Hidden by default */
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #28a745;
+        }
+
+        .action-buttons-container .btn {
+            margin-right: 15px;
+        }
+
+        .preview-buttons {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .configure-all-btn {
+            display: none; /* Hidden by default */
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">VLAN Configuration Preview</h1>
+        
+        <div class="row">
+            <div class="col-md-8">
+                {% for config in configs %}
+                <div class="config-section config-block">
+                    <h3>VLAN Configuration - Switch {{ config.switch_ip }}</h3>
+                    <pre class="config-preview">
+vlan {{ config.vlan }}
+name "{{ config.vlan_description }}"
+!
+interface Vlan {{ config.vlan }}
+description "{{ config.vlan_description }}"
+ip address {{ config.ip_with_subnet }}
+mtu {{ config.mtu_size }}
+{{ config.admin_state }}</pre>
+
+                    <div class="form-group mt-3">
+                        <label for="vlan_id_{{ config.sanitized_switch_ip }}">VLAN ID (optional):</label>
+                        <input type="text" class="form-control" id="vlan_id_{{ config.sanitized_switch_ip }}" placeholder="Enter VLAN ID">
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button type="button" class="custom-btn show-vlan-btn" data-switch="{{ config.switch_ip }}">
+                            Show VLAN
+                        </button>
+                        <button type="button" class="custom-btn show-interface-btn" data-switch="{{ config.switch_ip }}">
+                            Show IP Interface Brief
+                        </button>
+                    </div>
+
+                    <div class="status-output-section" id="status_{{ config.sanitized_switch_ip }}">
+                        <div class="vlan-output" style="display: none;">
+                            <h4>VLAN Status</h4>
+                            <pre class="status-preview"></pre>
+                        </div>
+                        <div class="interface-output" style="display: none;">
+                            <h4>Interface Status</h4>
+                            <pre class="status-preview"></pre>
+                        </div>
+                    </div>
+
+                    <div class="interface-section mt-4">
+                        <h3>Interface Configuration</h3>
                         <div class="form-group">
-                            <label for="vlan_id_{{ config.sanitized_switch_ip }}">VLAN ID (optional):</label>
-                            <input type="text" class="form-control" id="vlan_id_{{ config.sanitized_switch_ip }}" placeholder="Enter VLAN ID">
+                            <label for="interface_quantity_{{ config.sanitized_switch_ip }}">Number of Interfaces</label>
+                            <input type="number" class="form-control interface-quantity" 
+                                   id="interface_quantity_{{ config.sanitized_switch_ip }}" 
+                                   data-switch="{{ config.switch_ip }}" min="0">
                         </div>
-                        <div class="btn-group-custom mb-3" role="group">
-                            <button 
-                                type="button" 
-                                class="btn custom-btn show-vlan-btn" 
-                                data-switch="{{ config.switch_ip }}"
-                            >
-                                Show VLAN
-                            </button>
-                            <button 
-                                type="button" 
-                                class="btn custom-btn show-interface-btn" 
-                                data-switch="{{ config.switch_ip }}"
-                            >
-                                Show IP Interface Brief
-                            </button>
-                        </div>
-                        <div class="status-output-section" id="status_{{ config.sanitized_switch_ip }}">
-                            <div class="vlan-output" style="display: none;">
-                                <h4>VLAN Status</h4>
-                                <pre class="status-preview"></pre>
-                            </div>
-                            <div class="interface-output" style="display: none;">
-                                <h4>Interface Status</h4>
-                                <pre class="status-preview"></pre>
-                            </div>
-                        </div>
+                        <div id="interfaces-container_{{ config.sanitized_switch_ip }}" class="interfaces-container"></div>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="validator-block">
-                <h2>Validator Details</h2>
-                <form id="validatorForm">
-                    <div class="form-group">
-                        <label for="validator_name">Name</label>
-                        <input type="text" id="validator_name" name="validator_name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="validator_email">Email</label>
-                        <input type="email" id="validator_email" name="validator_email" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="validator_employee_id">Employee ID</label>
-                        <input type="text" id="validator_employee_id" name="validator_employee_id" class="form-control" required>
-                    </div>
-                    <button type="button" id="validateButton" class="btn btn-primary">Validate</button>
-                </form>
-                <div id="validatorDetails" style="display: none;">
+
+            <div class="col-md-4">
+                <div class="validation-block">
+                    <h3>Validator Details</h3>
+                    <form id="validatorForm">
+                        <div class="form-group">
+                            <label for="validator_name">Name</label>
+                            <input type="text" id="validator_name" name="validator_name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="validator_email">Email</label>
+                            <input type="email" id="validator_email" name="validator_email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="validator_employee_id">Employee ID</label>
+                            <input type="text" id="validator_employee_id" name="validator_employee_id" class="form-control" required>
+                        </div>
+                        <button type="button" id="validateButton" class="btn btn-primary">Validate</button>
+                    </form>
+                    <div id="validatorDetails" style="display: none;">
                     <p><strong>Name:</strong> <span id="validatorNameDisplay"></span></p>
                     <p><strong>Email:</strong> <span id="validatorEmailDisplay"></span></p>
                     <p><strong>Employee ID:</strong> <span id="validatorEmployeeIdDisplay"></span></p>
                 </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <form method="post" action="{% url 'plugins:naas:vlan-config-deploy' %}" id="deployForm" style="display: none; padding-top: 20px;">
-        {% csrf_token %}
-        <input type="hidden" name="configs" id="configs">
-        <button type="submit" class="btn btn-primary">Deploy Configuration</button>
-    </form>
-    <button type="button" class="btn btn-secondary" id="backToFormButton">Back to Form</button>
+        <form method="post" action="{% url 'plugins:naas:vlan-config-deploy' %}" id="deployForm">
+            {% csrf_token %}
+            <input type="hidden" name="configs" id="configs">
+            <button type="submit" class="btn btn-success">Deploy Configuration</button>
+        </form>
+
+        <button type="button" class="btn btn-secondary back-button" id="backToFormButton">Back to Form</button>
+    </div>
     <script>
         document.getElementById('configs').value = '{{ configs_json|safe }}';
 
@@ -152,6 +249,11 @@
                         document.getElementById('validatorEmailDisplay').textContent = email;
                         document.getElementById('validatorEmployeeIdDisplay').textContent = employeeId;
                         document.getElementById('validatorForm').style.display = 'none';
+
+                        const successAlert = document.createElement('div');
+                        successAlert.className = 'alert alert-success mt-3';
+                        successAlert.textContent = 'Validation successful! You can now deploy configuration.';
+                        document.getElementById('validatorForm').parentNode.appendChild(successAlert);
                     } else {
                         throw new Error('Validation failed');
                     }
@@ -160,6 +262,25 @@
                     console.error('Error:', error);
                 });
             }
+        });
+
+        // Back button functionality
+        document.getElementById('backToFormButton').addEventListener('click', function() {
+            window.history.back();
+        });
+
+        // Interface quantity change handlers
+        document.querySelectorAll('.interface-quantity').forEach(interfaceQuantityField => {
+            interfaceQuantityField.addEventListener("change", function () {
+                const switchIp = this.getAttribute('data-switch');
+                const containerId = `interfaces-container_${switchIp.replace(/\./g, '_')}`;
+                const interfacesContainer = document.getElementById(containerId);
+                const quantity = parseInt(this.value) || 0;
+                
+                if (interfacesContainer) {
+                    createInterfaceTable(interfacesContainer, quantity, switchIp);
+                }
+            });
         });
 
         document.querySelectorAll('.show-vlan-btn').forEach(button => {
@@ -246,10 +367,325 @@
             });
         });
 
-        // Handle "Back to Form" button click
-        document.getElementById('backToFormButton').addEventListener('click', function() {
-            window.history.back();
+    function createInterfaceTable(container, quantity, switchIp) {
+        container.innerHTML = "";
+        if (quantity > 0) {
+            const table = document.createElement("table");
+            table.classList.add("table", "table-bordered", "interface-config-table");
+
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+
+            const headers = ["Interface", "VLAN ID", "Description", "Mode"];
+            headers.forEach(headerText => {
+                const th = document.createElement("th");
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+            const interfaceConfigs = []; // Store interface configurations
+
+            // Fetch available Ethernet interfaces
+            fetch('/plugins/naas/get-ethernet-interfaces/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    switch_ip: switchIp,
+                    username: 'hcl',
+                    password: 'cisco'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const availableInterfaces = data.interfaces || [];
+                const configs = JSON.parse(document.getElementById("configs").value);
+                const config = configs.find(c => c.switch_ip === switchIp);
+                const vlanId = config ? config.vlan : '';
+
+                for (let i = 0; i < quantity; i++) {
+                    const row = document.createElement("tr");
+
+                    // Interface (Dropdown)
+                    const interfaceCell = document.createElement("td");
+                    const interfaceSelect = document.createElement("select");
+                    interfaceSelect.setAttribute("name", `interface_${i}`);
+                    interfaceSelect.classList.add("form-control");
+
+                    availableInterfaces.forEach(interfaceName => {
+                        const option = document.createElement("option");
+                        option.setAttribute("value", interfaceName);
+                        option.textContent = interfaceName;
+                        interfaceSelect.appendChild(option);
+                    });
+
+                    interfaceCell.appendChild(interfaceSelect);
+                    row.appendChild(interfaceCell);
+
+                    // VLAN ID (Editable)
+                    const vlanCell = document.createElement("td");
+                    const vlanInput = document.createElement("input");
+                    vlanInput.setAttribute("type", "number");
+                    vlanInput.setAttribute("name", `vlan_id_${i}`);
+                    vlanInput.setAttribute("min", "1");
+                    vlanInput.setAttribute("max", "4094");
+                    vlanInput.setAttribute("value", vlanId);
+                    vlanInput.classList.add("form-control");
+                    vlanCell.appendChild(vlanInput);
+                    row.appendChild(vlanCell);
+
+                    // Description
+                    const descCell = document.createElement("td");
+                    const descInput = document.createElement("input");
+                    descInput.setAttribute("type", "text");
+                    descInput.setAttribute("name", `interface_desc_${i}`);
+                    descInput.classList.add("form-control");
+                    descCell.appendChild(descInput);
+                    row.appendChild(descCell);
+
+                    // Mode (Access or Trunk)
+                    const modeCell = document.createElement("td");
+                    const modeSelect = document.createElement("select");
+                    modeSelect.setAttribute("name", `interface_mode_${i}`);
+                    modeSelect.classList.add("form-control");
+
+                    const accessOption = document.createElement("option");
+                    accessOption.setAttribute("value", "access");
+                    accessOption.textContent = "Access";
+                    modeSelect.appendChild(accessOption);
+
+                    const trunkOption = document.createElement("option");
+                    trunkOption.setAttribute("value", "trunk");
+                    trunkOption.textContent = "Trunk";
+                    modeSelect.appendChild(trunkOption);
+
+                    modeCell.appendChild(modeSelect);
+                    row.appendChild(modeCell);
+
+                    tbody.appendChild(row);
+                    interfaceConfigs.push({
+                        interfaceSelect,
+                        vlanInput,
+                        descInput,
+                        modeSelect
+                    });
+                }
+
+                table.appendChild(tbody);
+                container.appendChild(table); // Append the table first
+
+                // Add "Configure All" button with improved styling and margin
+                const configureAllContainer = document.createElement("div");
+                configureAllContainer.classList.add("row", "mt-5", "justify-content-center"); // Added more margin
+
+                const configureAllCol = document.createElement("div");
+                configureAllCol.classList.add("col-12", "col-md-6", "text-center"); // Adjusted column width for better centering
+
+                const buttonContainer = document.createElement("div");
+                buttonContainer.classList.add("row", "mt-4", "mb-3");
+
+                const buttonCol = document.createElement("div");
+                buttonCol.classList.add("col-12", "text-center");
+
+                // Preview Button
+                const previewBtn = document.createElement("button");
+                previewBtn.type = "button";
+                previewBtn.classList.add("btn", "custom-btn", "btn-lg", "mb-3", "mr-2");
+                previewBtn.textContent = "Preview Current Configuration";
+                previewBtn.style.width = "90%";
+                previewBtn.style.maxWidth = "300px";
+
+                // Preview Container
+                const previewContainer = document.createElement("div");
+                previewContainer.classList.add("mt-3", "mb-3", "d-none");
+                previewContainer.style.display = "none";
+                previewContainer.innerHTML = `
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-12">
+                            <div class="card mx-auto" style="max-width: 600px;">
+                                <div class="card-header bg-dark text-white">
+                                    <h5 class="card-title mb-0">Current Interface Configuration</h5>
+                                </div>
+                                <div class="col-12 col-md-8">
+                                    <pre class="bg-light p-3 border rounded" style="max-height: 300px; overflow-y: auto;"><code id="config-preview"></code></pre>
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                `;
+
+                // Configure All Button
+                const configureAllBtn = document.createElement("button");
+                configureAllBtn.setAttribute("type", "button");
+                configureAllBtn.classList.add("btn", "btn-lg", "custom-btn", "d-none");
+                configureAllBtn.textContent = "Configure All Interfaces";
+                configureAllBtn.style.width = "90%";
+                configureAllBtn.style.maxWidth = "300px";
+                configureAllBtn.disabled = true;
+                configureAllBtn.style.display = "none";
+
+                // Append the preview container and configure button to the container
+                buttonCol.appendChild(previewBtn);
+                buttonCol.appendChild(previewContainer);
+                buttonCol.appendChild(configureAllBtn);
+                buttonContainer.appendChild(buttonCol);
+                container.appendChild(buttonContainer); // Append the button container after the table
+
+                previewBtn.addEventListener('click', function() {
+                const selectedInterfaces = interfaceConfigs.map(config => 
+                    config.interfaceSelect.value
+                );
+
+                // Show loading state
+                const previewCode = document.getElementById('config-preview');
+                previewCode.textContent = 'Loading configuration...';
+                previewContainer.classList.remove('d-none');
+                previewContainer.style.display = "block"; // Show preview container
+
+                fetch('/plugins/naas/get-interface-config/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        switch_ip: switchIp,
+                        interfaces: selectedInterfaces,
+                        username: 'hcl',
+                        password: 'cisco'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        previewCode.textContent = data.config;
+                        // Show and enable configure button
+                        configureAllBtn.classList.remove('d-none');
+                        configureAllBtn.style.display = "inline-block";
+                        configureAllBtn.disabled = false;
+                    } else {
+                        previewCode.textContent = 'Error fetching configuration: ' + data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    previewCode.textContent = 'Error fetching configuration';
+                });
+            });
+                // Commands Preview
+                const commandsColumn = document.createElement("div");
+                commandsColumn.classList.add("preview-box");
+
+                const commandsTitle = document.createElement("div");
+                commandsTitle.classList.add("preview-title");
+                commandsTitle.textContent = "Generated Commands Preview";
+
+                const commandsPreview = document.createElement("pre");
+                commandsPreview.classList.add("commands-preview");
+                commandsPreview.id = "commands-preview";
+                commandsPreview.textContent = "No commands generated yet";
+
+                commandsColumn.appendChild(commandsTitle);
+                commandsColumn.appendChild(commandsPreview);
+
+                function updateCommandsPreview() {
+                    const commands = interfaceConfigs.map(config => {
+                        const interfaceName = config.interfaceSelect.value;
+                        const vlanId = config.vlanInput.value;
+                        const interfaceMode = config.modeSelect.value;
+                        const description = config.descInput.value || 'Configured Interface';
+
+                        return `interface ${interfaceName}
+                                description ${description}
+                                switchport mode ${interfaceMode}
+                                ${interfaceMode === 'access' ? `switchport access vlan ${vlanId}` : `switchport trunk allowed vlan add ${vlanId}`}
+                                !`;
+                    }).join('\n');
+
+                    commandsPreview.textContent = commands || "No commands generated yet";
+                }
+
+                // Add event listeners to all inputs to update preview
+                interfaceConfigs.forEach(config => {
+                    [config.interfaceSelect, config.vlanInput, config.descInput, config.modeSelect].forEach(element => {
+                        element.addEventListener('change', updateCommandsPreview);
+                        element.addEventListener('input', updateCommandsPreview);
+                    });
+                });
+
+                // Append everything to the container
+                previewContainer.appendChild(commandsColumn);
+                container.appendChild(previewContainer);
+
+                configureAllBtn.addEventListener('click', function() {
+                    const bulkCommands = interfaceConfigs.map(config => {
+                        const interfaceName = config.interfaceSelect.value;
+                        const vlanId = config.vlanInput.value;
+                        const interfaceMode = config.modeSelect.value;
+                        const description = config.descInput.value || 'Configured Interface';
+
+                        return [
+                            `interface ${interfaceName}`,
+                            `description ${description}`,
+                            `switchport mode ${interfaceMode}`,
+                            interfaceMode === 'access' 
+                                ? `switchport access vlan ${vlanId}` 
+                                : `switchport trunk allowed vlan add ${vlanId}`
+                        ];
+                    }).flat(); // Flatten the array of command arrays
+
+                    // Send bulk configuration to backend
+                    fetch('/plugins/naas/configure-interface/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            switch_ip: switchIp,
+                            commands: bulkCommands,
+                            username: 'hcl',
+                            password: 'cisco'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('All interfaces configured successfully');
+                        } else {
+                            alert(`Error configuring interfaces: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error configuring interfaces');
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching interfaces:', error);
+                alert('Could not fetch available interfaces');
+            });
+        }
+    }
+
+    // Event listener setup
+    document.querySelectorAll('#interface_quantity').forEach(interfaceQuantityField => {
+        const configSection = interfaceQuantityField.closest('.config-section');
+        const switchIp = configSection.querySelector('.show-vlan-btn').dataset.switch;
+        const interfacesContainer = configSection.querySelector('#interfaces-container');
+
+        interfaceQuantityField.addEventListener("change", function () {
+            const quantity = parseInt(this.value) || 0;
+            createInterfaceTable(interfacesContainer, quantity, switchIp);
         });
+    });
     </script>
 </div>
 {% endblock %}

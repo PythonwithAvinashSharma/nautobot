@@ -16,7 +16,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from uuid import UUID
 import jinja2
 from django.template import loader
-from netmiko import ConnectHandler
+from netmiko import ConnectHandler, NetMikoTimeoutException, NetMikoAuthenticationException
 import requests
 from requests.auth import HTTPBasicAuth
 import re
@@ -89,7 +89,12 @@ def configure_arista_vlan(ip, username, password, vlan_id, vlan_name, gateway_ip
             logger.info(f"Configuration successful for {ip}")
             return output
 
-    except Exception as e:
+    except NetMikoTimeoutException as e:
+        logger.error(f"Timeout error configuring VLAN on {ip}: {e}")
+        return str(e)
+    except NetMikoAuthenticationException as e:
+        logger.error(f"Authentication error configuring VLAN on {ip}: {e}")
+        return str(e)
         logger.error(f"Error configuring VLAN on {ip}: {e}")
         return str(e)
 
@@ -425,7 +430,7 @@ def run_command(request):
         with get_device_connection(ip, username, password) as net_connect:
             output = net_connect.send_command(command)
         return JsonResponse({'status': 'success', 'output': output})
-    except Exception as e:
+    except (NetMikoTimeoutException, NetMikoAuthenticationException) as e:
         logger.error(f'Failed to run command: {e}')
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     
@@ -808,7 +813,7 @@ def get_device_status_view(request):
                 'message': 'Invalid JSON'
             }, status=400)
         
-        except Exception as e:
+        except (NetMikoTimeoutException, NetMikoAuthenticationException) as e:
             logger.error(f"Unexpected error in get_device_status_view: {e}")
             return JsonResponse({
                 'status': 'error',
@@ -838,7 +843,7 @@ def get_device_status(ip, username, password, command, vlan_id=None):
                 'status': 'success',
                 'output': output
             }
-    except Exception as e:
+    except (NetMikoTimeoutException, NetMikoAuthenticationException) as e:
         return {
             'status': 'error',
             'error': str(e)
@@ -919,7 +924,7 @@ def create_epg_config(request):
             'pr_number': pr.number
         })
 
-    except Exception as e:
+    except (GithubException, yaml.YAMLError) as e:
         return JsonResponse({
             'success': False,
             'error': str(e)
@@ -927,3 +932,252 @@ def create_epg_config(request):
     
 def tenant_catalog_view(request):
     return render(request, 'naas/aci_tenant_child_objects.html')
+
+@csrf_exempt
+def get_ethernet_interfaces_view(request):
+    """View to retrieve available Ethernet interfaces for a switch"""
+    if request.method == 'POST':
+        try:
+            # Parse incoming JSON data
+            data = json.loads(request.body)
+            switch_ip = data.get('switch_ip')
+            
+            # Use hardcoded or environment-based credentials
+            username = data.get('username', 'hcl')
+            password = data.get('password', 'cisco')
+            
+            # Retrieve Ethernet interfaces
+            result = get_ethernet_interfaces(switch_ip, username, password)
+            
+            # Return response
+            if result['status'] == 'success':
+                return JsonResponse({
+                    'status': 'success',
+                    'interfaces': result['interfaces']
+                })
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': result.get('error', 'Unknown error')
+                }, status=500)
+        
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON'
+            }, status=400)
+        
+        except Exception as e:
+            logger.error(f"Unexpected error in get_ethernet_interfaces_view: {e}")
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Internal server error'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed'
+    }, status=405)
+
+
+def get_ethernet_interfaces(ip, username, password):
+    """Get available Ethernet interfaces for a device"""
+    try:
+        with get_device_connection(ip, username, password) as net_connect:
+            # Run command to get Ethernet interfaces
+            net_connect.enable()
+            output = net_connect.send_command("show interfaces | grep -Eo '^Ethernet[0-9]+'")
+            
+            # Split output into list, removing any whitespace
+            interfaces = [intf.strip() for intf in output.split('\n') if intf.strip()]
+            
+            return {
+                'status': 'success',
+                'interfaces': interfaces
+            }
+    except Exception as e:
+        return {
+            'status': 'error',
+            'error': str(e)
+        }
+    
+
+@csrf_exempt
+def configure_interface_view(request):
+    """View to configure multiple network interfaces in bulk"""
+    if request.method == 'POST':
+        try:
+            # Parse incoming JSON data
+            data = json.loads(request.body)
+            switch_ip = data.get('switch_ip')
+            commands = data.get('commands', [])
+            
+            # Use hardcoded or environment-based credentials
+            username = data.get('username', 'hcl')
+            password = data.get('password', 'cisco')
+            
+            # Configure interfaces in bulk
+            results = bulk_configure_interfaces(switch_ip, username, password, commands)
+            
+            # Check if all configurations were successful
+            if all(result['status'] == 'success' for result in results):
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'All interfaces configured successfully',
+                    'details': results
+                })
+            else:
+                # Collect failed configurations
+                failed_configs = [
+                    result for result in results 
+                    if result['status'] != 'success'
+                ]
+                return JsonResponse({
+                    'status': 'partial_error',
+                    'message': 'Some interfaces failed configuration',
+                    'failed_configs': failed_configs
+                }, status=500)
+        
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON'
+            }, status=400)
+        
+        except Exception as e:
+            logger.error(f"Unexpected error in configure_interfaces_view: {e}")
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Internal server error'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed'
+    }, status=405)
+
+
+def bulk_configure_interfaces(ip, username, password, commands):
+    """
+    Configure multiple network interfaces with given commands
+    Returns a list of configuration results for each interface
+    """
+    results = []
+    try:
+        with get_device_connection(ip, username, password) as net_connect:
+            # First enter privileged mode
+            try:
+                net_connect.enable()
+            except Exception as enable_error:
+                return [{
+                    'status': 'error',
+                    'error': str(enable_error),
+                    'message': 'Failed to enter privileged mode'
+                }]
+            
+            # Group commands by interface
+            interface_configs = {}
+            current_interface = None
+            
+            for command in commands:
+                if command.startswith('interface '):
+                    current_interface = command
+                    interface_configs[current_interface] = [command]
+                elif current_interface:
+                    interface_configs[current_interface].append(command)
+            
+            # Configure each interface with its command group
+            for interface, config_commands in interface_configs.items():
+                try:
+                    # Send all commands for this interface as a single set
+                    output = net_connect.send_config_set(config_commands)
+                    print(f"Configuration output for {interface}:\n{output}")
+                    
+                    # Check for error indicators in output
+                    if "Invalid input" in output or "ERROR" in output:
+                        results.append({
+                            'interface': interface.split(' ', 1)[1],
+                            'status': 'error',
+                            'error': 'Configuration error detected',
+                            'output': output
+                        })
+                    else:
+                        results.append({
+                            'interface': interface.split(' ', 1)[1],
+                            'status': 'success',
+                            'output': output
+                        })
+                
+                except Exception as cmd_error:
+                    results.append({
+                        'interface': interface.split(' ', 1)[1],
+                        'status': 'error',
+                        'error': str(cmd_error),
+                        'commands': config_commands
+                    })
+            
+            try:
+                # Save configuration
+                output = net_connect.save_config()
+                print(f"Save config output: {output}")
+            except Exception as save_error:
+                results.append({
+                    'status': 'error',
+                    'error': str(save_error),
+                    'message': 'Failed to save configuration'
+                })
+        
+        return results
+    
+    except Exception as connection_error:
+        return [{
+            'status': 'error',
+            'error': str(connection_error),
+            'message': 'Failed to establish device connection'
+        }]
+
+@csrf_exempt
+def get_interface_config_view(request):
+    """View to fetch current interface configurations"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            switch_ip = data.get('switch_ip')
+            interfaces = data.get('interfaces', [])
+            username = data.get('username', 'hcl')
+            password = data.get('password', 'cisco')
+
+            # Get current configuration
+            config = get_interface_config(switch_ip, username, password, interfaces)
+            
+            return JsonResponse({
+                'status': 'success',
+                'config': config
+            })
+        except Exception as e:
+            logger.error(f"Error in get_interface_config_view: {e}")
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed'
+    }, status=405)
+
+def get_interface_config(ip, username, password, interfaces):
+    """Fetch current configuration for specified interfaces"""
+    try:
+        with get_device_connection(ip, username, password) as net_connect:
+            # Build show command for multiple interfaces
+            interface_list = ' '.join(interfaces)
+            command = f"show running-config interface {interface_list}"
+            net_connect.enable()
+            # Execute command and get output
+            output = net_connect.send_command(command)
+            
+            return output
+
+    except Exception as e:
+        raise Exception(f"Failed to get interface configuration: {str(e)}")

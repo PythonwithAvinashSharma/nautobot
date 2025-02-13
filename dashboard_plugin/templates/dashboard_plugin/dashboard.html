@@ -9,6 +9,7 @@
 <title>Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     * {
         margin: 0;
@@ -346,7 +347,34 @@
         width: 100%;
         height: 150px;
     }
+    .dashboard-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #ddd;
+    }
 
+    .region-select-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .region-label {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        margin-right: 20px; /* Adjust the margin as needed */
+    }
+
+    .region-select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        font-size: 14px;
+    }
 </style>
 
 <div class="main-content">
@@ -365,45 +393,32 @@
     </div>
 
     <div class="network-status-section">
-        <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 20px;">Network Status</h2>
+        <h2 id="dashboardTitle" style="font-size: 24px; font-weight: 600; margin-bottom: 20px;">Network Health Dashboard</h2>
         
-        <div class="status-grid">
-            <div class="status-card" style="background-color: #DC2626;">
-                <div class="status-value">0</div>
-                <div class="status-label">Down</div>
-            </div>
-            <div class="status-card" style="background-color: #EA580C;">
-                <div class="status-value">3</div>
-                <div class="status-label">Critical</div>
-            </div>
-            <div class="status-card" style="background-color: #FBBF24;">
-                <div class="status-value">431</div>
-                <div class="status-label">Warning</div>
-            </div>
-            <div class="status-card" style="background-color: #E5E7EB;">
-                <div class="status-value">0</div>
-                <div class="status-label">Unknown</div>
-            </div>
-            <div class="status-card" style="background-color: #0D9488;">
-                <div class="status-value">20</div>
-                <div class="status-label">Other</div>
-            </div>
-            <div class="status-card" style="background-color: #16A34A;">
-                <div class="status-value">719</div>
-                <div class="status-label">Up</div>
+        <div class="dashboard-header">
+            <div class="region-select-container">
+                <label for="regionSelect" class="region-label">Select Region:</label>
+                <select id="regionSelect" onchange="updateDashboard()">
+                    <option value="Overall">All</option>
+                    <option value="EMEA">EMEA</option>
+                    <option value="NA">NA</option>
+                    <option value="APAC">APAC</option>
+                </select>
             </div>
         </div>
-    </div>
-
+    
+    <div class="status-grid" id="statusGrid"></div>
+    
     <div class="charts-grid">
         <div class="chart-container">
-            <h3>Models Summary (Pie)</h3>
+            <h3>Site-wise Summary (Pie)</h3>
             <canvas id="pieChart"></canvas>
         </div>
         <div class="chart-container">
-            <h3>Models Summary (Bar)</h3>
+            <h3>Site-wise Summary (Bar)</h3>
             <canvas id="barChart"></canvas>
         </div>
+    </div>
     </div>
 
     <div class="log-alerts">
@@ -627,70 +642,101 @@
 </div>
 
 <script>
-    // Initialize pie chart
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Devices', 'IP Addresses', 'Prefixes', 'Racks', 'Sites', 'Circuits', 'VLANs'],
-            datasets: [{
-                data: [320, 1958, 1184, 219, 35, 150, 75],
-                backgroundColor: [
-                    '#34D399', // Devices
-                    '#60A5FA', // IP Addresses
-                    '#FCD34D', // Prefixes
-                    '#A78BFA', // Racks
-                    '#F87171', // Sites
-                    '#FBBF24', // Circuits
-                    '#10B981'  // VLANs
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
+
+const data = {
+    EMEA: {
+        "London (EMEA-UK-LON-B1)": { down: 1, critical: 8, warning: 150, unknown: 2, other: 10, up: 800 },
+        "Berlin (EMEA-GER-BER-B1)": { down: 0, critical: 4, warning: 100, unknown: 1, other: 5, up: 500 },
+        "Paris (EMEA-FR-PAR-B1)": { down: 2, critical: 6, warning: 120, unknown: 1, other: 7, up: 600 }
+    },
+    NA: {
+        "New York (NA-USA-NYC-B1)": { down: 0, critical: 5, warning: 90, unknown: 1, other: 4, up: 450 },
+        "Toronto (NA-CAN-TOR-B1)": { down: 1, critical: 3, warning: 80, unknown: 2, other: 6, up: 400 },
+        "Chicago (NA-USA-CHI-B1)": { down: 0, critical: 4, warning: 100, unknown: 1, other: 5, up: 500 }
+    },
+    APAC: {
+        "Tokyo (APAC-JPN-TYO-B1)": { down: 1, critical: 3, warning: 110, unknown: 2, other: 6, up: 550 },
+        "Sydney (APAC-AUS-SYD-B1)": { down: 0, critical: 2, warning: 95, unknown: 1, other: 3, up: 500 },
+        "Mumbai (APAC-IND-MUM-B1)": { down: 1, critical: 5, warning: 120, unknown: 2, other: 8, up: 600 }
+    }
+};
+
+data.Overall = Object.entries(data).reduce((acc, [region, sites]) => {
+    Object.entries(sites).forEach(([site, stats]) => {
+        acc[site] = stats;
+    });
+    return acc;
+}, {});
+
+let pieChart, barChart;
+
+function updateDashboard() {
+    const region = document.getElementById('regionSelect').value;
+    document.getElementById('dashboardTitle').textContent = `Network Health Dashboard - ${region}`;
+    
+    const statusGrid = document.getElementById('statusGrid');
+    statusGrid.innerHTML = '';
+
+    const regionData = data[region];
+    const aggregatedData = { down: 0, critical: 0, warning: 0, unknown: 0, other: 0, up: 0 };
+    
+    for (const site in regionData) {
+        for (const key in regionData[site]) {
+            aggregatedData[key] += regionData[site][key];
         }
+    }
+
+    const statusLabels = ['Down', 'Critical', 'Warning', 'Unknown', 'Other', 'Up'];
+    const statusColors = ['#DC2626', '#EA580C', '#FBBF24', '#E5E7EB', '#0D9488', '#16A34A'];
+
+    statusLabels.forEach((label, index) => {
+        const card = document.createElement('div');
+        card.className = 'status-card';
+        card.style.backgroundColor = statusColors[index];
+        card.innerHTML = `<div class="status-value">${aggregatedData[label.toLowerCase()]}</div><div class="status-label">${label}</div>`;
+        statusGrid.appendChild(card);
     });
 
-    // Initialize horizontal bar chart
+    updateCharts(regionData);
+}
+
+function updateCharts(regionData) {
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
     const barCtx = document.getElementById('barChart').getContext('2d');
-    new Chart(barCtx, {
-        type: 'bar',
+
+    if (pieChart) pieChart.destroy();
+    if (barChart) barChart.destroy();
+
+    const siteLabels = Object.keys(regionData);
+    const siteUpValues = siteLabels.map(site => regionData[site].up);
+
+    pieChart = new Chart(pieCtx, {
+        type: 'pie',
         data: {
-            labels: ['Devices', 'IP Addresses', 'Prefixes', 'Racks', 'Sites', 'Circuits', 'VLANs'],
+            labels: siteLabels,
             datasets: [{
-                label: 'Total Count',
-                data: [320, 1958, 1184, 219, 35, 150, 75],
-                backgroundColor: [
-                    '#34D399', // Devices
-                    '#60A5FA', // IP Addresses
-                    '#FCD34D', // Prefixes
-                    '#A78BFA', // Racks
-                    '#F87171', // Sites
-                    '#FBBF24', // Circuits
-                    '#10B981'  // VLANs
-                ]
+                data: siteUpValues,
+                backgroundColor: ['#34D399', '#60A5FA', '#FCD34D', '#A78BFA', '#F87171']
             }]
         },
-        options: {
-            indexAxis: 'y', // Make the bar chart horizontal
-            responsive: true,
-            scales: {
-                x: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
+        options: { responsive: true }
     });
+
+    barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: siteLabels,
+            datasets: [{
+                label: 'Up Status per Site',
+                data: siteUpValues,
+                backgroundColor: '#34D399'
+            }]
+        },
+        options: { indexAxis: 'y', responsive: true }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', updateDashboard);
 
     // Handle dashboard change
     function handleDashboardChange() {
