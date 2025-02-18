@@ -527,6 +527,9 @@ def aci_config(request):
 def aci_templates_list(request):
     return render(request, 'naas/aci_list_templates.html')
 
+def arista_cn_templates_list(request):
+    return render(request, 'naas/arista_cn_templates_list.html')
+
 def aci_vlan_to_port_form(request):
     if request.method == 'POST':
         form = ACIConfigForm(request.POST)

@@ -1,0 +1,492 @@
+{% load static %}
+{% load registry %}
+{% load helpers %}
+{% registry %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nxt-Gen Networks Automation Platform</title>
+    <link rel="shortcut icon" href="{% custom_branding_or_static 'favicon' 'img/favicon.ico' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+        --sidebar-width: 250px;
+        --sidebar-collapsed-width: 70px;
+        --primary-color: #083c89;
+        --secondary-color: #6610f2;
+    }
+
+    body {
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+
+    #sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(to bottom, var(--secondary-color), var(--primary-color));
+        min-height: 100vh;
+        position: fixed;
+        transition: width 0.3s ease;
+        z-index: 1000;
+        height: 100vh; /* Explicitly set height */
+        display: flex;
+        flex-direction: column;
+    }
+
+    #sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    #sidebar.collapsed .logo-container img {
+        width: 40px;
+        height: 40px;
+    }
+
+    #content {
+        margin-left: calc(var(--sidebar-width) + 6px);
+    }
+
+    #content.expanded {
+        margin-left: calc(var(--sidebar-collapsed-width) + 6px);
+    }
+
+    .logo-container {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .logo-text {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 0.8rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .nav-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link i {
+        font-size: 1.2rem;
+        min-width: 24px;
+    }
+
+    .nav-wrapper {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 60px;
+        height: calc(100vh - 60px); /* Subtract system status height */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+
+    .nav-wrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .nav-wrapper::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .nav-wrapper::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    .menu-text {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    /* .collapsed .menu-text {
+        display: none;
+    } */
+
+    .welcome-section {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .feature-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+        background: white;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    #toggleSidebar {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 0.5rem;
+        cursor: pointer;
+        border-radius: 4px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    #toggleSidebar:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    #sidebar.collapsed #toggleSidebar:hover {
+        background: var(--secondary-color);
+    }
+
+    #sidebar.collapsed .nav-link .menu-text {
+        display: none;
+    }
+
+    #sidebar.collapsed .nav-link {
+        justify-content: center;
+        padding: 0.8rem;
+    }
+
+    #sidebar.collapsed .nav-link i {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    #sidebar.collapsed .nav-dropdown-menu {
+        position: absolute;
+        left: 100%;
+        top: auto;
+        width: 200px;
+        margin-top: -40px;
+        background: var(--primary-color);
+        border-radius: 0 4px 4px 0;
+        box-shadow: 4px 0 5px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+
+    #sidebar.collapsed .nav-dropdown-menu.show {
+        display: block;
+    }
+
+    /* Rotate icon when sidebar is collapsed */
+    #sidebar.collapsed #toggleSidebar i {
+        transform: rotate(180deg);
+    }
+
+    /* Add transition for smooth icon rotation */
+    #toggleSidebar i {
+        transition: transform 0.3s ease;
+    }
+
+    .system-status {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        min-height: 60px;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        color: white;
+        z-index: 1001;
+    }
+
+    .collapsed .system-status {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    .nav-dropdown-menu {
+        list-style: none;
+        padding-left: 0;
+        margin-left: 2.5rem;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .nav-dropdown-menu li {
+        margin: 0;
+    }
+
+    .nav-dropdown-menu li a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        padding: 0.8rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .nav-dropdown-menu li a:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-dropdown-menu .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 0.5rem 0;
+    }
+
+    .nav-dropdown-menu.collapsing {
+        transition: height 0.3s ease;
+    }
+
+    .nav-link[data-bs-toggle="collapse"] {
+        position: relative;
+    }
+
+    .nav-link[data-bs-toggle="collapse"]::after {
+        content: '\F282';
+        font-family: bootstrap-icons;
+        position: absolute;
+        right: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    #sidebar.collapsed .nav-dropdown-menu li a {
+        padding: 0.8rem 1rem;
+    }
+
+    #sidebar.collapsed .nav-dropdown-menu li a .menu-text {
+        display: inline-block;
+    }
+
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <div class="logo-container">
+            <div class="d-flex align-items-center">
+                <img src="{% custom_branding_or_static 'logo' 'img/hcl.jpg' %}" alt="HCLTech" height="40" class="me-2">
+            </div>
+            <button id="toggleSidebar" class="d-flex align-items-center">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <nav class="mt-4 nav-wrapper">
+            <div class="nav flex-column">
+                <a href="{% url 'home' %}" class="nav-link active">
+                    <i class="bi bi-house-door"></i>
+                    <span class="menu-text">HOME</span>
+                </a>
+                <a href="{% url 'cio_view' %}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span class="menu-text">CIO/CTO VIEW</span>
+                </a>
+                <a href="{% url 'sot_view' %}" class="nav-link">
+                    <i class="bi bi-database"></i>
+                    <span class="menu-text">SoT VIEW</span>
+                </a>
+                <a href="{% url 'config_mgmt' %}" class="nav-link">
+                    <i class="bi bi-gear"></i>
+                    <span class="menu-text">WORKFLOW</span>
+                </a>
+                <a href="{% url 'nw_catalog' %}" class="nav-link">
+                    <i class="bi bi-collection"></i>
+                    <span class="menu-text">NW CATALOG</span>
+                </a>
+                <a href="{% url 'digital_twin' %}" class="nav-link">
+                    <i class="bi bi-box"></i>
+                    <span class="menu-text">DIGITAL TWIN</span>
+                </a>
+                <a href="{% url 'genai' %}" class="nav-link">
+                    <i class="bi bi-stars"></i>
+                    <span class="menu-text">GenAI</span>
+                </a>
+                <a href="{% url 'integration' %}" class="nav-link">
+                    <i class="bi bi-diagram-3"></i>
+                    <span class="menu-text">INTEGRATION</span>
+                </a>
+                <a href="{% url 'health_dashboard' %}" class="nav-link">
+                    <i class="bi bi-activity"></i>
+                    <span class="menu-text">NW HEALTH DASHBOARD</span>
+                </a>
+                <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#adminDropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle"></i>
+                    <span class="menu-text">Admin</span>
+                </a>
+                <ul class="collapse nav-dropdown-menu" id="adminDropdown">
+                    <li>
+                        <a href="{% url 'about' %}">
+                            <i class="bi bi-info-circle"></i>
+                            <span class="menu-text">About</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user:profile' %}">
+                            <i class="bi bi-person-square"></i>
+                            <span class="menu-text">Profile</span>
+                        </a>
+                    </li>
+                    {% if request.user.is_staff %}
+                    <li>
+                        <a href="{% url 'worker_status' %}">
+                            <i class="bi bi-hdd-network"></i>
+                            <span class="menu-text">Worker Status</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin:index' %}">
+                            <i class="bi bi-gear-fill"></i>
+                            <span class="menu-text">Admin</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="divider"></li>
+                    <li>
+                        <a href="{% url 'logout' %}">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="menu-text">Log out</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="system-status">
+            <i class="bi bi-circle-fill text-success"></i>
+            <span class="menu-text ms-2">System Online</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content">
+        <div class="container-fluid p-4">
+            <div class="welcome-section">
+                <h2>Welcome to Nxt-Gen Networks Automation Platform</h2>
+                <p class="mb-0">Transform your network operations with intelligent automation. Streamline configurations, enhance visibility, and accelerate network management.</p>
+            </div>
+
+            <h3 class="mb-4">Key Features</h3>
+            <div class="row g-4">
+                <!-- Configuration Management -->
+                <div class="col-md-6">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <i class="bi bi-gear feature-icon mb-3"></i>
+                            <h5 class="card-title">Configuration Management</h5>
+                            <p class="card-text">Centralized control and automation of network configurations with version control and compliance tracking.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Twin -->
+                <div class="col-md-6">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <i class="bi bi-box feature-icon mb-3"></i>
+                            <h5 class="card-title">Digital Twin</h5>
+                            <p class="card-text">Virtual replica of your network infrastructure for testing, simulation, and predictive analysis.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Catalog -->
+                <div class="col-md-6">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <i class="bi bi-collection feature-icon mb-3"></i>
+                            <h5 class="card-title">Network Catalog</h5>
+                            <p class="card-text">Comprehensive inventory of network assets, services, and dependencies in a unified repository.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Dashboard -->
+                <div class="col-md-6">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <i class="bi bi-activity feature-icon mb-3"></i>
+                            <h5 class="card-title">Health Dashboard</h5>
+                            <p class="card-text">Real-time monitoring and visualization of network performance, health, and status.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const adminDropdown = document.getElementById('adminDropdown');
+            sidebar.classList.toggle('collapsed');
+            document.getElementById('content').classList.toggle('expanded');
+            if (sidebar.classList.contains('collapsed')) {
+                adminDropdown.classList.remove('show');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const adminDropdown = document.getElementById('adminDropdown');
+
+            // Handle hover for admin dropdown when sidebar is collapsed
+            if (sidebar.classList.contains('collapsed')) {
+                const adminLink = adminDropdown.previousElementSibling;
+                
+                adminLink.addEventListener('mouseenter', function() {
+                    if (sidebar.classList.contains('collapsed')) {
+                        adminDropdown.classList.add('show');
+                    }
+                });
+
+                adminLink.addEventListener('mouseleave', function(e) {
+                    if (sidebar.classList.contains('collapsed') && !adminDropdown.contains(e.relatedTarget)) {
+                        setTimeout(() => {
+                            if (!adminDropdown.matches(':hover')) {
+                                adminDropdown.classList.remove('show');
+                            }
+                        }, 100);
+                    }
+                });
+
+                adminDropdown.addEventListener('mouseleave', function() {
+                    if (sidebar.classList.contains('collapsed')) {
+                        adminDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

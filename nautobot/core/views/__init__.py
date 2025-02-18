@@ -55,8 +55,83 @@ from nautobot.extras.registry import registry
 
 logger = logging.getLogger(__name__)
 
-
 class HomeView(AccessMixin, TemplateView):
+    template_name = "landing_page.html"
+
+    def render_additional_content(self, request, context, details):
+        # Collect all custom data using callback functions.
+        for key, data in details.get("custom_data", {}).items():
+            if callable(data):
+                context[key] = data(request)
+            else:
+                context[key] = data
+
+        # Create standalone template
+        path = f'{details["template_path"]}{details["custom_template"]}'
+        if os.path.isfile(path):
+            with open(path, "r") as f:
+                html = f.read()
+        else:
+            raise TemplateDoesNotExist(path)
+
+        template = Template(html)
+
+        additional_context = RequestContext(request, context)
+        return template.render(additional_context)
+
+    def get(self, request, *args, **kwargs):
+        # Redirect user to login page if not authenticated
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        # Check whether a new release is available. (Only for staff/superusers.)
+        new_release = None
+        if request.user.is_staff or request.user.is_superuser:
+            latest_release, release_url = get_latest_release()
+            if isinstance(latest_release, version.Version):
+                current_version = version.parse(settings.VERSION)
+                if latest_release > current_version:
+                    new_release = {
+                        "version": str(latest_release),
+                        "url": release_url,
+                    }
+
+        context = self.get_context_data()
+        context.update(
+            {
+                "search_form": SearchForm(),
+                "new_release": new_release,
+            }
+        )
+
+        # Loop over homepage layout to collect all additional data and create custom panels.
+        for panel_details in registry["homepage_layout"]["panels"].values():
+            if panel_details.get("custom_template"):
+                panel_details["rendered_html"] = self.render_additional_content(request, context, panel_details)
+
+            else:
+                for item_details in panel_details["items"].values():
+                    if item_details.get("custom_template"):
+                        item_details["rendered_html"] = self.render_additional_content(request, context, item_details)
+
+                    elif item_details.get("model"):
+                        # If there is a model attached collect object count.
+                        item_details["count"] = item_details["model"].objects.restrict(request.user, "view").count()
+
+                    elif item_details.get("items"):
+                        # Collect count for grouped objects.
+                        for group_item_details in item_details["items"].values():
+                            if group_item_details.get("custom_template"):
+                                group_item_details["rendered_html"] = self.render_additional_content(
+                                    request, context, group_item_details
+                                )
+                            elif group_item_details.get("model"):
+                                group_item_details["count"] = (
+                                    group_item_details["model"].objects.restrict(request.user, "view").count()
+                                )
+
+        return self.render_to_response(context)
+
+class SOTView(AccessMixin, TemplateView):
     template_name = "home.html"
 
     def render_additional_content(self, request, context, details):
@@ -526,3 +601,24 @@ class RenderJinjaView(LoginRequiredMixin, TemplateView):
     """Render a Jinja template with context data."""
 
     template_name = "utilities/render_jinja2.html"
+
+class CIOview(AccessMixin, TemplateView):
+    template_name = "cio.html" 
+
+class ConfigManagement(AccessMixin, TemplateView):
+    template_name = "workflow.html" 
+
+class NWCatelog(AccessMixin, TemplateView):
+    template_name = "naas/switches.html" 
+
+class DigitalTwin(AccessMixin, TemplateView):
+    template_name = "digital_twin.html" 
+
+class GenAI(AccessMixin, TemplateView):
+    template_name = "gen_ai.html" 
+
+class Integration(AccessMixin, TemplateView):
+    template_name = "integration.html"  
+
+class HealthDashboard(AccessMixin, TemplateView):
+    template_name = "dashboard_plugin/dashboard.html"

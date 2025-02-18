@@ -652,6 +652,7 @@ td span.hover_copy:hover .hover_copy_button {
 .navbar-fixed-left > .container-fluid {
     padding-left: 0;
     padding-right: 0;
+    background-color: #083c89;
 }
 
 .navbar-fixed-left .navbar-header {
@@ -744,12 +745,13 @@ td span.hover_copy:hover .hover_copy_button {
 
 .navbar-fixed-left .navbar-nav:last-of-type > .dropdown > .dropdown-toggle {
     text-transform: uppercase;
+    background-color: #062d67;
 }
 
 /* Navbar Dropdown Behavior */
 .navbar-fixed-left .navbar-nav > .dropdown > .nav-dropdown-menu {
     color: #999999 !important;
-    background-color: #151e2a;
+    background-color: #083c89;
     position: relative;
     padding: 5px 0;
     padding-left: 0;
@@ -851,7 +853,7 @@ td span.hover_copy:hover .hover_copy_button {
 }
 
 .navbar-inverse .navbar-nav > .dropdown > .nav-dropdown-menu {
-    background-color: #151e2a;
+    background-color: #083c89;
 }
 
 .nav-dropdown-menu .mdi {

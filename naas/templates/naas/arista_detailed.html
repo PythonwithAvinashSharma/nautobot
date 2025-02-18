@@ -6,7 +6,7 @@
 
 <style>
     .container {
-        padding: 24px;
+        padding: 20px;
         font-family: system-ui, -apple-system, sans-serif;
     }
     
@@ -159,8 +159,8 @@
             name: 'Spine-Leaf DC',
             category: 'Data Center',
             description: 'Spine-Leaf Architecture with CloudVision',
-            templates: 42,
-            active: 186,
+            // templates: 42,
+            // active: 186,
             health: '98%',
             healthClass: 'health-good',
             lastUpdated: '1 hour ago'
@@ -169,8 +169,8 @@
             name: 'CloudEOS',
             category: 'Cloud',
             description: 'Multi-Cloud Networking',
-            templates: 35,
-            active: 142,
+            // templates: 35,
+            // active: 142,
             health: '96%',
             healthClass: 'health-good',
             lastUpdated: '30 minutes ago'
@@ -179,18 +179,19 @@
             name: 'Campus Network',
             category: 'Enterprise',
             description: 'Campus Switching and Routing',
-            templates: 28,
-            active: 134,
+            // templates: 28,
+            // active: 134,
             health: '95%',
             healthClass: 'health-warning',
-            lastUpdated: '2 hours ago'
+            lastUpdated: '2 hours ago',
+            url: '{% url "plugins:naas:arista_cn_templates_list" %}'
         },
         {
             name: 'CloudVision',
             category: 'Management',
             description: 'Network Management and Automation',
-            templates: 31,
-            active: 158,
+            // templates: 31,
+            // active: 158,
             health: '97%',
             healthClass: 'health-good',
             lastUpdated: '45 minutes ago'
@@ -199,8 +200,8 @@
             name: 'EOS Security',
             category: 'Security',
             description: 'Network Security and Segmentation',
-            templates: 25,
-            active: 112,
+            // templates: 25,
+            // active: 112,
             health: '94%',
             healthClass: 'health-warning',
             lastUpdated: '3 hours ago'
@@ -219,21 +220,11 @@
                     <span class="health-badge ${solution.healthClass}">${solution.health} Health</span>
                 </div>
                 <div class="card-content">
-                    <div class="metrics">
-                        <div class="metric">
-                            <span class="metric-label">Templates</span>
-                            <span class="metric-value">${solution.templates}</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Active</span>
-                            <span class="metric-value metric-active">${solution.active}</span>
-                        </div>
-                    </div>
                     <div class="last-updated">Last used ${solution.lastUpdated}</div>
-                    <button class="view-btn">
+                    <a href="${solution.url || '#'}" class="view-btn">
                         View Templates
                         <span style="font-size: 18px">⚙️</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         `;

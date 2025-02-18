@@ -41,12 +41,16 @@ from nautobot.ipam.models import VLAN, Prefix
 import uuid
 
 class VLANConfigurationForm(forms.Form):
+
+    unused_tag = Tag.objects.get(name="unused")
+    active_status = Status.objects.get(name="Active")
+    
     switch_ip = forms.GenericIPAddressField(
         protocol='IPv4',
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Switch IP'})
     )
     vlan = forms.ModelChoiceField(
-        queryset=VLAN.objects.all(),
+        queryset=VLAN.objects.filter(tags=unused_tag, status=active_status),
         widget=forms.Select(attrs={'class': 'form-control vlan-select'})
     )
     admin_state = forms.ChoiceField(
