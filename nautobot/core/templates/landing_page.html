@@ -114,9 +114,13 @@
         overflow: hidden;
     }
 
-    /* .collapsed .menu-text {
+    .collapsed .menu-text {
         display: none;
-    } */
+    }
+
+    .collapsed .logo-text {
+        display: none;
+    }
 
     .welcome-section {
         background-color: var(--primary-color);
@@ -293,7 +297,8 @@
     <div id="sidebar">
         <div class="logo-container">
             <div class="d-flex align-items-center">
-                <img src="{% custom_branding_or_static 'logo' 'img/hcl.jpg' %}" alt="HCLTech" height="40" class="me-2">
+                <!-- <img src="{% custom_branding_or_static 'logo' 'img/hcl.jpg' %}" alt="HCLTech" height="40" class="me-2"> -->
+                <h1 class="logo-text">Internal Developer Portal</h1>
             </div>
             <button id="toggleSidebar" class="d-flex align-items-center">
                 <i class="bi bi-list"></i>
