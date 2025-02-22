@@ -1049,7 +1049,7 @@ BRANDING_FILEPATHS = {
 }
 
 # Title to use in place of "Nautobot"
-BRANDING_TITLE = os.getenv("NAUTOBOT_BRANDING_TITLE", "HCLTech Automation Platform")
+BRANDING_TITLE = os.getenv("NAUTOBOT_BRANDING_TITLE", "Nxt Gen Automation Platform")
 
 # Prepended to CSV, YAML and export template filenames (i.e. `nautobot_device.yml`)
 BRANDING_PREPENDED_FILENAME = os.getenv("NAUTOBOT_BRANDING_PREPENDED_FILENAME", "nautobot_")

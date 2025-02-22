@@ -6,7 +6,7 @@ class DashboardPluginConfig(NautobotAppConfig):
     verbose_name = "Dashboard Plugin"
     description = "Custom dashboard for device and KPI health."
     author = "Avinash Sharma"
-    author_email = "avinash_sharma@hcltech.com"
+    author_email = "avinash.jecrc@gmail.com"
     base_url = "dashboard-plugin"
     required_settings = []
     default_settings = {}

@@ -10,7 +10,7 @@ class NaaSConfig(NautobotAppConfig):
     verbose_name = "NaaS"
     description = "NaaS can replace hardware-centric VPNs, load balancers, firewall appliances, and Multiprotocol Label Switching (MPLS) connections.."
     author = "Avinash Sharma"
-    author_email = "avinash_sharma@hcltech.com"
+    author_email = "avinash.jecrc@gmail.com"
     base_url = "naas"
     required_settings = []
     default_settings = {}
