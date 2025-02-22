@@ -1,0 +1,354 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home - HCLTech Automation Platform</title>
+    
+
+
+
+    <link rel="stylesheet" id="template-theme"
+          href="/template.css">
+    <link rel="stylesheet"
+          href="/static/bootstrap-3.4.1-dist/css/bootstrap.min.css"
+          onerror="window.location='/media-failure/?filename=bootstrap-3.4.1-dist/css/bootstrap.min.css'">
+    <link rel="stylesheet"
+          href="/static/materialdesignicons-7.4.47/css/materialdesignicons.min.css"
+          onerror="window.location='/media-failure/?filename=materialdesignicons-7.4.47/css/materialdesignicons.min.css'">
+    <link rel="stylesheet"
+          href="/static/jquery-ui-1.13.2/jquery-ui.min.css"
+          onerror="window.location='/media-failure/?filename=jquery-ui-1.13.2/jquery-ui.min.css'">
+    <link rel="stylesheet"
+          href="/static/select2-4.0.13/select2.min.css"
+          onerror="window.location='/media-failure/?filename=select2-4.0.13/select2.min.css'">
+    <link rel="stylesheet"
+          href="/static/select2-bootstrap-0.1.0-beta.10/select2-bootstrap.min.css"
+          onerror="window.location='/media-failure/?filename=select2-bootstrap-0.1.0-beta.10/select2-bootstrap.min.css'">
+    <link rel="stylesheet"
+          href="/static/flatpickr-4.6.9/themes/light.min.css"
+          onerror="window.location='/media-failure/?filename=flatpickr-4.6.9/themes/light.min.css'">
+    <link rel="stylesheet"
+          href="/static/highlight.js-11.9.0/github.min.css"
+          onerror="window.location='/media-failure/?filename=highlight.js-11.9.0/github.min.css'" >
+    <link rel="stylesheet"
+          href="/static/highlight.js-11.9.0/github-dark.min.css"
+          onerror="window.location='/media-failure/?filename=highlight.js-11.9.0/github-dark.min.css'" disabled="disabled" />
+    <link rel="stylesheet" id="dark-theme"
+          href="/static/css/dark.css?version=2.3.13b1"
+          onerror="window.location='/media-failure/?filename=css/dark.css'" disabled="disabled" />
+    <link rel="stylesheet" id="base-theme"
+          href="/static/css/base.css?version=2.3.13b1"
+          onerror="window.location='/media-failure/?filename=css/base.css'">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/img/hcl-blue.png?version=2.3.13b1">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/hcl-blue.png?version=2.3.13b1">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/hcl-blue.png?version=2.3.13b1">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/img/hcl-blue.png?version=2.3.13b1">
+    <link rel="mask-icon" type="image/png" color="#0097ff" href="/static/img/hcl-blue.png?version=2.3.13b1">
+    <link rel="shortcut icon" href="/static/img/favicon.ico?version=2.3.13b1">
+    <meta name="msapplication-TileColor" content="#2d89ef">
+    <meta name="theme-color" content="#ffffff">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    
+
+    
+<style>
+    .style-line {
+        overflow: hidden;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .style-line span {
+        text-align: center;
+        font-size: 15px;
+        color: #acacac;
+        display: inline-block;
+        position: relative;
+        padding: 0 25px;
+        z-index: 1;
+    }
+    .style-line span:before {
+        display: inline-block;
+        content: "";
+        height: 2px;
+        width: 100%;
+        background-color: #cfcfcf;
+        left: 100%;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        transform: translateY(-50%);
+        position: absolute;
+        z-index: 1;
+    }
+    .style-line span:after {
+        display: inline-block;
+        content: "";
+        height: 2px;
+        width: 100%;
+        background-color: #cfcfcf;
+        right: 100%;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        transform: translateY(-50%);
+        position: absolute;
+        z-index: 1;
+    }
+</style>
+
+</head>
+<body>
+    
+
+
+
+
+<nav class="navbar navbar-default navbar-fixed-left navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">
+		    <!-- <img src="/static/img/hcl.jpg?version=2.3.13b1" height="70" width="200" /> -->
+            <img src="/static/img/idp.png?version=2.3.13b1" height="70" width="200" />
+            </a>
+        </div>
+
+        <div id="navbar">
+            
+
+            <ul class="nav navbar-nav">
+                
+                    <li>
+                        <a href="/login/?next=/login/%3Fnext%3D/">
+                            <i class="mdi mdi-login"></i> Log in
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Collapsible button -->
+<button type="button" class="btn btn-xs navbar-toggler" style="color: white; background-color: #a784ff; border-color: transparent;" aria-label="Collapse navbar">
+    <span class="mdi mdi-chevron-up mdi-rotate-270 navbar-toggler-arrow"></span>
+</button>
+
+    <div class="container-fluid wrapper" id="main-content">
+        <div class="banner-alert-area">
+        
+        
+        
+
+
+        
+        </div>
+        
+        
+<div class="row" style="margin-top: 150px;">
+    <div class="col-sm-4 col-sm-offset-4">
+        
+        
+            <div class="panel panel-danger">
+                <div class="panel-heading"><strong>Errors</strong></div>
+                <div class="panel-body">
+                    <ul class="errorlist nonfield"><li>Please enter a correct username and password. Note that both fields may be case-sensitive.</li></ul>
+                </div>
+            </div>
+        
+        <form action="/login/" method="post" class="form form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Log In</strong>
+                </div>
+                <div class="panel-body">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="J2acFJGWZ369BWiKMrYCeDTBwmRu1tCTZtigShGv9wT1vwfWjPDx9Fsm0D4ENwUu">
+                    <input type="hidden" name="next" value="/" />
+                    
+                    
+
+
+    
+        
+            
+                
+
+<div class="form-group">
+    
+        <label class="col-md-3 control-label required" for="id_username">Username</label>
+        <div class="col-md-9">
+            <input type="text" name="username" value="admin" autofocus autocapitalize="none" autocomplete="username" maxlength="150" class="form-control" required placeholder="" id="id_username">
+            
+            
+    
+    
+    </div>
+</div>
+
+            
+        
+    
+
+    
+        
+            
+                
+
+<div class="form-group">
+    
+        <label class="col-md-3 control-label required" for="id_password">Password</label>
+        <div class="col-md-9">
+            <input type="password" name="password" autocomplete="current-password" class="form-control" required placeholder="" id="id_password">
+            
+            
+    
+    
+    </div>
+</div>
+
+            
+        
+    
+
+
+                </div>
+                <div class="panel-footer text-right">
+                    <button type="submit" class="btn btn-primary">Log In</button>
+                </div>
+            </div>
+        </form>
+        
+    </div>
+</div>
+
+        <div class="push"></div>
+        
+    </div>
+    
+
+
+<!-- Theme Setting Modal -->
+<div id="theme_modal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Select A Theme</h4>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive-md">
+                    <table class="table theme-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-center">Light</th>
+                                <th scope="col" class="text-center">Dark</th>
+                                <th scope="col" class="text-center">System</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="td-light-theme"><a href="#" onclick="toggleTheme('light');" id="btn-light-theme"><img src="/static/img/light-theme.png" id="img-light-theme" alt="Light" height="170" width="232" class="img-responsive" /></a></td>
+                                <td id="td-dark-theme"><a href="#" onclick="toggleTheme('dark');" id="btn-dark-theme"><img src="/static/img/dark-theme.png" id="img-dark-theme" alt="Dark" height="170" width="232" class="img-responsive" /></a></td>
+                                <td id="td-system-theme"><a href="#" onclick="toggleTheme('system');" id="btn-system-theme"><img src="/static/img/system-theme.png" id="img-system-theme" alt="Toggle" height="170" width="232" class="img-responsive" /></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="dismiss-modal-theme" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+    
+
+
+
+<style>
+    /* Styles for viewports narrower than 1232px, i.e. bootstrap 'xs' and 'sm' layouts */
+    @media (max-width: 1232px) {
+        .footer-col-1, .footer-col-2, .footer-col-3 {
+            text-align: center !important;
+        }
+    }
+    @media (max-width: 767px) {
+        .footer .footer-links {
+            white-space: normal !important;
+        }
+    }
+
+</style>
+    <footer class="footer" id="footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-4 col-lg-4 col-md-3 col-sm-12 col-xs-12 text-left footer-col-1 no-wrap">
+                    
+                </div>
+                <div class="col-xl-4 col-lg-3 col-md-3 col-sm-12 col-xs-12 text-center footer-col-2">
+                    <p class="text-muted">HCLTech Automation Platform</p>
+                </div>
+                <div class="col-xl-4 col-lg-5 col-md-6 col-sm-12 col-xs-12 text-right footer-col-3 noprint">
+                    
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    
+
+
+
+<script src="/static/jquery/jquery-3.7.1.min.js"
+        onerror="window.location='/media-failure/?filename=jquery/jquery-3.7.1.min.js'"></script>
+<script src="/static/jquery-ui-1.13.2/jquery-ui.min.js"
+        onerror="window.location='/media-failure/?filename=jquery-ui-1.13.2/jquery-ui.min.js'"></script>
+<script src="/static/bootstrap-3.4.1-dist/js/bootstrap.min.js"
+        onerror="window.location='/media-failure/?filename=bootstrap-3.4.1-dist/js/bootstrap.min.js'"></script>
+<script src="/static/select2-4.0.13/select2.min.js"
+        onerror="window.location='/media-failure/?filename=select2-4.0.13/select2.min.js'"></script>
+<script src="/static/clipboard.js-2.0.9/clipboard.min.js"
+        onerror="window.location='/media-failure/?filename=clipboard.js-2.0.9/clipboard.min.js'"></script>
+<script src="/static/flatpickr-4.6.9/flatpickr.min.js"
+        onerror="window.location='/media-failure/?filename=flatpickr-4.6.9/flatpickr.min.js'"></script>
+<script src="/static/highlight.js-11.9.0/highlight.min.js"
+        onerror="window.location='/media-failure/?filename=highlight.js-11.9.0/highlight.min.js'"></script>
+<script src="/static/js/forms.js?version=2.3.13b1"
+        onerror="window.location='/media-failure/?filename=js/forms.js'"></script>
+<script src="/static/js/nav_menu.js?version=2.3.13b1"
+        onerror="window.location='/media-failure/?filename=js/nav_menu.js'"></script>
+<script src="/static/js/theme.js?version=2.3.13b1"
+        onerror="window.location='/media-failure/?filename=js/theme.js'"></script>
+<script src="/static/js/table_sorting_indicator.js?version=2.3.13b1"
+        onerror="window.location='/media-failure/?filename=js/table_sorting_indicator.js'"></script>
+<script src="/static/js/dropdown.js?version=2.3.13b1"
+        onerror="window.location='/media-failure/?filename=js/dropdown.js'"></script>
+<script type="text/javascript">
+    var nautobot_api_path = "/api/";
+    var nautobot_csrf_token = "J2acFJGWZ369BWiKMrYCeDTBwmRu1tCTZtigShGv9wT1vwfWjPDx9Fsm0D4ENwUu";
+    var loading = $(".loading");
+    $(document).ajaxStart(function() {
+        loading.show();
+    }).ajaxStop(function() {
+        loading.hide();
+    });
+    // Applies bootstrap tooltip to all elements with the title attribute.
+    // Button groups are "special" and require child tooltips to have
+    // `{ container: 'body' }` option not to break their styles:
+    // https://getbootstrap.com/docs/3.4/javascript/#markup-1
+    $("*:not(.btn-group) > [title]").tooltip();
+    $(".btn-group > [title]").tooltip({ container: 'body' });
+</script>
+<script type="text/javascript">
+    hljs.configure({ cssSelector: '.language-graphql, .language-json, .language-xml, .language-yaml' });
+    hljs.highlightAll();
+</script>
+
+
+
+</body>
+</html>
