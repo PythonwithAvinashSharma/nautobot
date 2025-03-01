@@ -34,3 +34,27 @@ def lcm_network(request):
 
 def amsterdam_site(request):
     return render(request, 'dashboard_plugin/amsterdam_site.html')
+
+def KpiMetrics(request):
+    return render(request, 'dashboard_plugin/kpi_metrics.html')
+
+def AIOpsScore(request):
+    return render(request, 'dashboard_plugin/ai_ops_score.html')
+
+def ApplicationExperience(request):
+    return render(request, 'dashboard_plugin/application_experience.html')
+
+def CapacityPlanning(request):
+    return render(request, 'dashboard_plugin/capacity_planning.html')
+
+def RoutingObservability(request):
+    return render(request, 'dashboard_plugin/routing_observablity.html')
+
+def SustainabilityScore(request):
+    return render(request, 'dashboard_plugin/sustainability_score.html')
+
+def VunlnerabilityScore(request):
+    return render(request, 'dashboard_plugin/vulnerability_score.html')
+
+def TopTalkers(request):
+    return render(request, 'dashboard_plugin/top_talkers.html')

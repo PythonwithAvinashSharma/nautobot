@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Main Header -->
+    <div class="dashboard-header">
+        <h2>Network Observability Dashboard - AI Ops Score</h2>
+        <button class="close-button">×</button>
+    </div>
+
+    <!-- AI Operations Intelligence Card -->
+    <div class="dashboard-card">
+        <div class="row">
+            <div class="col-md-4">
+                <h3 class="section-title">AI Operations Intelligence</h3>
+                <div class="score-circle">
+                    <div class="progress-ring">
+                        <svg width="200" height="200" viewBox="0 0 200 200">
+                            <circle class="progress-ring-circle-bg" cx="100" cy="100" r="80" />
+                            <circle class="progress-ring-circle" cx="100" cy="100" r="80" stroke-dasharray="502.4" stroke-dashoffset="90.43" />
+                        </svg>
+                        <div class="score-text">
+                            <span class="score-percentage">82%</span>
+                            <span class="score-label">Overall Score</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 metrics-column">
+                <div class="metric-item">
+                    <span class="metric-title">Anomaly Detection</span>
+                    <span class="metric-value text-primary">87%</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-title">Predictive Analytics</span>
+                    <span class="metric-value text-primary">83%</span>
+                </div>
+            </div>
+            <div class="col-md-4 metrics-column">
+                <div class="metric-item">
+                    <span class="metric-title">Root Cause Analysis</span>
+                    <span class="metric-value text-primary">79%</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-title">Auto-remediation</span>
+                    <span class="metric-value text-primary">76%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent AI-Detected Incidents -->
+    <div class="dashboard-header">
+        <h2>Recent AI-Detected Incidents</h2>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Incident Type</th>
+                        <th>Location</th>
+                        <th>Detection Time</th>
+                        <th>Status</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-danger">Bandwidth Anomaly</td>
+                        <td>NY-Edge-Router-04</td>
+                        <td>27 Feb, 08:15 AM</td>
+                        <td><span class="badge rounded-pill" style="background-color: #e74c3c;">Active</span></td>
+                        <td>98.2%</td>
+                    </tr>
+                    <tr>
+                        <td class="text-warning">CPU Utilization Spike</td>
+                        <td>APAC-Core-Switch-07</td>
+                        <td>27 Feb, 06:42 AM</td>
+                        <td><span class="badge rounded-pill" style="background-color: #f39c12; color: #333;">Pending</span></td>
+                        <td>93.7%</td>
+                    </tr>
+                    <tr>
+                        <td class="text-success">Router Configuration Drift</td>
+                        <td>EU-Core-Router-12</td>
+                        <td>26 Feb, 11:27 PM</td>
+                        <td><span class="badge rounded-pill" style="background-color: #2ecc71;">Resolved</span></td>
+                        <td>95.8%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- AI Model Performance -->
+    <div class="dashboard-header">
+        <h2>AI Model Performance</h2>
+    </div>
+
+    <div class="row">
+        <!-- Anomaly Detection Model -->
+        <div class="col-md-4">
+            <div class="dashboard-card h-100">
+                <h4 class="card-title">Anomaly Detection Model</h4>
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Accuracy</span>
+                        <span class="stat-value">94.6%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">False Positive Rate</span>
+                        <span class="stat-value">3.2%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Last Training</span>
+                        <span class="stat-value">24 Feb 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictive Maintenance Model -->
+        <div class="col-md-4">
+            <div class="dashboard-card h-100">
+                <h4 class="card-title">Predictive Maintenance Model</h4>
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Precision</span>
+                        <span class="stat-value">91.8%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Mean Time to Predict</span>
+                        <span class="stat-value">14.2 hours</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Failures Prevented</span>
+                        <span class="stat-value">18 (This Month)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Root Cause Analysis Model -->
+        <div class="col-md-4">
+            <div class="dashboard-card h-100">
+                <h4 class="card-title">Root Cause Analysis Model</h4>
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Resolution Rate</span>
+                        <span class="stat-value">87.3%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Mean Time to Diagnose</span>
+                        <span class="stat-value">2.3 minutes</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Auto-remediation Success</span>
+                        <span class="stat-value">76.4%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Base styles */
+    .dashboard-wrapper {
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        background-color: #f5f7f9;
+    }
+    
+    /* Card styles */
+    .dashboard-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Header styles */
+    .dashboard-header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .dashboard-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 500;
+    }
+
+    /* Section titles */
+    .section-title {
+        color: #2c3e50;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        margin-top: 5px;
+    }
+
+    .card-title {
+        color: #2c3e50;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    /* Score circle styles */
+    .score-circle {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        margin-top: -10px;
+    }
+
+    .progress-ring {
+        position: relative;
+        width: 200px;
+        height: 200px;
+    }
+
+    .progress-ring-circle-bg {
+        fill: none;
+        stroke: #e6e6e6;
+        stroke-width: 12;
+    }
+
+    .progress-ring-circle {
+        fill: none;
+        stroke: #3498db;
+        stroke-width: 12;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+        transition: stroke-dashoffset 0.5s;
+    }
+
+    .score-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    .score-percentage {
+        display: block;
+        font-size: 42px;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1;
+    }
+
+    .score-label {
+        display: block;
+        font-size: 14px;
+        color: #777;
+        margin-top: 5px;
+    }
+
+    /* Metrics styles */
+    .metrics-column {
+        border-left: 1px solid #eee;
+        padding-left: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .metric-item {
+        margin-bottom: 25px;
+    }
+
+    .metric-title {
+        display: block;
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 5px;
+    }
+
+    .metric-value {
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .text-primary {
+        color: #3498db;
+    }
+
+    /* Table styles */
+    .table th {
+        background-color: #2c3e50;
+        color: white;
+        font-weight: 500;
+    }
+
+    .text-danger {
+        color: #e74c3c;
+    }
+
+    .text-warning {
+        color: #f39c12;
+    }
+
+    .text-success {
+        color: #2ecc71;
+    }
+
+    /* Model stats styles */
+    .model-stats {
+        padding: 10px 0;
+    }
+
+    .stat-item {
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .stat-label {
+        color: #555;
+        font-size: 14px;
+    }
+
+    .stat-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .close-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Any additional JavaScript functionality can be added here
+    document.querySelector('.close-button').addEventListener('click', function() {
+                window.location.href = "/cio";
+                });
+});
+</script>
+{% endblock %}

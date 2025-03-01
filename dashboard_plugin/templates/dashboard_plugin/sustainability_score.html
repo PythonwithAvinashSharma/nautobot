@@ -1,0 +1,637 @@
+{% extends "base.html" %} 
+{% load static %} 
+{% load helpers %} 
+{% block content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Observability Dashboard - Sustainability Score</title>
+    <style>
+        :root {
+            --main-bg-color: #f5f5f7;
+            --card-bg-color: #f9f9f9;
+            --header-bg-color: #2c3e50;
+            --header-text-color: white;
+            --progress-green: #2ecc71;
+            --chart-blue: #3498db;
+            --chart-green: #2ecc71;
+            --chart-orange: #f39c12;
+            --chart-purple: #9b59b6;
+            --chart-red: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--main-bg-color);
+        }
+
+        /* Main container with relative width to accommodate left navigation */
+        .dashboard-container {
+            margin-left: auto;
+            padding: 20px;
+            max-width: 1200px; /* Added max-width for better control */
+        }
+
+        .section-header {
+            background-color: var(--header-bg-color);
+            color: var(--header-text-color);
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 5px 5px 0 0;
+            position: relative;
+        }
+
+        .close-button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .section-content {
+            background-color: var(--card-bg-color);
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* Added to contain floating elements */
+        }
+
+        /* Overview section with gauge */
+        .overview {
+            display: flex;
+            flex-wrap: wrap; /* Added for better responsiveness */
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-right: 30px;
+            border-right: 1px solid #eee;
+            margin-right: 30px; /* Added spacing */
+        }
+
+        .gauge-container h2 {
+            font-size: 16px;
+            margin-bottom: 0px !important;
+            text-align: center;
+        }
+
+        .gauge {
+            position: relative;
+            width: 150px;
+            height: 150px;/* Added vertical spacing */
+        }
+
+        .gauge-background {
+            fill: none;
+            stroke: #e0e0e0;
+            stroke-width: 12;
+        }
+
+        .gauge-progress {
+            fill: none;
+            stroke: var(--progress-green);
+            stroke-width: 12;
+            stroke-linecap: round;
+        }
+
+        .gauge-text {
+            font-size: 24px;
+            font-weight: bold;
+            fill: #2c3e50;
+            text-anchor: middle;
+        }
+
+        .gauge-label {
+            font-size: 10px;
+            fill: #7f8c8d;
+            text-anchor: middle;
+        }
+
+        /* Metrics section */
+        .metrics {
+            flex-grow: 1;
+            padding-left: 0; /* Removed left padding since we added margin to gauge */
+        }
+
+        .metric {
+            margin-bottom: 20px;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .progress-container {
+            height: 16px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--progress-green);
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Power Consumption Breakdown */
+        .power-breakdown {
+            display: flex;
+            flex-wrap: wrap; /* For responsiveness */
+        }
+
+        .chart-area {
+            width: 65%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .chart-container {
+            width: 100%;
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        /* Chart wrapper for the pie chart */
+        .chart-wrapper {
+            width: 55%;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Legend positioned to the right of the chart */
+        .chart-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 45%;
+            margin-top: 80px;
+            padding-left: 40px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .power-usage {
+            width: 35%;
+            min-width: 280px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .usage-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .usage-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .green-text {
+            color: var(--progress-green);
+            font-weight: 600;
+        }
+
+        /* Carbon Analysis */
+        .carbon-analysis {
+            display: flex;
+            flex-wrap: wrap; /* Added for responsiveness */
+        }
+
+        .emissions-chart {
+            width: 65%;
+            min-width: 300px; /* Added minimum width */
+            height: 200px; /* Increased height */
+            margin-bottom: 20px; /* Added margin for mobile */
+        }
+
+        .initiatives {
+            width: 35%;
+            min-width: 250px; /* Added minimum width */
+            padding-left: 20px;
+        }
+
+        .initiative-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .initiative-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .initiative-box {
+            width: 16px;
+            height: 16px;
+            background-color: var(--progress-green);
+            margin-right: 10px;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        /* E-Waste Management */
+        .waste-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .waste-column {
+            width: 32%;
+            min-width: 180px;
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .waste-stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .waste-stat-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .waste-label {
+            color: #2c3e50;
+        }
+
+        .waste-value {
+            font-weight: 600;
+        }
+
+        /* Media queries for better responsiveness */
+        @media (max-width: 768px) {
+            .gauge-container {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding-right: 0;
+                padding-bottom: 20px;
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .metrics {
+                width: 100%;
+                padding-left: 0;
+            }
+            
+            .chart-container, 
+            .power-usage,
+            .emissions-chart,
+            .initiatives,
+            .waste-column {
+                width: 100%;
+                padding-right: 0;
+                padding-left: 0;
+                margin-left: 0;
+            }
+        }
+    </style>
+
+    <div class="dashboard-container">
+        <!-- Main Dashboard Header -->
+        <div class="section-header">
+            Network Observability Dashboard - Sustainability Score
+            <div class="close-button">×</div>
+        </div>
+
+        <!-- Overview Section -->
+        <div class="section-content">
+            <div class="overview">
+                <div class="gauge-container">
+                    <h2>Sustainability Overview</h2>
+                    <svg class="gauge" viewBox="0 0 100 100">
+                        <path class="gauge-background" d="M 15 85 A 40 40 0 1 1 85 85" />
+                        <path class="gauge-progress" d="M 15 85 A 40 40 0 1 1 85 85" stroke-dasharray="188.5 188.5" stroke-dashoffset="39.5" />
+                        <text class="gauge-text" x="50" y="60">79%</text>
+                        <text class="gauge-label" x="50" y="75">Overall Score</text>
+                    </svg>
+                </div>
+
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-label">Power Consumption</div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 71%"></div>
+                            <div class="progress-text">71%</div>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-label">Carbon Footprint</div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 63%"></div>
+                            <div class="progress-text">63%</div>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-label">E-Waste Reduction</div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 79%"></div>
+                            <div class="progress-text">79%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Power Consumption Breakdown -->
+        <div class="section-header">Power Consumption Breakdown</div>
+        <div class="section-content">
+            <div class="power-breakdown">
+                <div class="chart-area">
+                    <div class="chart-row">
+                        <div class="chart-wrapper">
+                            <canvas id="powerChart" width="300" height="300"></canvas>
+                        </div>
+                        <!-- Legend positioned alongside the chart -->
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--chart-blue);"></div>
+                                <div>Networking Devices: 28%</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--chart-green);"></div>
+                                <div>Servers: 35%</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--chart-orange);"></div>
+                                <div>UPS & Power Distribution: 17%</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--chart-purple);"></div>
+                                <div>Cooling Systems: 15%</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--chart-red);"></div>
+                                <div>Legacy Hardware: 5%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="power-usage">
+                    <h3 class="usage-title">Current vs Target Power Usage</h3>
+                    
+                    <div class="usage-row">
+                        <div>Current Monthly Usage:</div>
+                        <div>842 kWh</div>
+                    </div>
+                    
+                    <div class="usage-row">
+                        <div>Target Monthly Usage:</div>
+                        <div>750 kWh</div>
+                    </div>
+                    
+                    <div class="usage-row" style="border-bottom: none;">
+                        <div>Power Efficiency:</div>
+                        <div class="green-text">12.3% reduction YoY</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carbon Footprint Analysis -->
+        <div class="section-header">Carbon Footprint Analysis</div>
+        <div class="section-content">
+            <div class="carbon-analysis">
+                <div class="emissions-chart">
+                    <canvas id="emissionsChart" width="600" height="200"></canvas>
+                </div>
+                
+                <div class="initiatives">
+                    <h3 class="initiative-title">Carbon Reduction Initiatives</h3>
+                    
+                    <div class="initiative-item">
+                        <div class="initiative-box"></div>
+                        <div>Server Virtualization: 15% reduction</div>
+                    </div>
+                    
+                    <div class="initiative-item">
+                        <div class="initiative-box"></div>
+                        <div>Energy-efficient Cooling: 9% reduction</div>
+                    </div>
+                    
+                    <div class="initiative-item">
+                        <div class="initiative-box"></div>
+                        <div>Equipment Refresh Cycle: 7% reduction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- E-Waste Management -->
+        <div class="section-header">E-Waste Management</div>
+        <div class="section-content">
+            <div class="waste-stats">
+                <div class="waste-column">
+                    <div class="waste-stat-row">
+                        <div class="waste-label">Recycled Equipment:</div>
+                        <div class="waste-value">85%</div>
+                    </div>
+                    <div class="waste-stat-row">
+                        <div class="waste-label">Refurbished Equipment:</div>
+                        <div class="waste-value">12%</div>
+                    </div>
+                </div>
+                
+                <div class="waste-column">
+                    <div class="waste-stat-row">
+                        <div class="waste-label">Average Device Lifespan:</div>
+                        <div class="waste-value">4.2 years</div>
+                    </div>
+                    <div class="waste-stat-row">
+                        <div class="waste-label">Devices with Extended Life:</div>
+                        <div class="waste-value">203 units</div>
+                    </div>
+                </div>
+                
+                <div class="waste-column">
+                    <div class="waste-stat-row">
+                        <div class="waste-label">Landfill Diversion Rate:</div>
+                        <div class="waste-value green-text">97%</div>
+                    </div>
+                    <div class="waste-stat-row">
+                        <div class="waste-label">E-waste YoY Reduction:</div>
+                        <div class="waste-value green-text">18.3%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        // Initialize charts when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+
+           // Power consumption pie chart
+            const powerCtx = document.getElementById('powerChart').getContext('2d');
+            const powerChart = new Chart(powerCtx, {
+                type: 'pie',
+                data: {
+                    labels: [
+                        'Networking Devices', 
+                        'Servers', 
+                        'UPS & Power Distribution',
+                        'Cooling Systems',
+                        'Legacy Hardware'
+                    ],
+                    datasets: [{
+                        data: [28, 35, 17, 15, 5],
+                        backgroundColor: [
+                            '#3498db', // blue
+                            '#2ecc71', // green
+                            '#f39c12', // orange
+                            '#9b59b6', // purple
+                            '#e74c3c'  // red
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    layout: {
+                        padding: {
+                            bottom: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Carbon emissions bar chart
+            const emissionsCtx = document.getElementById('emissionsChart').getContext('2d');
+            const emissionsChart = new Chart(emissionsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
+                    datasets: [{
+                        data: [10, 9.8, 9.2, 8.6, 8.2, 8.8, 8.4, 8.5, 7.8, 7.5, 7, 6.8],
+                        backgroundColor: function(context) {
+                            const index = context.dataIndex;
+                            return index < 9 ? '#3498db' : '#2ecc71';
+                        },
+                        borderWidth: 0,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Carbon: ' + context.raw + ' tons';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 12,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            document.querySelector('.close-button').addEventListener('click', function() {
+              window.location.href = "/cio";
+          });
+        });
+    </script>
+{% endblock %}

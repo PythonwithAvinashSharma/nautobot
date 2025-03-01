@@ -1,0 +1,684 @@
+{% extends "base.html" %} 
+{% load static %} 
+{% load helpers %} 
+
+{% block content %}
+<style>
+  #content-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+  }
+  
+  .dashboard-wrapper {
+    position: absolute;
+    top: 0;
+    left: 230px;
+    right: 0;
+    padding: 15px;
+    z-index: 10;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+  }
+  
+  .dashboard-card {
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .dashboard-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .dashboard-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .stats-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: -10px;
+  }
+  
+  .stat-card {
+    flex: 1 1 30%;
+    margin: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .stat-card.traffic { border-left: 4px solid #2ecc71; }
+  .stat-card.hosts { border-left: 4px solid #f39c12; }
+  .stat-card.utilization { border-left: 4px solid #e74c3c; }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 5px;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .stat-value.traffic { color: #2ecc71; }
+  .stat-value.hosts { color: #f39c12; }
+  .stat-value.utilization { color: #e74c3c; }
+  
+  .stat-change {
+    font-size: 0.85rem;
+  }
+  
+  .stat-change.positive { color: #2ecc71; }
+  .stat-change.negative { color: #e74c3c; }
+  .stat-change.warning { color: #f39c12; }
+  
+  .chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px;
+  }
+  
+  .chart-box {
+    flex: 1 1 calc(50% - 20px);
+    margin: 10px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  
+  .chart-header {
+    background-color: #ecf0f1;
+    padding: 10px 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  
+  .chart-body {
+    padding: 15px;
+  }
+  
+  .chart-container {
+    position: relative;
+    height: 250px;
+    width: 100%;
+  }
+  
+  .donut-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px;
+  }
+  
+  .donut-box {
+    flex: 1 1 calc(25% - 20px);
+    margin: 10px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  
+  .tabs-container {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  
+  .tab-header {
+    background-color: #ecf0f1;
+    display: flex;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  
+  .tab-button {
+    padding: 12px 20px;
+    background-color: transparent;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+  
+  .tab-button.active {
+    border-bottom-color: #3498db;
+    color: #3498db;
+  }
+  
+  .tab-content {
+    padding: 15px;
+  }
+  
+  .responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .responsive-table th {
+    text-align: left;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+  }
+  
+  .responsive-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .badge-ip {
+    background-color: #e9ecef;
+    color: #495057;
+    font-family: monospace;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+  
+  .badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .badge-critical { background-color: #e74c3c; color: white; }
+  .badge-warning { background-color: #f39c12; color: white; }
+  .badge-normal { background-color: #2ecc71; color: white; }
+  .badge-info { background-color: #3498db; color: white; }
+  
+  .filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .filter-label {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-right: 5px;
+  }
+  
+  .filter-value {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-right: 15px;
+  }
+  
+  .small-text {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+  }
+  
+  .pagination {
+    display: flex;
+    list-style-type: none;
+    margin: 15px 0 0 0;
+    padding: 0;
+  }
+  
+  .pagination li {
+    margin-right: 5px;
+  }
+  
+  .pagination a {
+    padding: 5px 10px;
+    border: 1px solid #e9ecef;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #495057;
+  }
+  
+  .pagination a.active {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+  }
+  
+  .small-chart {
+    max-height: 60px;
+    margin-top: 10px;
+  }
+</style>
+
+<!-- Include Chart.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<div class="dashboard-wrapper">
+  <!-- Dashboard header -->
+  <div class="dashboard-header">
+    <h2>Network Observability - Top Talkers</h2>
+  </div>
+  
+  <!-- Filter and actions area -->
+  <div class="dashboard-card">
+    <div class="filter-bar">
+      <h3>Top Talkers Analysis</h3>
+      <div class="filter-group">
+        <select class="form-select form-select-sm">
+          <option>Last 24 Hours</option>
+          <option>Last 7 Days</option>
+          <option>Last 30 Days</option>
+        </select>
+        <button class="btn btn-sm btn-outline-secondary ml-2">
+          <i class="fas fa-download"></i> Export
+        </button>
+      </div>
+    </div>
+    
+    <div class="filter-bar">
+      <div class="filter-group">
+        <div class="filter-label">Region:</div>
+        <div class="filter-value">All Regions</div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Network:</div>
+        <div class="filter-value">Internal + External</div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Protocol:</div>
+        <div class="filter-value">All Protocols</div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Threshold:</div>
+        <div class="filter-value">Auto (>85%)</div>
+      </div>
+    </div>
+    
+    <p class="small-text">
+      This dashboard displays network hosts with the highest traffic volumes, potential bottlenecks, 
+      and traffic anomalies detected across your infrastructure.
+    </p>
+  </div>
+  
+  <!-- Stats cards -->
+  <div class="stats-row">
+    <div class="stat-card traffic">
+      <div class="stat-label">Total Traffic Volume</div>
+      <div class="stat-value traffic">27.8 TB</div>
+      <div class="stat-change positive">+3.2% from last period</div>
+      <canvas id="trafficTrend" class="small-chart"></canvas>
+    </div>
+    
+    <div class="stat-card hosts">
+      <div class="stat-label">Active Host Count</div>
+      <div class="stat-value hosts">1,247</div>
+      <div class="stat-change warning">+18 new hosts</div>
+      <canvas id="hostsTrend" class="small-chart"></canvas>
+    </div>
+    
+    <div class="stat-card utilization">
+      <div class="stat-label">Bandwidth Utilization</div>
+      <div class="stat-value utilization">78.3%</div>
+      <div class="stat-change negative">4 segments >90%</div>
+      <canvas id="utilizationTrend" class="small-chart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Charts row -->
+  <div class="chart-row">
+    <div class="chart-box">
+      <div class="chart-header">Traffic Distribution by Protocol</div>
+      <div class="chart-body">
+        <div class="chart-container">
+          <canvas id="protocolChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chart-box">
+      <div class="chart-header">Traffic Trends (Last 24 Hours)</div>
+      <div class="chart-body">
+        <div class="chart-container">
+          <canvas id="trafficTrendsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Donut charts row -->
+  <div class="donut-row">
+    <div class="donut-box">
+      <div class="chart-header">Traffic by Direction</div>
+      <div class="chart-body">
+        <div class="chart-container">
+          <canvas id="directionChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <div class="donut-box">
+      <div class="chart-header">Traffic by Region</div>
+      <div class="chart-body">
+        <div class="chart-container">
+          <canvas id="regionChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <div class="donut-box">
+      <div class="chart-header">Traffic by Application</div>
+      <div class="chart-body">
+        <div class="chart-container">
+          <canvas id="applicationChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <div class="donut-box">
+      <div class="chart-header">Traffic by Priority</div>
+      <div class="chart-body">
+        <div class="chart-container">
+          <canvas id="priorityChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tabs area -->
+  <div class="tabs-container">
+    <div class="tab-header">
+      <button class="tab-button active" onclick="openTab('tab-ip-talkers')">Top IP Talkers</button>
+      <button class="tab-button" onclick="openTab('tab-conversations')">Top Conversations</button>
+      <button class="tab-button" onclick="openTab('tab-applications')">Top Applications</button>
+      <button class="tab-button" onclick="openTab('tab-anomalies')">Traffic Anomalies</button>
+    </div>
+    
+    <!-- Tab content -->
+    <div class="tab-content">
+      <!-- Top IP Talkers Table -->
+      <div id="tab-ip-talkers" class="tab-pane active">
+        <div style="overflow-x: auto;">
+          <table class="responsive-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>IP Address</th>
+                <th>Hostname</th>
+                <th>Traffic Volume</th>
+                <th>% of Total</th>
+                <th>Packets</th>
+                <th>Connections</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="ip-talkers-tbody">
+              <!-- Will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+          <div class="small-text">Showing <span id="ip-count">0</span> of <span id="ip-total">0</span> hosts</div>
+          <ul class="pagination" id="ip-pagination"></ul>
+        </div>
+      </div>
+      
+      <!-- Other tabs will be populated by JavaScript -->
+      <div id="tab-conversations" class="tab-pane" style="display: none;"></div>
+      <div id="tab-applications" class="tab-pane" style="display: none;"></div>
+      <div id="tab-anomalies" class="tab-pane" style="display: none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Chart.js initialization
+    initCharts();
+    
+    // Load data for tables
+    loadTableData();
+    
+    // Initialize tabs
+    setupTabs();
+  });
+  
+  function openTab(tabId) {
+    // Hide all tab panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+      pane.style.display = 'none';
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    // Show the selected tab pane
+    document.getElementById(tabId).style.display = 'block';
+    
+    // Add active class to the clicked tab button
+    document.querySelector(`[onclick="openTab('${tabId}')"]`).classList.add('active');
+  }
+  
+  function initCharts() {
+    // Small trend charts for stats
+    initTrendChart('trafficTrend', [22.4, 23.1, 24.5, 25.2, 26.7, 26.9, 27.8], '#2ecc71');
+    initTrendChart('hostsTrend', [1102, 1124, 1156, 1178, 1195, 1229, 1247], '#f39c12');
+    initTrendChart('utilizationTrend', [65.2, 68.7, 71.2, 74.5, 76.1, 77.8, 78.3], '#e74c3c');
+    
+    // Protocol distribution chart
+    initProtocolChart();
+    
+    // Traffic trends chart
+    initTrafficTrendsChart();
+    
+    // Donut charts
+    initDonutChart('directionChart', ['Inbound', 'Outbound', 'Internal'], [42, 35, 23]);
+    initDonutChart('regionChart', ['APAC', 'NA', 'EMEA', 'SA', 'ANZ'], [25, 32, 28, 8, 7]);
+    initDonutChart('applicationChart', ['Web', 'Database', 'Storage', 'Backup', 'Other'], [30, 25, 20, 15, 10]);
+    initDonutChart('priorityChart', ['Critical', 'High', 'Medium', 'Low'], [15, 25, 40, 20]);
+  }
+  
+  function initTrendChart(canvasId, data, color) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['', '', '', '', '', '', ''],
+        datasets: [{
+          data: data,
+          borderColor: color,
+          backgroundColor: color.replace(')', ', 0.1)').replace('rgb', 'rgba'),
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { display: false }
+        }
+      }
+    });
+  }
+  
+  function initProtocolChart() {
+    const ctx = document.getElementById('protocolChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['HTTP/S', 'Database', 'File Transfer', 'Email', 'Streaming', 'VoIP', 'Other'],
+        datasets: [{
+          label: 'Traffic Volume (TB)',
+          data: [8.4, 6.2, 4.8, 1.2, 3.6, 1.1, 2.5],
+          backgroundColor: [
+            'rgba(52, 152, 219, 0.7)',
+            'rgba(46, 204, 113, 0.7)',
+            'rgba(155, 89, 182, 0.7)',
+            'rgba(52, 73, 94, 0.7)',
+            'rgba(243, 156, 18, 0.7)',
+            'rgba(231, 76, 60, 0.7)',
+            'rgba(149, 165, 166, 0.7)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Traffic Volume (TB)' }
+          }
+        }
+      }
+    });
+  }
+  
+  function initTrafficTrendsChart() {
+    const ctx = document.getElementById('trafficTrendsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+        datasets: [{
+          label: 'Inbound',
+          data: [1.2, 0.8, 0.9, 2.4, 2.8, 2.6, 2.2, 1.6],
+          borderColor: 'rgba(52, 152, 219, 1)',
+          backgroundColor: 'rgba(52, 152, 219, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }, {
+          label: 'Outbound',
+          data: [0.9, 0.6, 0.7, 1.8, 2.1, 1.9, 1.7, 1.2],
+          borderColor: 'rgba(46, 204, 113, 1)',
+          backgroundColor: 'rgba(46, 204, 113, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { tooltip: { mode: 'index', intersect: false } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Traffic (TB)' }
+          }
+        }
+      }
+    });
+  }
+  
+  function initDonutChart(canvasId, labels, data) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const colors = [
+      'rgba(52, 152, 219, 0.8)',
+      'rgba(46, 204, 113, 0.8)',
+      'rgba(155, 89, 182, 0.8)',
+      'rgba(231, 76, 60, 0.8)',
+      'rgba(243, 156, 18, 0.8)'
+    ];
+    
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors.slice(0, labels.length),
+          borderColor: 'rgba(255, 255, 255, 0.8)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
+  
+  function loadTableData() {
+    // Example data - in a real application, this would be loaded from an API
+    const ipTalkers = [
+      { id: 1, ip: '192.168.1.254', hostname: 'core-router-01.internal', traffic: '3.42 TB', percentage: '12.3%', packets: '4.8B', connections: '126,842', status: 'Critical' },
+      { id: 2, ip: '10.0.1.25', hostname: 'app-server-db-prod.internal', traffic: '2.87 TB', percentage: '10.3%', packets: '3.2B', connections: '98,452', status: 'Warning' },
+      { id: 3, ip: '172.16.32.12', hostname: 'storage-cluster-01.internal', traffic: '2.65 TB', percentage: '9.5%', packets: '1.4B', connections: '42,853', status: 'Warning' },
+      { id: 4, ip: '192.168.15.102', hostname: 'backup-server-03.internal', traffic: '2.24 TB', percentage: '8.1%', packets: '985M', connections: '28,754', status: 'Normal' },
+      { id: 5, ip: '10.0.1.101', hostname: 'app-server-web-prod.internal', traffic: '1.98 TB', percentage: '7.1%', packets: '2.7B', connections: '254,873', status: 'Normal' }
+    ];
+    
+    // Populate IP Talkers table
+    const tbody = document.getElementById('ip-talkers-tbody');
+    ipTalkers.forEach(talker => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${talker.id}</td>
+        <td><span class="badge-ip">${talker.ip}</span></td>
+        <td>${talker.hostname}</td>
+        <td>${talker.traffic}</td>
+        <td>${talker.percentage}</td>
+        <td>${talker.packets}</td>
+        <td>${talker.connections}</td>
+        <td><span class="badge badge-${talker.status.toLowerCase()}">${talker.status}</span></td>
+      `;
+      tbody.appendChild(row);
+    });
+    
+    // Update counters
+    document.getElementById('ip-count').textContent = ipTalkers.length;
+    document.getElementById('ip-total').textContent = '1,247';
+    
+    // Create pagination
+    const pagination = document.getElementById('ip-pagination');
+    pagination.innerHTML = `
+      <li><a href="#">&laquo;</a></li>
+      <li><a href="#" class="active">1</a></li>
+      <li><a href="#">2</a></li>
+      <li><a href="#">3</a></li>
+      <li><a href="#">&raquo;</a></li>
+    `;
+    
+    // Populate other tabs (simplified)
+    document.getElementById('tab-conversations').innerHTML = '<div class="small-text text-center p-4">Conversations data will be loaded when tab is activated</div>';
+    document.getElementById('tab-applications').innerHTML = '<div class="small-text text-center p-4">Applications data will be loaded when tab is activated</div>';
+    document.getElementById('tab-anomalies').innerHTML = '<div class="small-text text-center p-4">Anomalies data will be loaded when tab is activated</div>';
+  }
+  
+  function setupTabs() {
+    // Add click handlers if needed
+  }
+</script>
+
+{% endblock %}

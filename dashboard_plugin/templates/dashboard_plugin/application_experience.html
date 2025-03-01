@@ -1,0 +1,579 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+<!-- Override any default content styling from base template -->
+<style>
+#content-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+}
+</style>
+<div class="dashboard-wrapper">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Observability Dashboard - Application Experience</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Dashboard header -->
+<div class="dashboard-header">
+    <h2>Network Observability Dashboard - Application Experience</h2>
+    <button class="close-button">×</button>
+</div>
+
+<!-- Application Performance Summary -->
+<div class="dashboard-card">
+    <h3 class="mb-4">Application Performance Summary</h3>
+    
+    <div class="app-row">
+        <div class="app-name">Office 365</div>
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar bg-excellent" role="progressbar" style="width: 65%"></div>
+            </div>
+        </div>
+        <div class="metric">38ms</div>
+        <div class="status status-excellent">Excellent</div>
+        <div class="target">Target: <50ms</div>
+    </div>
+    
+    <div class="app-row">
+        <div class="app-name">DNS Services</div>
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar bg-excellent" role="progressbar" style="width: 40%"></div>
+            </div>
+        </div>
+        <div class="metric">42ms</div>
+        <div class="status status-excellent">Excellent</div>
+        <div class="target">Target: <100ms</div>
+    </div>
+    
+    <div class="app-row">
+        <div class="app-name">ERP System</div>
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar bg-fair" role="progressbar" style="width: 65%"></div>
+            </div>
+        </div>
+        <div class="metric">86ms</div>
+        <div class="status status-fair">Fair</div>
+        <div class="target">Target: <75ms</div>
+    </div>
+    
+    <div class="app-row">
+        <div class="app-name">CRM Portal</div>
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar bg-good" role="progressbar" style="width: 55%"></div>
+            </div>
+        </div>
+        <div class="metric">62ms</div>
+        <div class="status status-good">Good</div>
+        <div class="target">Target: <80ms</div>
+    </div>
+</div>
+
+<!-- Office 365 Performance Details -->
+<div class="dashboard-header">
+    <h2>Office 365 Performance Details</h2>
+</div>
+
+<div class="row">
+    <!-- Service Components and Regional Performance in one card with two columns -->
+    <div class="col-md-12">
+        <div class="dashboard-card">
+            <div class="row">
+                <!-- Service Components -->
+                <div class="col-md-6">
+                    <h4 class="mb-4">Service Components</h4>
+                    
+                    <div class="service-row">
+                        <div class="service-name">Exchange Online</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-excellent" role="progressbar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">32ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">SharePoint Online</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-excellent" role="progressbar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">41ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">Teams</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-excellent" role="progressbar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">38ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">OneDrive</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-excellent" role="progressbar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">43ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">Office Apps</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-excellent" role="progressbar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">35ms</div>
+                    </div>
+                </div>
+                
+                <!-- Regional Performance -->
+                <div class="col-md-6">
+                    <h4 class="mb-4">Regional Performance</h4>
+                    
+                    <div class="service-row">
+                        <div class="service-name">APAC</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-fair" role="progressbar" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">56ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">EMEA</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-excellent" role="progressbar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">35ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">NA</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-excellent" role="progressbar" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">25ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">SA</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-fair" role="progressbar" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">50ms</div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-name">ANZ</div>
+                        <div class="service-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar bg-good" role="progressbar" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div class="service-metric">45ms</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ERP System Performance Alert -->
+<div class="alert-box">
+    <h3>ERP System Performance Alert</h3>
+</div>
+
+<!-- ERP Response Time Trend and Performance Analysis in one card with two columns -->
+<div class="row">
+    <!-- ERP Response Time Trend -->
+    <div class="col-md-12">
+        <div class="dashboard-card">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>ERP Response Time Trend (Last 24 Hours)</h4>
+                    <div class="chart-container">
+                        <canvas id="erpTrendChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Performance Analysis -->
+                <div class="col-md-6">
+                    <h4>Performance Analysis</h4>
+                    <div class="performance-analysis">
+                        <div class="alert-title">Database Query Latency Alert</div>
+                        <div class="analysis-details">Issue detected at: 27 Feb 2025, 08:42 AM</div>
+                        <div class="analysis-details">Current latency: 86ms (15% above threshold)</div>
+                        <div class="analysis-details">Affected components: SAP Production DB, Inventory Module</div>
+                        <div class="analysis-details">Root cause: High CPU utilization on database servers</div>
+                        <div class="analysis-details">Recommended action: Scale up database resources</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Experience Metrics -->
+<div class="dashboard-header">
+    <h2>User Experience Metrics</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div>Page Load Time</div>
+            <div class="metric-value">1.2s</div>
+            <div class="metric-target">Target: <2s</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div>Transaction Success</div>
+            <div class="metric-value">99.8%</div>
+            <div class="metric-target">Target: >99.5%</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div>API Response Time</div>
+            <div class="metric-value">178ms</div>
+            <div class="metric-target">Target: <200ms</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div>User Satisfaction</div>
+            <div class="metric-value">4.7/5</div>
+            <div class="metric-target">Target: >4.5</div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.service-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .service-name {
+        width: 130px;
+        font-weight: normal;
+    }
+    
+    .service-progress-container {
+        flex: 1;
+    }
+    
+    .service-metric {
+        width: 50px;
+        padding-left: 15px;
+    }
+
+.dashboard-wrapper {
+    position: absolute;
+    top: 0;
+    left: 230px; /* Match the width of your sidebar */
+    right: 0;
+    padding: 15px;
+    z-index: 10;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+/* Card styles */
+.dashboard-card {
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Header styles */
+.dashboard-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress {
+    height: 12px;
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.status-excellent {
+    color: #27ae60;
+}
+
+.status-good {
+    color: #2ecc71;
+}
+
+.status-fair {
+    color: #f39c12;
+}
+
+.status-poor {
+    color: #e74c3c;
+}
+
+.alert-box {
+    background-color: #e74c3c;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.alert-box h3 {
+    margin: 0;
+}
+
+.chart-container {
+    height: 150px;
+    width: 100%;
+}
+
+.performance-analysis {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.alert-title {
+    color: #e74c3c;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.analysis-details {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #27ae60;
+    margin: 10px 0;
+}
+
+.metric-target {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.bg-excellent {
+    background-color: #27ae60;
+}
+
+.bg-good {
+    background-color: #2ecc71;
+}
+
+.bg-fair {
+    background-color: #f39c12;
+}
+
+.bg-poor {
+    background-color: #e74c3c;
+}
+
+/* Grid layout for the performance details */
+.app-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.app-name {
+    width: 120px;
+    font-weight: bold;
+}
+
+.progress-container {
+    flex: 1;
+    max-width: 40%;
+}
+
+.progress {
+    height: 12px;
+    border-radius: 10px;
+    background-color: #e9ecef;
+    margin: 0;
+}
+
+.metric {
+    width: 60px;
+    padding-left: 15px;
+}
+
+.status {
+    width: 80px;
+    text-align: center;
+}
+
+.target {
+    width: 110px;
+    text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-wrapper {
+        left: 0;
+        margin-left: 0;
+    }
+}
+
+/* Ensure the content block doesn't interfere */
+#content {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: static !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Close button functionality
+    document.querySelector('.close-button').addEventListener('click', function() {
+        window.location.href = "/cio";
+    });
+    
+    // ERP Trend Chart
+    const ctx = document.getElementById('erpTrendChart').getContext('2d');
+    
+    // Chart data points to represent the ERP response time trend
+    const labels = ['00:00', '06:00', '12:00', '18:00', 'Now'];
+    const data = [70, 65, 75, 68, 60, 55, 65, 75, 72, 62, 55, 86];
+    
+    const erpTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Response Time (ms)',
+                data: data,
+                borderColor: '#e74c3c',
+                tension: 0.3,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 40,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    // Add threshold line to chart
+    const threshold = {
+        id: 'threshold',
+        beforeDraw(chart) {
+            const {ctx, chartArea: {top, right, bottom, left, width, height}, scales: {x, y}} = chart;
+            ctx.save();
+            ctx.strokeStyle = '#f39c12';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const thresholdValue = 75;
+            const yCoordinate = y.getPixelForValue(thresholdValue);
+            ctx.moveTo(left, yCoordinate);
+            ctx.lineTo(right, yCoordinate);
+            ctx.stroke();
+            
+            // Add threshold label
+            ctx.fillStyle = '#f39c12';
+            ctx.fillText('Threshold (75ms)', left + 5, yCoordinate - 5);
+            ctx.restore();
+        }
+    };
+    
+    erpTrendChart.options.plugins.threshold = threshold;
+    erpTrendChart.update();
+});
+</script>
+{% endblock %}

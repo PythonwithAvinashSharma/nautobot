@@ -7,21 +7,26 @@
             bottom: 20px;
             right: 20px;
             z-index: 1000;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
 
         .chat-button {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: #2563eb;
+            background-color: #3b82f6;
             color: white;
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.05);
         }
 
         .chat-window {
@@ -29,19 +34,21 @@
             position: fixed;
             bottom: 100px;
             right: 20px;
-            width: 350px;
-            height: 500px;
+            width: 380px;
+            height: 550px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             flex-direction: column;
+            overflow: hidden;
         }
 
         .chat-header {
-            background: #2563eb;
+            background: #3b82f6;
             color: white;
-            padding: 15px;
-            border-radius: 10px 10px 0 0;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 500;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -49,57 +56,72 @@
 
         .chat-messages {
             flex-grow: 1;
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
+            background-color: #f8fafc;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .message {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 15px;
-            margin: 5px 0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .user-message {
-            background: #e5e7eb;
+            background: #3b82f6;
+            color: white;
             align-self: flex-end;
+            border-bottom-right-radius: 4px;
         }
 
         .bot-message {
-            background: #2563eb;
-            color: white;
+            background: white;
+            color: #1f2937;
             align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
         }
 
         .chat-input {
-            padding: 15px;
+            padding: 16px;
+            background: white;
             border-top: 1px solid #e5e7eb;
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         .chat-input input {
             flex-grow: 1;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #e5e7eb;
-            border-radius: 5px;
+            border-radius: 8px;
             outline: none;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input input:focus {
+            border-color: #3b82f6;
         }
 
         .chat-input button {
             padding: 10px 20px;
-            background: #2563eb;
+            background: #3b82f6;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
         }
 
         .chat-input button:hover {
-            background: #1d4ed8;
+            background: #2563eb;
         }
 
         .close-button {
@@ -107,7 +129,69 @@
             border: none;
             color: white;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 24px;
+            padding: 4px;
+            line-height: 1;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .close-button:hover {
+            opacity: 1;
+        }
+
+        .typing-indicator {
+            padding: 12px 16px;
+            display: none;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            animation: blink 1.4s infinite both;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0% { opacity: 0.4; }
+            20% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        /* Improved table styles */
+        .bot-message table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .bot-message table th {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .bot-message table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
+        }
+
+        .bot-message table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .bot-message table tr:hover {
+            background-color: #f8fafc;
         }
     </style>
 </head>
@@ -121,10 +205,13 @@
         
         <div class="chat-window" id="chatWindow">
             <div class="chat-header">
-                <span>Chat with Us</span>
+                <span>Chat Assistant</span>
                 <button class="close-button" id="closeChat">&times;</button>
             </div>
             <div class="chat-messages" id="chatMessages"></div>
+            <div class="typing-indicator" id="typingIndicator">
+                <span>.</span><span>.</span><span>.</span>
+            </div>
             <div class="chat-input">
                 <input type="text" id="messageInput" placeholder="Type your message...">
                 <button id="sendMessage">Send</button>
@@ -140,8 +227,143 @@
             const messageInput = document.getElementById('messageInput');
             const sendMessage = document.getElementById('sendMessage');
             const chatMessages = document.getElementById('chatMessages');
+            const typingIndicator = document.getElementById('typingIndicator');
 
-            // Toggle chat window
+            // Auto-popup after 5 seconds
+            setTimeout(() => {
+                chatWindow.style.display = 'flex';
+                // Add initial greeting
+                setTimeout(() => {
+                    addMessage("👋 Hi! How can I help you today?", 'bot');
+                }, 500);
+            }, 5000);
+
+            // Handle greetings
+            function getGreetingResponse(message) {
+                const lowerMessage = message.toLowerCase();
+                const currentHour = new Date().getHours();
+                let timeOfDay = currentHour < 12 ? "morning" : currentHour < 17 ? "afternoon" : "evening";
+
+                if (lowerMessage.includes('good morning') || 
+                    lowerMessage.includes('good afternoon') || 
+                    lowerMessage.includes('good evening')) {
+                    return `Good ${timeOfDay}! 👋 How can I assist you today?`;
+                } else if (lowerMessage.includes('hi') || lowerMessage.includes('hello')) {
+                    return "Hello! 👋 How can I assist you today?";
+                }
+                return null;
+            }
+
+            // Send message function
+            async function sendChatMessage(message) {
+                // Add user message to chat
+                addMessage(message, 'user');
+                
+                // Check for greetings first
+                const greetingResponse = getGreetingResponse(message);
+                if (greetingResponse) {
+                    setTimeout(() => addMessage(greetingResponse, 'bot'), 500);
+                    return;
+                }
+
+                // Show typing indicator
+                typingIndicator.style.display = 'block';
+                
+                try {
+                    const response = await fetch('/plugins/custom-chatbot/chat/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            session_id: 'user_' + Date.now()
+                        })
+                    });
+
+                    const data = await response.json();
+                    typingIndicator.style.display = 'none';
+
+                    // Check if response is a string that needs to be parsed
+                    if (typeof data.response === 'string') {
+                        try {
+                            // Attempt to parse the string as JSON
+                            const parsedData = JSON.parse(data.response);
+                            if (Array.isArray(parsedData) && parsedData.length > 0) {
+                                // Render array of objects as a table
+                                addMessage(renderJsonAsTable(parsedData), 'bot', true);
+                                return;
+                            }
+                        } catch (error) {
+                            console.warn("Response is not valid JSON, rendering as text.");
+                            addMessage(data.response, 'bot');
+                            return;
+                        }
+                    } 
+                    
+                    // Check if response is already a parsed array
+                    if (Array.isArray(data.response) && data.response.length > 0) {
+                        addMessage(renderJsonAsTable(data.response), 'bot', true);
+                        return;
+                    }
+                    
+                    // Default fallback - just display the response as text
+                    addMessage(typeof data.response === 'object' ? 
+                        JSON.stringify(data.response, null, 2) : 
+                        data.response, 'bot');
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    typingIndicator.style.display = 'none';
+                    addMessage('Sorry, there was an error processing your request. Please try again.', 'bot');
+                }
+            }
+
+            function renderJsonAsTable(jsonData) {
+                // Guard against empty data
+                if (!jsonData || jsonData.length === 0) {
+                    return "No data available";
+                }
+                
+                let tableHtml = '<table border="1" style="width:100%; border-collapse: collapse;">';
+                
+                // Create table header from keys of first object
+                tableHtml += '<thead><tr>';
+                Object.keys(jsonData[0]).forEach(key => {
+                    tableHtml += `<th>${key}</th>`;
+                });
+                tableHtml += '</tr></thead>';
+                
+                // Create table body from all objects
+                tableHtml += '<tbody>';
+                jsonData.forEach(row => {
+                    tableHtml += '<tr>';
+                    Object.values(row).forEach(value => {
+                        // Handle null or undefined values
+                        const displayValue = value === null || value === undefined ? '' : value;
+                        tableHtml += `<td>${displayValue}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</tbody></table>';
+                
+                return tableHtml;
+            }
+
+            function addMessage(message, type, isHtml = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', `${type}-message`);
+                if (isHtml) {
+                    messageDiv.innerHTML = message;
+                } else {
+                    messageDiv.textContent = message;
+                }
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Event Listeners
             chatButton.addEventListener('click', () => {
                 chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
             });
@@ -150,44 +372,6 @@
                 chatWindow.style.display = 'none';
             });
 
-            // Send message function
-            async function sendChatMessage(message) {
-                // Add user message to chat
-                addMessage(message, 'user');
-                
-                try {
-                    const response = await fetch('/chatbot/chat/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')  // Django CSRF token
-                        },
-                        body: JSON.stringify({
-                            message: message,
-                            session_id: 'user_' + Date.now(),
-                            use_rag: true
-                        })
-                    });
-
-                    const data = await response.json();
-                    addMessage(data.response, 'bot');
-                } catch (error) {
-                    console.error('Error:', error);
-                    addMessage('Sorry, there was an error processing your request.', 'bot');
-                }
-            }
-
-            // Add message to chat window
-            function addMessage(message, type) {
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message');
-                messageDiv.classList.add(type === 'user' ? 'user-message' : 'bot-message');
-                messageDiv.textContent = message;
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-
-            // Handle send button click
             sendMessage.addEventListener('click', () => {
                 const message = messageInput.value.trim();
                 if (message) {
@@ -196,7 +380,6 @@
                 }
             });
 
-            // Handle enter key
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     const message = messageInput.value.trim();
@@ -207,7 +390,6 @@
                 }
             });
 
-            // Get CSRF token from cookies
             function getCookie(name) {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
@@ -223,6 +405,8 @@
                 return cookieValue;
             }
         });
+
     </script>
+    
 </body>
 </html>

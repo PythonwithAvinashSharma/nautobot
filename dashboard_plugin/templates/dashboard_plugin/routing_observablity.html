@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+<style>
+#content-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative !important;
+}
+
+.dashboard-wrapper {
+  position: absolute;
+  top: 0;
+  left: 230px; /* Keep this exactly as is to match existing navbar */
+  right: 0;
+  padding: 15px;
+  z-index: 10;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+.card {
+  border-radius: 5px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  background-color: #2d4154;
+  color: white;
+  padding: 15px;
+  font-weight: bold;
+  font-size: 18px;
+  border-radius: 5px 5px 0 0;
+}
+
+.card-body {
+  padding: 15px;
+  background-color: #f8f9fa;
+}
+
+.stat-box {
+  display: inline-block;
+  width: 70px;
+  text-align: center;
+  margin-right: 10px;
+}
+
+.added {
+  background-color: #28a745;
+  color: white;
+}
+
+.deleted {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modified {
+  background-color: #ffc107;
+  color: white;
+}
+
+.stat-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  font-weight: bold;
+}
+
+.status-healthy {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.progress {
+  height: 25px;
+  margin: 10px 0;
+}
+
+.progress-bar {
+  background-color: #007bff;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+}
+
+.chart-container {
+  height: 150px;
+  width: 100%;
+}
+
+.status-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+}
+.status-dot-green {
+  background-color: #28a745;
+}
+
+.status-dot-orange {
+  background-color: #ffc107;
+}
+
+.status-label {
+  display: inline-block;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.route-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.route-table th {
+  background-color: #2d4154;
+  color: white;
+  padding: 8px;
+  text-align: left;
+}
+
+.route-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.section-title {
+  font-weight: bold;
+  color: #333;
+  margin: 10px 0;
+}
+
+.optimization-card {
+  background-color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.orange-header {
+  color: #ff8c00;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.red-text {
+  color: #dc3545;
+}
+</style>
+
+<div class="dashboard-wrapper">
+  <!-- Title Card -->
+  <div class="card">
+    <div class="card-header">
+      Network Observability Dashboard - Routing Observability
+      <button type="button" class="close" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Routing Change Summary Card -->
+  <div class="card">
+    <div class="card-body">
+      <h5 class="section-title">Routing Change Summary (Last 24 Hours)</h5>
+      <div class="row">
+        <div class="col-md-3">
+          <!-- Stat boxes -->
+          <div class="stat-box">
+            <div class="stat-circle added">
+              <div>
+                <i class="fas fa-plus"></i><br>
+                27
+              </div>
+            </div>
+            <div>Added</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-circle deleted">
+              <div>
+                <i class="fas fa-minus"></i><br>
+                14
+              </div>
+            </div>
+            <div>Deleted</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-circle modified">
+              <div>
+                <i class="fas fa-pencil-alt"></i><br>
+                35
+              </div>
+            </div>
+            <div>Modified</div>
+          </div>
+          <div style="margin-top: 10px;">
+            <strong>Total Changes: 76</strong>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <h5>Routing Table Capacity</h5>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 52%;" aria-valuenow="52" aria-valuemin="0" aria-valuemax="100">52%</div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-4">
+              <small>Current Routes: 84,532</small>
+            </div>
+            <div class="col-md-4">
+              <small>Maximum Capacity: 162,560</small>
+            </div>
+            <div class="col-md-4">
+              <small>Growth Rate: +3.2%/month</small>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-4">
+              <small>Change Frequency: Normal</small>
+            </div>
+            <div class="col-md-8">
+              <small>Last Significant Change: 12h ago <span class="status-healthy">Status: Healthy</span></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Routing Changes Timeline Card -->
+  <div class="card">
+    <div class="card-header">
+      Routing Changes Timeline
+    </div>
+    <div class="card-body">
+      <h5 class="section-title">Changes by Hour (Last 24 Hours)</h5>
+      <div class="row">
+        <div class="col-md-9">
+          <div class="chart-container">
+            <canvas id="changesChart"></canvas>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card" style="background-color: #f8f9fa; border: 1px solid #ddd;">
+            <div class="card-body">
+              <div><strong>Peak Change Period:</strong></div>
+              <div>08:00 - 09:00 AM (42 changes)</div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <span style="display: inline-block; width: 15px; height: 15px; background-color: #28a745; margin-right: 5px;"></span> Added<br>
+            <span style="display: inline-block; width: 15px; height: 15px; background-color: #ffc107; margin-right: 5px;"></span> Modified<br>
+            <span style="display: inline-block; width: 15px; height: 15px; background-color: #dc3545; margin-right: 5px;"></span> Deleted
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Routing Changes Card -->
+  <div class="card">
+    <div class="card-header">
+      Recent Routing Changes
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="route-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Device</th>
+              <th>Type</th>
+              <th>Prefix</th>
+              <th>Next Hop</th>
+              <th>AS Path</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>27 Feb, 10:15 AM</td>
+              <td>CORE-RTR-01</td>
+              <td><span class="status-label added">ADDED</span></td>
+              <td>172.16.128.0/20</td>
+              <td>10.10.1.5</td>
+              <td>65001 65005</td>
+              <td><span class="status-dot status-dot-green"></span></td>
+            </tr>
+            <tr>
+              <td>27 Feb, 09:42 AM</td>
+              <td>EDGE-RTR-05</td>
+              <td><span class="status-label modified">MODIFIED</span></td>
+              <td>192.168.24.0/24</td>
+              <td>10.10.2.18</td>
+              <td>65001 65003 65008</td>
+              <td><span class="status-dot status-dot-green"></span></td>
+            </tr>
+            <tr>
+              <td>27 Feb, 08:37 AM</td>
+              <td>CORE-RTR-03</td>
+              <td><span class="status-label deleted">DELETED</span></td>
+              <td>10.45.67.0/24</td>
+              <td>10.10.5.2</td>
+              <td>65001 65002</td>
+              <td><span class="status-dot status-dot-green"></span></td>
+            </tr>
+            <tr>
+              <td>27 Feb, 08:22 AM</td>
+              <td>EDGE-RTR-02</td>
+              <td><span class="status-label added">ADDED</span></td>
+              <td>192.168.102.0/24</td>
+              <td>10.10.6.1</td>
+              <td>65001 65004</td>
+              <td><span class="status-dot status-dot-green"></span></td>
+            </tr>
+            <tr>
+              <td>27 Feb, 08:15 AM</td>
+              <td>CORE-RTR-02</td>
+              <td><span class="status-label modified">MODIFIED</span></td>
+              <td>10.75.16.0/20</td>
+              <td>10.10.3.6</td>
+              <td>65001 65003</td>
+              <td><span class="status-dot status-dot-orange"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Route Optimization Analysis Card -->
+  <div class="card">
+    <div class="card-header">
+      Route Optimization Analysis
+    </div>
+    <div class="card-body">
+      <h5 class="section-title">Optimization Opportunities</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="optimization-card">
+            <div class="orange-header">Route Aggregation Opportunity</div>
+            <div><strong>Device:</strong> EDGE-RTR-05</div>
+            <div><strong>Prefixes:</strong> 192.168.24.0/24, 192.168.25.0/24, 192.168.26.0/24, 192.168.27.0/24</div>
+            <div><strong>Recommended Aggregate:</strong> 192.168.24.0/22</div>
+          </div>
+          
+          <div class="optimization-card">
+            <div class="orange-header">Suboptimal Path Detected</div>
+            <div><strong>Route:</strong> 172.16.200.0/24</div>
+            <div><strong>Current Path:</strong> via AS65001 AS65003 AS65008 (3 hops)</div>
+            <div><strong>Recommended Path:</strong> via AS65001 AS65005 (2 hops)</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="optimization-card">
+            <div class="orange-header">Route Stability Analysis</div>
+            <div class="red-text">Flapping Routes Detected: 2</div>
+            <div style="margin-top: 10px;">
+              <div>10.85.144.0/24</div>
+              <div><small>7 changes in 6 hours</small></div>
+            </div>
+            <div style="margin-top: 5px;">
+              <div>172.16.78.0/24</div>
+              <div><small>5 changes in 4 hours</small></div>
+            </div>
+          </div>
+          
+          <div class="optimization-card">
+            <div class="orange-header">Stability Metrics</div>
+            <div><strong>Average Route Age:</strong> 67 days</div>
+            <div><strong>Route Flap Dampening:</strong> Enabled</div>
+            <div><strong>Convergence Time (avg):</strong> 3.2 seconds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Charts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Chart for Changes by Hour
+    var ctx = document.getElementById('changesChart').getContext('2d');
+    var changesChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '00:00', '02:00', '04:00', '06:00', '08:00', '10:00'],
+        datasets: [
+          {
+            label: 'Added',
+            data: [3, 2, 4, 2, 2, 2, 1, 1, 0, 1, 2, 4, 3],
+            backgroundColor: '#28a745',
+            stack: 'Stack 0',
+          },
+          {
+            label: 'Modified',
+            data: [2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 3, 5, 2],
+            backgroundColor: '#ffc107',
+            stack: 'Stack 0',
+          },
+          {
+            label: 'Deleted',
+            data: [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 0],
+            backgroundColor: '#dc3545',
+            stack: 'Stack 0',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            stacked: true,
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            max: 12,
+            ticks: {
+              stepSize: 4
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        }
+      }
+    });
+    document.querySelector('.close').addEventListener('click', function() {
+        window.location.href = "/cio";
+    });
+  });
+</script>
+{% endblock %}

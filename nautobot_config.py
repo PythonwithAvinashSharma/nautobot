@@ -118,11 +118,11 @@ CONFIG_CONTEXT_DYNAMIC_GROUPS_ENABLED = is_truthy(os.getenv("NAUTOBOT_CONFIG_CON
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "nautobot",
-        "USER": "postgres",
-        "PASSWORD": "admin12345",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": os.getenv("DB_NAME", "nautobot"),
+        "USER": os.getenv("DB_USER", "postgres"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "admin12345"),
+        "HOST": os.getenv("DB_HOST", "10.24.65.27"),
+        "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
 
@@ -393,7 +393,7 @@ STORAGE_CONFIG = {}
 # Plugins
 METRICS_DISABLED_APPS = []
 PLUGINS =  ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir", "nautobot_golden_config", "nautobot_firewall_models", "nautobot_device_lifecycle_mgmt", "nautobot_chatops", 
-                "dashboard_plugin","nautobot_design_builder", "welcome_wizard", "nautobot_data_validation_engine", "slurpit_nautobot", "nautobot_capacity_metrics", "naas", "nautobot_ui_plugin"]
+                "dashboard_plugin","nautobot_design_builder", "welcome_wizard", "nautobot_data_validation_engine", "slurpit_nautobot", "nautobot_capacity_metrics", "naas", "nautobot_ui_plugin", "custom_chatbot"]
 PLUGINS_CONFIG = {
    "nautobot_plugin_nornir": {
        "use_config_context": {"secrets": True, "connection_options": True},
@@ -523,6 +523,7 @@ PLUGINS_CONFIG = {
     },
     "dashboard_plugin": {},
     "naas": {},
+    "custom_chatbot": {},
     "nautobot_data_validation_engine": {},
     "nautobot_ui_plugin" : {},
     # "netbox_topology_views": {

@@ -7,4 +7,16 @@ Traceback (most recent call last):
   File "/home/ubuntu/nautobot-dev/nautobot/nautobot/core/cli/__init__.py", line 139, in load_settings
     raise FileNotFoundError(
 FileNotFoundError: Configuration file not found at /home/ubuntu/.nautobot/nautobot_config.py - Please provide a valid --config-path path, or use 'nautobot-server init' to create a new configuration.
- path, or use 'nautobot-server init' to create a new configuration.
+ings import LOG_DEPRECATION_WARNINGS
+  File "/home/ubuntu/nautobot-dev/nautobot/nautobot/core/settings.py", line 950, in <module>
+    os.path.join(tempfile.gettempdir(), "nautobot_celery_beat_heartbeat"),
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/tempfile.py", line 454, in gettempdir
+    return _os.fsdecode(_gettempdir())
+                        ^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/tempfile.py", line 447, in _gettempdir
+    tempdir = _get_default_tempdir()
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/tempfile.py", line 362, in _get_default_tempdir
+    raise FileNotFoundError(_errno.ENOENT,
+FileNotFoundError: [Errno 2] No usable temporary directory found in ['/tmp', '/var/tmp', '/usr/tmp', '/home/ubuntu/nautobot-dev/nautobot']
