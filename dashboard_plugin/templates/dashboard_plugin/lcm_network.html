@@ -24,16 +24,20 @@
         padding: 20px;
     }
 
-    .dashboard-header {
-        margin-bottom: 20px;
-    }
-
     .dashboard-header h1 {
         font-size: 24px;
         font-weight: 600;
         margin-bottom: 16px;
     }
-
+    .dashboard-select select {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        background-color: #e5e7eb;
+        font-size: 16px;
+        cursor: pointer;
+        color: #333; /* Ensure text color is visible */
+    }
     .tab-buttons {
         display: flex;
         gap: 8px;
@@ -177,25 +181,58 @@
       font-size: 32px;
       font-weight: bold;
     }
+    /* Header styles */
+    .dashboard-header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .dashboard-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 500;
+    }
+    .close-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
 </style>
 
 <div class="main-content">
-    <div class="dashboard-select">
-        <select id="dashboardSelect" onchange="handleDashboardChange()">
-            <option value="00">Main Dashboard</option>
-            <option value="01">Sites</option>
-            <option value="02">Device Inventory</option>
-            <option value="03">Racks</option>
-            <option value="04">Circuits</option>
-            <option value="05">VLANs</option>
-            <option value="06">IP Addresses</option>
-            <option value="07">Prefixes</option>
-            <option value="08" selected>LCM Netwrok Dashboard</option>
-        </select>
+    <div class="dashboard-header">
+        <h2> Network Connectivity: LCM Dashboard</h2>
+        <div class="dashboard-select">
+            <select id="dashboardSelect" onchange="handleDashboardChange()">
+                <option value="00">Main Dashboard</option>
+                <option value="01">Sites</option>
+                <option value="02">Device Inventory</option>
+                <option value="03">Racks</option>
+                <option value="04">Circuits</option>
+                <option value="05">VLANs</option>
+                <option value="06">IP Addresses</option>
+                <option value="07">Prefixes</option>
+                <option value="08" selected>LCM Netwrok Dashboard</option>
+            </select>
+        </div>
+        <button class="close-button">×</button>
     </div>
     <div class="container">
         <div class="dashboard-header">
-            <h1>Network Connectivity: LCM Dashboard</h1>
             <div class="tab-buttons">
                 <button class="tab-button active" onclick="showTab('hardware')">NW Hardware</button>
                 <button class="tab-button" onclick="showTab('software')">NW Software</button>
@@ -436,6 +473,11 @@
     document.addEventListener('DOMContentLoaded', function() {
         showTab('hardware');
     });
+
+    // Close button functionality
+    document.querySelector('.close-button').addEventListener('click', function() {
+                window.location.href = "/cio";
+                });
 
     function handleDashboardChange() {
         const selectedDashboard = document.getElementById('dashboardSelect').value;

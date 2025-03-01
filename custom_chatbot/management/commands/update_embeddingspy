@@ -1,0 +1,20 @@
+from django.core.management.base import BaseCommand
+from custom_chatbot.models import Document
+from langchain.embeddings import HuggingFaceEmbeddings
+import numpy as np
+
+class Command(BaseCommand):
+    help = 'Update document embeddings in the database'
+
+    def handle(self, *args, **options):
+        embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        
+        documents = Document.objects.filter(embedding__isnull=True)
+        self.stdout.write(f"Updating embeddings for {documents.count()} documents")
+        
+        for doc in documents:
+            embedding = embedding_model.embed_query(doc.content)
+            doc.embedding = embedding
+            doc.save()
+            
+        self.stdout.write(self.style.SUCCESS('Successfully updated document embeddings'))

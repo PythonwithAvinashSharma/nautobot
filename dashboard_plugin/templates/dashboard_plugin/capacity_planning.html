@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+{% load static %}
+{% load helpers %}
+{% block content %}
+<div class="dashboard-wrapper">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Observability Dashboard - Capacity Planning</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js"></script>
+  <style>
+    /* Dashboard header */
+    .dashboard-header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .dashboard-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    
+    .close-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Dashboard card */
+    .dashboard-card {
+      background-color: #ffffff;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+      height: 300px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden; /* Fix for table overflow */
+    }
+
+    .growth-card {
+      background-color: #ffffff;
+      border-radius: 5px;
+      padding: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* Section headers */
+    .section-header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .section-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    
+    /* Chart containers */
+    .chart-container {
+      position: relative;
+      margin: auto;
+      height: 180px;
+    }
+    
+    .donut-charts {
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+    
+    .donut-chart {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      text-align: center;
+    }
+    
+    .donut-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+    
+    .donut-title {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.9rem;
+      color: #7f8c8d;
+    }
+    
+    /* Tables */
+    .table-container {
+      overflow: auto; /* Changed from overflow-x to just overflow */
+      max-height: 210px; /* Added max-height to control vertical overflow */
+    }
+    
+    .capacity-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed; /* Added for better column width control */
+    }
+    
+    .capacity-table th {
+      background-color: #2c3e50;
+      color: white;
+      padding: 8px 12px;
+      text-align: left;
+      position: sticky; /* Make headers sticky */
+      top: 0; /* Stick to the top */
+      z-index: 1; /* Ensure headers appear above content when scrolling */
+    }
+    
+    .capacity-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #ecf0f1;
+      white-space: nowrap; /* Prevent text wrapping */
+    }
+    
+    .capacity-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .status-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .status-green {
+      background-color: #2ecc71;
+    }
+    
+    .status-red {
+      background-color: #e74c3c;
+    }
+    
+    .status-orange {
+      background-color: #f39c12;
+    }
+    
+    .status-yellow {
+      background-color: #f1c40f;
+    }
+    
+    /* Trend indicators */
+    .trend-up {
+      color: #e74c3c;
+    }
+    
+    .trend-down {
+      color: #2ecc71;
+    }
+    
+    .trend-neutral {
+      color: #95a5a6;
+    }
+    
+    /* Growth projections */
+    .growth-container {
+      display: flex;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding: 15px;
+    }
+    
+    .growth-item {
+      margin: 10px;
+      text-align: center;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      
+    }
+    
+    .growth-label {
+      font-weight: 500;
+      font-size: large;
+    }
+    
+    .growth-value {
+      font-weight: bold;
+      margin-left: 10px;
+      font-size: large
+    }
+    
+    .growth-value.positive {
+      color: #27ae60;
+    }
+    
+    .growth-value.critical {
+      color: #e74c3c;
+    }
+    
+    .growth-value.warning {
+      color: #f39c12;
+    }
+  </style>
+
+  <!-- Dashboard header -->
+  <div class="dashboard-header">
+    <h2>Network Observability Dashboard - Capacity Planning</h2>
+    <button class="close-button">×</button>
+  </div>
+
+  <!-- Network Capacity Overview -->
+  <div class="dashboard-card">
+    <h3>Network Capacity Overview</h3>
+    <div class="donut-charts">
+      <div class="donut-chart">
+        <canvas id="bandwidthChart" width="130" height="130"></canvas>
+        <div class="donut-title">Bandwidth</div>
+        <div class="donut-label">68%</div>
+      </div>
+      <div class="donut-chart">
+        <canvas id="portsChart" width="130" height="130"></canvas>
+        <div class="donut-title">Ports</div>
+        <div class="donut-label">72%</div>
+      </div>
+      <div class="donut-chart">
+        <canvas id="routingChart" width="130" height="130"></canvas>
+        <div class="donut-title">Routing Table</div>
+        <div class="donut-label">52%</div>
+      </div>
+      <div class="donut-chart">
+        <canvas id="vpnChart" width="130" height="130"></canvas>
+        <div class="donut-title">VPN Tunnels</div>
+        <div class="donut-label">57%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAN Bandwidth Capacity -->
+  <div class="section-header">
+    <h3>WAN Bandwidth Capacity</h3>
+  </div>
+
+  <!-- WAN Traffic and Status -->
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="dashboard-card">
+        <h4>WAN Traffic Trends (Last 24 Hours)</h4>
+        <div class="chart-container">
+          <canvas id="trafficChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="dashboard-card">
+        <h4>Critical WAN Link Status</h4>
+        <div class="table-container">
+          <table class="capacity-table">
+            <thead>
+              <tr>
+                <th>Link</th>
+                <th>Capacity</th>
+                <th>Current</th>
+                <th>Peak (24h)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>NY-DC Primary</td>
+                <td>10 Gbps</td>
+                <td>5.8 Gbps</td>
+                <td>7.2 Gbps</td>
+                <td><span class="status-dot status-green"></span></td>
+              </tr>
+              <tr>
+                <td>EMEA-APAC</td>
+                <td>5 Gbps</td>
+                <td>3.9 Gbps</td>
+                <td>4.7 Gbps</td>
+                <td><span class="status-dot status-orange"></span></td>
+              </tr>
+              <tr>
+                <td>SA-NA Backup</td>
+                <td>2 Gbps</td>
+                <td>0.8 Gbps</td>
+                <td>1.1 Gbps</td>
+                <td><span class="status-dot status-green"></span></td>
+              </tr>
+              <tr>
+                <td>APAC-ANZ</td>
+                <td>2.5 Gbps</td>
+                <td>2.1 Gbps</td>
+                <td>2.4 Gbps</td>
+                <td><span class="status-dot status-red"></span></td>
+              </tr>
+              <tr>
+                <td>London-Frankfurt</td>
+                <td>4 Gbps</td>
+                <td>3.6 Gbps</td>
+                <td>3.8 Gbps</td>
+                <td><span class="status-dot status-orange"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Router & Switch Capacity -->
+  <div class="section-header">
+    <h3>Router & Switch Capacity</h3>
+  </div>
+
+  <!-- Device Utilization and Interface Capacity -->
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="dashboard-card">
+        <h4>High Utilization Devices</h4>
+        <div class="table-container">
+          <table class="capacity-table">
+            <thead>
+              <tr>
+                <th>Device</th>
+                <th>Location</th>
+                <th>Utilization</th>
+                <th>Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Core-RTR-05</td>
+                <td>NY Data Center</td>
+                <td><span style="color: #e74c3c;">92%</span></td>
+                <td><span class="trend-up">↑</span></td>
+              </tr>
+              <tr>
+                <td>Edge-SW-12</td>
+                <td>APAC-ANZ</td>
+                <td><span style="color: #e74c3c;">89%</span></td>
+                <td><span class="trend-up">↑</span></td>
+              </tr>
+              <tr>
+                <td>Core-SW-03</td>
+                <td>London DC</td>
+                <td><span style="color: #f39c12;">81%</span></td>
+                <td><span class="trend-down">↓</span></td>
+              </tr>
+              <tr>
+                <td>MPLS-RTR-02</td>
+                <td>Frankfurt</td>
+                <td><span style="color: #f39c12;">78%</span></td>
+                <td><span class="trend-neutral">→</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="dashboard-card">
+        <h4>Interface Capacity</h4>
+        <div class="donut-charts">
+          <div class="donut-chart">
+            <canvas id="interface1Chart" width="110" height="110"></canvas>
+            <div class="donut-title">1G Ports</div>
+            <div class="donut-label">73%</div>
+          </div>
+          <div class="donut-chart">
+            <canvas id="interface10Chart" width="110" height="110"></canvas>
+            <div class="donut-title">10G Ports</div>
+            <div class="donut-label">65%</div>
+          </div>
+          <div class="donut-chart">
+            <canvas id="interface40Chart" width="110" height="110"></canvas>
+            <div class="donut-title">40G Ports</div>
+            <div class="donut-label">42%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Capacity Growth Forecast -->
+  <div class="section-header">
+    <h3>Capacity Growth Forecast</h3>
+  </div>
+
+  <!-- 12-Month Network Growth Projection -->
+  <div class="growth-card">
+    <h4>12-Month Network Growth Projection</h4>
+    <div class="growth-container">
+      <div class="growth-item">
+        <span class="growth-label">WAN Bandwidth</span>
+        <span class="growth-value critical">+38%</span>
+      </div>
+      <div class="growth-item">
+        <span class="growth-label">VPN Tunnels</span>
+        <span class="growth-value critical">+42%</span>
+      </div>
+      <div class="growth-item">
+        <span class="growth-label">Routing Table</span>
+        <span class="growth-value warning">+25%</span>
+      </div>
+      <div class="growth-item">
+        <span class="growth-label">Port Capacity</span>
+        <span class="growth-value warning">+29%</span>
+      </div>
+      <div class="growth-item">
+        <span class="growth-label">IP Addresses</span>
+        <span class="growth-value positive">+18%</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create the donut charts for Network Capacity Overview
+    function createDonutChart(elementId, percentage, color) {
+      const ctx = document.getElementById(elementId).getContext('2d');
+      return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [percentage, 100 - percentage],
+            backgroundColor: [color, '#ecf0f1'],
+            borderWidth: 0,
+            cutout: '75%'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              enabled: false
+            }
+          },
+          animation: {
+            animateRotate: true
+          }
+        }
+      });
+    }
+
+    // Create the traffic trends chart
+    function createTrafficChart() {
+      const ctx = document.getElementById('trafficChart').getContext('2d');
+      
+      // Create time labels for 24 hours - match the exact format from the image
+      const labels = [];
+      for (let i = 0; i < 25; i++) {
+        // Format to match the image with hours ranging from 00:00 to 24:00
+        const hour = i.toString().padStart(2, '0') + ':00';
+        labels.push(hour);
+      }
+      
+      // Sample data for inbound and outbound traffic
+      const inboundData = [4.2, 3.8, 3.5, 3.7, 4.0, 4.5, 5.2, 5.8, 6.5, 7.2, 7.8, 8.0, 8.2, 7.9, 7.5, 7.0, 6.5, 6.0, 5.5, 5.0, 4.8, 4.5, 4.2, 4.0, 3.8];
+      const outboundData = [4.5, 4.2, 3.8, 3.5, 3.2, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 5.8, 6.0, 5.8, 5.5, 5.2, 5.0, 4.8, 4.5, 4.2, 4.0, 3.8, 3.5, 3.2, 3.0];
+      
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Inbound',
+            data: inboundData,
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            fill: true,
+            tension: 0.4
+          }, {
+            label: 'Outbound',
+            data: outboundData,
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Gbps'
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)' // Light grid lines to match the image
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)' // Light grid lines to match the image
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'start'
+            }
+          }
+        }
+      });
+    }
+
+    // Initialize all charts when the document is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      // Create Network Capacity Overview charts
+      createDonutChart('bandwidthChart', 68, '#3498db');
+      createDonutChart('portsChart', 72, '#2ecc71');
+      createDonutChart('routingChart', 52, '#f39c12');
+      createDonutChart('vpnChart', 57, '#9b59b6');
+      
+      // Create Interface Capacity charts
+      createDonutChart('interface1Chart', 73, '#2ecc71');
+      createDonutChart('interface10Chart', 65, '#f39c12');
+      createDonutChart('interface40Chart', 42, '#3498db');
+      
+      // Create Traffic Trends chart
+      createTrafficChart();
+      document.querySelector('.close-button').addEventListener('click', function() {
+              window.location.href = "/cio";
+          });
+    });
+  </script>
+</div>
+{% endblock %}
+
+<style>
+#content-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative !important;
+}
+
+.dashboard-wrapper {
+  position: absolute;
+  top: 0;
+  left: 230px; /* Keep this exactly as is to match existing navbar */
+  right: 0;
+  padding: 15px;
+  z-index: 10;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+</style>

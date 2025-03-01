@@ -28,76 +28,78 @@
                     {% csrf_token %}
                     <div id="vlanBlocksContainer">
                         {% for row_form in form.rows %}
-                        <div class="vlan-block">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="switch_ip_{{ forloop.counter0 }}">Switch IP</label>
-                                    <input type="text" name="switch_ip_{{ forloop.counter0 }}" 
-                                        value="{{ row_form.switch_ip.value|default:'' }}" 
-                                        class="form-control" required placeholder="Enter Switch IP">
-                                    <div class="error-message" id="switch_ip_error_{{ forloop.counter0 }}"></div>
-                                    {{ row_form.switch_ip.errors }}
+                            {% if forloop.counter0 == 0 %}
+                                <div class="vlan-block">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="switch_ip_{{ forloop.counter0 }}">Switch IP</label>
+                                            <input type="text" name="switch_ip_{{ forloop.counter0 }}" 
+                                                value="{{ row_form.switch_ip.value|default:'' }}" 
+                                                class="form-control" required placeholder="Enter Switch IP">
+                                            <div class="error-message" id="switch_ip_error_{{ forloop.counter0 }}"></div>
+                                            {{ row_form.switch_ip.errors }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="vlan_{{ forloop.counter0 }}">VLAN</label>
+                                            <select name="vlan_{{ forloop.counter0 }}" class="form-control vlan-select" required>
+                                                {% for vlan in row_form.vlan.field.queryset %}
+                                                <option value="{{ vlan.pk }}" {% if vlan.pk == row_form.vlan.value %}selected{% endif %}>{{ vlan }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="error-message" id="vlan_error_{{ forloop.counter0 }}"></div>
+                                            {{ row_form.vlan.errors }}
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="admin_state_{{ forloop.counter0 }}">Admin State</label>
+                                            <select name="admin_state_{{ forloop.counter0 }}" class="form-control" required>
+                                                <option value="no shutdown" {% if row_form.admin_state.value == 'no shutdown' %}selected{% endif %}>No Shutdown</option>
+                                                <option value="shutdown" {% if row_form.admin_state.value == 'shutdown' %}selected{% endif %}>Shutdown</option>
+                                            </select>
+                                            <div class="error-message" id="admin_state_error_{{ forloop.counter0 }}"></div>
+                                            {{ row_form.admin_state.errors }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="subnet_{{ forloop.counter0 }}">Subnet</label>
+                                            <select name="subnet_{{ forloop.counter0 }}" class="form-control subnet-select">
+                                                {% for subnet in row_form.subnet.field.queryset %}
+                                                <option value="{{ subnet.pk }}" {% if subnet.pk == row_form.subnet.value %}selected{% endif %}>{{ subnet }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="error-message" id="subnet_error_{{ forloop.counter0 }}"></div>
+                                            {{ row_form.subnet.errors }}
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="gateway_ip_{{ forloop.counter0 }}">Gateway IP</label>
+                                            <input type="text" name="gateway_ip_{{ forloop.counter0 }}" 
+                                                value="{{ row_form.gateway_ip.value|default:'' }}" 
+                                                class="form-control" placeholder="Enter Gateway IP">
+                                            <div class="error-message" id="gateway_ip_error_{{ forloop.counter0 }}"></div>
+                                            {{ row_form.gateway_ip.errors }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="mtu_size_{{ forloop.counter0 }}">MTU Size</label>
+                                            <input type="number" name="mtu_size_{{ forloop.counter0 }}" 
+                                                value="{{ row_form.mtu_size.value|default:'' }}" 
+                                                class="form-control" placeholder="Enter MTU Size">
+                                            <div class="error-message" id="mtu_size_error_{{ forloop.counter0 }}"></div>
+                                            {{ row_form.mtu_size.errors }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="vlan_description_{{ forloop.counter0 }}">VLAN Description</label>
+                                        <input type="text" name="vlan_description_{{ forloop.counter0 }}" 
+                                            value="{{ row_form.vlan_description.value|default:'' }}" 
+                                            class="form-control" placeholder="Enter VLAN Description">
+                                        <div class="error-message" id="vlan_description_error_{{ forloop.counter0 }}"></div>
+                                        {{ row_form.vlan_description.errors }}
+                                    </div>
+                                    <button type="button" class="btn-remove remove-block">Remove</button>
                                 </div>
-                                <div class="form-group">
-                                    <label for="vlan_{{ forloop.counter0 }}">VLAN</label>
-                                    <select name="vlan_{{ forloop.counter0 }}" class="form-control vlan-select" required>
-                                        {% for vlan in row_form.vlan.field.queryset %}
-                                        <option value="{{ vlan.pk }}" {% if vlan.pk == row_form.vlan.value %}selected{% endif %}>{{ vlan }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <div class="error-message" id="vlan_error_{{ forloop.counter0 }}"></div>
-                                    {{ row_form.vlan.errors }}
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="admin_state_{{ forloop.counter0 }}">Admin State</label>
-                                    <select name="admin_state_{{ forloop.counter0 }}" class="form-control" required>
-                                        <option value="no shutdown" {% if row_form.admin_state.value == 'no shutdown' %}selected{% endif %}>No Shutdown</option>
-                                        <option value="shutdown" {% if row_form.admin_state.value == 'shutdown' %}selected{% endif %}>Shutdown</option>
-                                    </select>
-                                    <div class="error-message" id="admin_state_error_{{ forloop.counter0 }}"></div>
-                                    {{ row_form.admin_state.errors }}
-                                </div>
-                                <div class="form-group">
-                                    <label for="subnet_{{ forloop.counter0 }}">Subnet</label>
-                                    <select name="subnet_{{ forloop.counter0 }}" class="form-control subnet-select">
-                                        {% for subnet in row_form.subnet.field.queryset %}
-                                        <option value="{{ subnet.pk }}" {% if subnet.pk == row_form.subnet.value %}selected{% endif %}>{{ subnet }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <div class="error-message" id="subnet_error_{{ forloop.counter0 }}"></div>
-                                    {{ row_form.subnet.errors }}
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="gateway_ip_{{ forloop.counter0 }}">Gateway IP</label>
-                                    <input type="text" name="gateway_ip_{{ forloop.counter0 }}" 
-                                        value="{{ row_form.gateway_ip.value|default:'' }}" 
-                                        class="form-control" placeholder="Enter Gateway IP">
-                                    <div class="error-message" id="gateway_ip_error_{{ forloop.counter0 }}"></div>
-                                    {{ row_form.gateway_ip.errors }}
-                                </div>
-                                <div class="form-group">
-                                    <label for="mtu_size_{{ forloop.counter0 }}">MTU Size</label>
-                                    <input type="number" name="mtu_size_{{ forloop.counter0 }}" 
-                                        value="{{ row_form.mtu_size.value|default:'' }}" 
-                                        class="form-control" placeholder="Enter MTU Size">
-                                    <div class="error-message" id="mtu_size_error_{{ forloop.counter0 }}"></div>
-                                    {{ row_form.mtu_size.errors }}
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="vlan_description_{{ forloop.counter0 }}">VLAN Description</label>
-                                <input type="text" name="vlan_description_{{ forloop.counter0 }}" 
-                                    value="{{ row_form.vlan_description.value|default:'' }}" 
-                                    class="form-control" placeholder="Enter VLAN Description">
-                                <div class="error-message" id="vlan_description_error_{{ forloop.counter0 }}"></div>
-                                {{ row_form.vlan_description.errors }}
-                            </div>
-                            <button type="button" class="btn-remove remove-block">Remove</button>
-                        </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                     <div class="button-container">

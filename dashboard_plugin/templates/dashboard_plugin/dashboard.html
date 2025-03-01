@@ -50,6 +50,20 @@
         margin-bottom: 20px;
     }
 
+    .close-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
     .metric-card {
         background: white;
         padding: 20px;
@@ -375,9 +389,31 @@
         background: white;
         font-size: 14px;
     }
+
+    /* Header styles */
+    .dashboard-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dashboard-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 500;
+        }
 </style>
 
 <div class="main-content">
+    <div class="dashboard-header">
+        <h2>Network Observability Dashboard - Region Health Score</h2>
+        <button class="close-button">×</button>
+    </div>
     <div class="dashboard-select">
         <select id="dashboardSelect" onchange="handleDashboardChange()">
             <option value="00" selected>Main Dashboard</option>
@@ -390,9 +426,10 @@
             <option value="07">Prefixes</option>
             <option value="08">LCM Netwrok Dashboard</option>
         </select>
+    <button class="close-button">×</button>
     </div>
 
-    <div class="network-status-section">
+    <!-- <div class="network-status-section">
         <h2 id="dashboardTitle" style="font-size: 24px; font-weight: 600; margin-bottom: 20px;">Network Health Dashboard</h2>
         
         <div class="dashboard-header">
@@ -419,25 +456,8 @@
             <canvas id="barChart"></canvas>
         </div>
     </div>
-    </div>
+    </div> -->
 
-    <div class="log-alerts">
-        <h3 style="margin-bottom: 15px;">Triggered log alerts</h3>
-        <input type="text" class="search-bar" placeholder="Search..." id="logSearch">
-        <table>
-            <thead>
-                <tr>
-                    <th>S No.</th>
-                    <th>Name</th>
-                    <th>Time</th>
-                    <th>Message</th>
-                </tr>
-            </thead>
-            <tbody id="logAlertsBody">
-                <!-- Log entries will be populated by JavaScript -->
-            </tbody>
-        </table>
-    </div>
     <div class="metrics-grid">
         <div class="metric-card" onclick="redirectToSiteDashboard()">
             <div class="metric-title">Total Sites</div>
@@ -639,6 +659,24 @@
         </div>
         <!-- Add other device cards similarly -->
     </div>
+
+    <div class="log-alerts">
+        <h3 style="margin-bottom: 15px;">Triggered log alerts</h3>
+        <input type="text" class="search-bar" placeholder="Search..." id="logSearch">
+        <table>
+            <thead>
+                <tr>
+                    <th>S No.</th>
+                    <th>Name</th>
+                    <th>Time</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody id="logAlertsBody">
+                <!-- Log entries will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
@@ -670,75 +708,80 @@ data.Overall = Object.entries(data).reduce((acc, [region, sites]) => {
 
 let pieChart, barChart;
 
-function updateDashboard() {
-    const region = document.getElementById('regionSelect').value;
-    document.getElementById('dashboardTitle').textContent = `Network Health Dashboard - ${region}`;
+// function updateDashboard() {
+//     const region = document.getElementById('regionSelect').value;
+//     document.getElementById('dashboardTitle').textContent = `Network Health Dashboard - ${region}`;
     
-    const statusGrid = document.getElementById('statusGrid');
-    statusGrid.innerHTML = '';
+//     const statusGrid = document.getElementById('statusGrid');
+//     statusGrid.innerHTML = '';
 
-    const regionData = data[region];
-    const aggregatedData = { down: 0, critical: 0, warning: 0, unknown: 0, other: 0, up: 0 };
+//     const regionData = data[region];
+//     const aggregatedData = { down: 0, critical: 0, warning: 0, unknown: 0, other: 0, up: 0 };
     
-    for (const site in regionData) {
-        for (const key in regionData[site]) {
-            aggregatedData[key] += regionData[site][key];
-        }
-    }
+//     for (const site in regionData) {
+//         for (const key in regionData[site]) {
+//             aggregatedData[key] += regionData[site][key];
+//         }
+//     }
 
-    const statusLabels = ['Down', 'Critical', 'Warning', 'Unknown', 'Other', 'Up'];
-    const statusColors = ['#DC2626', '#EA580C', '#FBBF24', '#E5E7EB', '#0D9488', '#16A34A'];
+    // const statusLabels = ['Down', 'Critical', 'Warning', 'Unknown', 'Other', 'Up'];
+    // const statusColors = ['#DC2626', '#EA580C', '#FBBF24', '#E5E7EB', '#0D9488', '#16A34A'];
 
-    statusLabels.forEach((label, index) => {
-        const card = document.createElement('div');
-        card.className = 'status-card';
-        card.style.backgroundColor = statusColors[index];
-        card.innerHTML = `<div class="status-value">${aggregatedData[label.toLowerCase()]}</div><div class="status-label">${label}</div>`;
-        statusGrid.appendChild(card);
+    // statusLabels.forEach((label, index) => {
+    //     const card = document.createElement('div');
+    //     card.className = 'status-card';
+    //     card.style.backgroundColor = statusColors[index];
+    //     card.innerHTML = `<div class="status-value">${aggregatedData[label.toLowerCase()]}</div><div class="status-label">${label}</div>`;
+    //     statusGrid.appendChild(card);
+    // });
+
+    // updateCharts(regionData);
+
+
+// function updateCharts(regionData) {
+//     const pieCtx = document.getElementById('pieChart').getContext('2d');
+//     const barCtx = document.getElementById('barChart').getContext('2d');
+
+//     if (pieChart) pieChart.destroy();
+//     if (barChart) barChart.destroy();
+
+//     const siteLabels = Object.keys(regionData);
+//     const siteUpValues = siteLabels.map(site => regionData[site].up);
+
+//     pieChart = new Chart(pieCtx, {
+//         type: 'pie',
+//         data: {
+//             labels: siteLabels,
+//             datasets: [{
+//                 data: siteUpValues,
+//                 backgroundColor: ['#34D399', '#60A5FA', '#FCD34D', '#A78BFA', '#F87171']
+//             }]
+//         },
+//         options: { responsive: true }
+//     });
+
+//     barChart = new Chart(barCtx, {
+//         type: 'bar',
+//         data: {
+//             labels: siteLabels,
+//             datasets: [{
+//                 label: 'Up Status per Site',
+//                 data: siteUpValues,
+//                 backgroundColor: '#34D399'
+//             }]
+//         },
+//         options: { indexAxis: 'y', responsive: true }
+//     });
+// }
+document.addEventListener('DOMContentLoaded', function() {
+        
+        // Initialize Tippy.js tooltips
+        tippy('[data-tippy-content]', {
+            placement: 'top',
+            arrow: true
+        });
     });
-
-    updateCharts(regionData);
-}
-
-function updateCharts(regionData) {
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const barCtx = document.getElementById('barChart').getContext('2d');
-
-    if (pieChart) pieChart.destroy();
-    if (barChart) barChart.destroy();
-
-    const siteLabels = Object.keys(regionData);
-    const siteUpValues = siteLabels.map(site => regionData[site].up);
-
-    pieChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-            labels: siteLabels,
-            datasets: [{
-                data: siteUpValues,
-                backgroundColor: ['#34D399', '#60A5FA', '#FCD34D', '#A78BFA', '#F87171']
-            }]
-        },
-        options: { responsive: true }
-    });
-
-    barChart = new Chart(barCtx, {
-        type: 'bar',
-        data: {
-            labels: siteLabels,
-            datasets: [{
-                label: 'Up Status per Site',
-                data: siteUpValues,
-                backgroundColor: '#34D399'
-            }]
-        },
-        options: { indexAxis: 'y', responsive: true }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', updateDashboard);
-
-    // Handle dashboard change
+    // Your existing JavaScript functions
     function handleDashboardChange() {
         const selectedDashboard = document.getElementById('dashboardSelect').value;
         switch (selectedDashboard) {
@@ -752,27 +795,21 @@ document.addEventListener('DOMContentLoaded', updateDashboard);
                 window.location.href = "{% url 'plugins:dashboard_plugin:device_inventory' %}";
                 break;
             case '03':
-                // Add redirection for Racks
                 window.location.href = "{% url 'plugins:dashboard_plugin:racks' %}";
                 break;
             case '04':
-                // Add redirection for Circuits
                 window.location.href = "{% url 'plugins:dashboard_plugin:circuits' %}";
                 break;
             case '05':
-                // Add redirection for VLANs
                 window.location.href = "{% url 'plugins:dashboard_plugin:vlans' %}";
                 break;
             case '06':
-                // Add redirection for IP Addresses
                 window.location.href = "{% url 'plugins:dashboard_plugin:ip_addresses' %}";
                 break;
             case '07':
-                // Add redirection for Prefixes
                 window.location.href = "{% url 'plugins:dashboard_plugin:prefixes' %}";
                 break;
             case '08':
-                // Add redirection for Prefixes
                 window.location.href = "{% url 'plugins:dashboard_plugin:lcm_network' %}";
                 break;
             default:
@@ -780,7 +817,6 @@ document.addEventListener('DOMContentLoaded', updateDashboard);
         }
     }
 
-    // Redirect to Site Dashboard
     function redirectToSiteDashboard() {
         window.location.href = "{% url 'plugins:dashboard_plugin:site_dashboard' %}";
     }
@@ -802,7 +838,7 @@ document.addEventListener('DOMContentLoaded', updateDashboard);
     function redirectToPrefixesDashboard() {
         window.location.href = "{% url 'plugins:dashboard_plugin:prefixes' %}";
     }
-    
+
     function createDeviceChart(canvasId, data) {
         const ctx = document.getElementById(canvasId).getContext('2d');
         return new Chart(ctx, {
@@ -877,19 +913,14 @@ document.addEventListener('DOMContentLoaded', updateDashboard);
         });
     });
 
-    tippy('[data-tippy-content]', {
-        placement: 'top',
-        arrow: true
-    });
-
     function showNWHardwareDetails() {
-            document.getElementById('nwHardwareSection').style.display = 'block';
-            document.getElementById('nwSoftwareSection').style.display = 'none';
-            
-            // Create device charts for NW Hardware
-            createDeviceChart('accessPointChart', [48, 3, 2]);
-            createDeviceChart('switchChart', [421, 3, 43, 3]);
-            createDeviceChart('wirelessControllerChart', [6, 1, 0, 0]);
+        document.getElementById('nwHardwareSection').style.display = 'block';
+        document.getElementById('nwSoftwareSection').style.display = 'none';
+        
+        // Create device charts for NW Hardware
+        createDeviceChart('accessPointChart', [48, 3, 2]);
+        createDeviceChart('switchChart', [421, 3, 43, 3]);
+        createDeviceChart('wirelessControllerChart', [6, 1, 0, 0]);
     }
 
     function showNWSoftwareDetails() {
@@ -901,6 +932,10 @@ document.addEventListener('DOMContentLoaded', updateDashboard);
         createDeviceChart('iosXEChart', [1756, 0, 43, 1]);
         createDeviceChart('iosXRChart', [512, 0, 0, 0]);
     }
+
+    document.querySelector('.close-button').addEventListener('click', function() {
+                window.location.href = "/cio";
+                });
 
     function createDeviceChart(canvasId, data) {
         const ctx = document.getElementById(canvasId).getContext('2d');
@@ -927,6 +962,5 @@ document.addEventListener('DOMContentLoaded', updateDashboard);
             }
         });
     }
-
 </script>
 {% endblock %}

@@ -3,62 +3,807 @@
 {% load helpers %}
 
 {% block content %}
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkFlow</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js"></script>
-
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-
-    .work-in-progress {
-        text-align: center;
-        padding: 50px;
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .work-in-progress img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 10px;
-    }
-
-    .work-in-progress h2 {
-        margin-top: 20px;
-        font-size: 2rem;
-        color: #333;
-    }
-
-    .work-in-progress p {
-        margin-top: 10px;
-        font-size: 1.2rem;
-        color: #666;
-    }
-</style>
-
-<div class="container">
-    <div class="work-in-progress">
-        <img src="{% custom_branding_or_static 'logo' 'img/wip.png' %}" alt="Work in Progress">
-        <p>We are working hard to bring you new features. Stay tuned!</p>
+<!-- Dashboard Container -->
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="dashboard-header mb-4">
+    <h2>Network Observability Dashboard</h2>
+  </div>
+  
+  <!-- First Row -->
+  <div class=" row mb-2 dashboard-row">
+    <!-- KPI Metrics -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1" onclick="window.location.href = '{% url 'plugins:dashboard_plugin:kpi_metrics' %}'">
+        <h5>KPI Metrics</h5>
+        <div class="health-score">97.2%</div>
+        <div class="score-label">Overall Health Score</div>
+      </div>
     </div>
+    
+    <!-- Region Health Score -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"   onclick="window.location.href = '{% url 'plugins:dashboard_plugin:dashboard' %}'">
+        <h5>Region Health Score</h5>
+        <div class="region-chart" id="regionChart"></div>
+      </div>
+    </div>
+    
+    <!-- LCM Status -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"  onclick="window.location.href = '{% url 'plugins:dashboard_plugin:lcm_network' %}'">
+        <h5>LCM Status</h5>
+        <div class="lcm-gauge" id="lcmGauge">
+          <div class="gauge-center">
+            <div class="gauge-value">75%</div>
+          </div>
+        </div>
+        <div class="gauge-legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #27ae60;"></div>
+            <span>Compliant</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #3498db;"></div>
+            <span>In Progress</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #f1c40f;"></div>
+            <span>Pending</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #e74c3c;"></div>
+            <span>Alert</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Second Row -->
+  <div class="row mb-2 dashboard-row">
+    <!-- Application Experience -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"  onclick="window.location.href = '{% url 'plugins:dashboard_plugin:application_experience' %}'">
+        <h5>Application Experience</h5>
+        <div class="mb-3">
+            <div class="app-label d-flex justify-content-between">
+              <span>Office 365</span>
+              <span class="ms-indicator">28ms</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+            </div>
+          </div>
+        <div class="mb-3">
+            <div class="app-label d-flex justify-content-between">
+              <span>DNS Services</span>
+              <span class="ms-indicator">42ms</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 45%"></div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="app-label d-flex justify-content-between">
+              <span>ERP System</span>
+              <span class="ms-indicator">86ms</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar bg-warning" role="progressbar" style="width: 65%"></div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="app-label d-flex justify-content-between">
+              <span>CRM Portal</span>
+              <span class="ms-indicator">62ms</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 60%"></div>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Routing Observability -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"  '{% url 'plugins:dashboard_plugin:routing_observability' %}'">
+        <h5>Routing Observability</h5>
+        <div class="mb-3">
+          <div class="app-label">Route Changes (24h)</div>
+          <div class="route-changes">
+            <div class="change-item">
+              <div class="change-indicator change-added"></div>
+              <span>Added: 27</span>
+            </div>
+            <div class="change-item">
+              <div class="change-indicator change-deleted"></div>
+              <span>Deleted: 14</span>
+            </div>
+            <div class="change-item">
+              <div class="change-indicator change-modified"></div>
+              <span>Modified: 35</span>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="app-label">Routing Table Capacity</div>
+          <div class="progress">
+            <div class="progress-bar bg-primary" role="progressbar" style="width: 52%"></div>
+          </div>
+          <div class="text-center text-muted small">84,532 / 162,560 routes</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Capacity Planning -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"  onclick="window.location.href = '{% url 'plugins:dashboard_plugin:capacity_planning' %}'">
+        <h5>Capacity Planning</h5>
+        <div class="capacity-container">
+          <div class="capacity-rings" id="capacityRings"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Third Row -->
+  <div class="row mb-2 dashboard-row">
+    <!-- Inventory Management -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1" onclick="window.location.href='#'">
+        <h5>Inventory Management</h5>
+        <div class="inventory-item">
+          <span><i class="fas fa-network-wired text-primary"></i> Routers</span>
+          <span class="inventory-count">127</span>
+        </div>
+        <div class="inventory-item">
+          <span><i class="fas fa-random text-success"></i> Switches</span>
+          <span class="inventory-count">284</span>
+        </div>
+        <div class="inventory-item">
+          <span><i class="fas fa-shield-alt text-purple"></i> Firewalls</span>
+          <span class="inventory-count">56</span>
+        </div>
+        <div class="inventory-item">
+          <span><i class="fas fa-wifi text-warning"></i> Access Points</span>
+          <span class="inventory-count">192</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Top Talkers -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"  onclick="window.location.href='#'">
+        <h5>Top Talkers</h5>
+        <div class="talker-item">
+          <span class="talker-ip">192.168.1.254</span>
+          <div class="talker-bar" style="width: 85%;"></div>
+        </div>
+        <div class="talker-item">
+          <span class="talker-ip">10.0.0.123</span>
+          <div class="talker-bar" style="width: 75%;"></div>
+        </div>
+        <div class="talker-item">
+          <span class="talker-ip">172.16.5.87</span>
+          <div class="talker-bar" style="width: 65%;"></div>
+        </div>
+        <div class="talker-item">
+          <span class="talker-ip">192.168.10.15</span>
+          <div class="talker-bar" style="width: 45%;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- IM/CM Integration -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1" onclick="window.location.href='#'">
+        <h5>IM/CM Integration</h5>
+        <div class="integration-venn" id="integrationVenn"></div>
+        <div class="progress mt-3">
+          <div class="progress-bar bg-success" role="progressbar" style="width: 87%"></div>
+        </div>
+        <div class="text-center text-muted small">Integration Completion</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fourth Row -->
+<div class="row mb-2 dashboard-row">
+    <!-- AI Ops Score -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1" onclick="window.location.href = '{% url 'plugins:dashboard_plugin:ai_ops' %}'">
+        <h5>AI Ops Score</h5>
+        <div class="lcm-gauge" id="aiOpsGauge">
+          <div class="gauge-center">
+            <div class="gauge-value">82%</div>
+          </div>
+        </div>
+        <div class="text-center text-muted small">Anomaly Detection</div>
+      </div>
+    </div>
+    
+    <!-- Sustainability Score -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"  onclick="window.location.href = '{% url 'plugins:dashboard_plugin:sustainability_score' %}'">
+        <h5>Sustainability Score</h5>
+        <div class="mb-3">
+            <div class="app-label d-flex justify-content-between">
+              <span>Power Consumption</span>
+              <span class="ms-indicator">71%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="app-label d-flex justify-content-between">
+              <span>Carbon Footprint</span>
+              <span class="ms-indicator">63%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="app-label d-flex justify-content-between">
+              <span>E-Waste Reduction</span>
+              <span class="ms-indicator">79%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+            </div>
+        </div>
+    </div>
+    </div>
+        
+    
+    <!-- Vulnerability Score -->
+    <div class="col-md-4 custom-padding">
+      <div class="dashboard-card mx-1"  onclick="window.location.href = '{% url 'plugins:dashboard_plugin:vulnerability_score' %}'">
+        <h5>Vulnerability Score</h5>
+        <div class="lcm-gauge" id="vulnerabilityGauge">
+          <div class="gauge-center">
+            <div class="gauge-value">93%</div>
+          </div>
+        </div>
+        <div class="gauge-legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #27ae60;"></div>
+            <span>Patched: 93%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #e74c3c;"></div>
+            <span>Vulnerable: 7%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- CSS for the dashboard -->
+<style>
+  body {
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .dashboard-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .dashboard-row {
+    min-height: 270px;
+    }
+  
+  .dashboard-card {
+    background-color: #f0f3f5;
+    border-radius: 10px;
+    padding: 10px;
+    min-height: 250px;
+    height: 100%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  
+  .dashboard-card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+  
+  .dashboard-card h5 {
+    color: #34495e;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  
+  .health-score {
+    font-size: 6rem;
+    font-weight: bold;
+    color: #27ae60;
+    text-align: center;
+  }
+  
+  .score-label {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 3rem;
+  }
+  
+  .progress {
+    height: 10px;
+    margin-bottom: 5px;
+    border-radius: 20px;
+}
+  
+  .progress-slim {
+    height: 8px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+  }
+  
+  .app-label {
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  .region-chart {
+    height: 130px;
+    width: 100%;
+  }
+  
+  .inventory-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  
+  .inventory-count {
+    font-weight: bold;
+  }
+  
+  .talker-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .talker-bar {
+    flex-grow: 1;
+    margin-left: 15px;
+    background-color: #3498db;
+    border-radius: 3px;
+    height: 15px;
+  }
+  
+  .talker-ip {
+    font-family: monospace;
+    color: #34495e;
+    min-width: 110px;
+  }
+  
+  .route-changes {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+  
+  .change-item {
+    margin-right: 10px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .change-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    margin-right: 5px;
+  }
+  
+  .change-added {
+    background-color: #27ae60;
+  }
+  
+  .change-deleted {
+    background-color: #e74c3c;
+  }
+  
+  .change-modified {
+    background-color: #f39c12;
+  }
+  
+  .capacity-container {
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .capacity-rings {
+    display: flex;
+    justify-content: space-around;
+    height: 130px;
+  }
+  
+  .capacity-ring {
+    width: 30%;
+  }
+  
+  .integration-venn {
+    height: 120px;
+    position: relative;
+    margin: 0 auto;
+  }
+  
+  .lcm-gauge {
+    position: relative;
+    height: 130px;
+  }
+  
+  .gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+  }
+  
+  .gauge-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .gauge-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 0.7rem;
+    margin-top: 10px;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin: 0 5px 5px;
+  }
+  
+  .legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 3px;
+  }
+  
+  .ms-indicator {
+    color: #7f8c8d;
+    font-size: 0.8rem;
+  }
+
+  .text-purple {
+    color: #9b59b6;
+  }
+  .custom-padding {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+</style>
+
+<!-- Load JS dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+<!-- Charts JavaScript -->
 <script>
-    // Add any JavaScript if needed
+  document.addEventListener('DOMContentLoaded', function() {
+    // Region Health Score Chart
+    const regionCtx = document.createElement('canvas');
+    document.getElementById('regionChart').appendChild(regionCtx);
+    
+    new Chart(regionCtx, {
+      type: 'bar',
+      data: {
+        labels: ['APAC', 'EMEA', 'NA', 'SA', 'ANZ'],
+        datasets: [{
+          label: 'Health Score',
+          data: [88, 94, 96, 73, 92],
+          backgroundColor: [
+            '#3498db',
+            '#3498db',
+            '#3498db',
+            '#e74c3c',
+            '#3498db'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            display: false
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+    
+    // LCM Status Gauge
+    const lcmGauge = document.createElement('canvas');
+    document.getElementById('lcmGauge').appendChild(lcmGauge);
+    
+    new Chart(lcmGauge, {
+      type: 'doughnut',
+      data: {
+        labels: ['Compliant', 'In Progress', 'Pending', 'Alert'],
+        datasets: [{
+          data: [45, 20, 25, 10],
+          backgroundColor: [
+            '#27ae60',
+            '#3498db',
+            '#f1c40f',
+            '#e74c3c'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+    
+    // Capacity Planning Rings
+    const capacityRings = document.getElementById('capacityRings');
+    
+    // Create three ring containers
+    const ring1 = document.createElement('div');
+    ring1.className = 'capacity-ring';
+    
+    const ring2 = document.createElement('div');
+    ring2.className = 'capacity-ring';
+    
+    const ring3 = document.createElement('div');
+    ring3.className = 'capacity-ring';
+    
+    capacityRings.appendChild(ring1);
+    capacityRings.appendChild(ring2);
+    capacityRings.appendChild(ring3);
+    
+    // Create canvas elements for the rings
+    const ring1Canvas = document.createElement('canvas');
+    const ring2Canvas = document.createElement('canvas');
+    const ring3Canvas = document.createElement('canvas');
+    
+    ring1.appendChild(ring1Canvas);
+    ring2.appendChild(ring2Canvas);
+    ring3.appendChild(ring3Canvas);
+    
+    // Create the doughnut charts for each ring
+    const ringData = [
+      {
+        values: [65, 35],
+        colors: ['#3498db', '#f5fffa']
+      },
+      {
+        values: [45, 55],
+        colors: ['#27ae60', '#f5fffa']
+      },
+      {
+        values: [80, 20],
+        colors: ['#9b59b6', '#f5fffa']
+      }
+    ];
+    
+    // Create the charts
+    new Chart(ring1Canvas, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: ringData[0].values,
+          backgroundColor: ringData[0].colors,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+    
+    new Chart(ring2Canvas, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: ringData[1].values,
+          backgroundColor: ringData[1].colors,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+    
+    new Chart(ring3Canvas, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: ringData[2].values,
+          backgroundColor: ringData[2].colors,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+    
+    // IM/CM Integration Venn Diagram
+    const vennCanvas = document.createElement('canvas');
+    document.getElementById('integrationVenn').appendChild(vennCanvas);
+    
+    const vennChart = new Chart(vennCanvas, {
+      type: 'pie',
+      data: {
+        labels: ['IM', 'Integration', 'CM'],
+        datasets: [{
+          data: [30, 40, 30],
+          backgroundColor: [
+            'rgba(52, 152, 219, 0.7)',
+            'rgba(46, 204, 113, 0.7)',
+            'rgba(46, 204, 113, 0.7)'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+    
+    // Add center text
+    const vennCenterText = document.createElement('div');
+    vennCenterText.style.position = 'absolute';
+    vennCenterText.style.top = '50%';
+    vennCenterText.style.left = '50%';
+    vennCenterText.style.transform = 'translate(-50%, -50%)';
+    vennCenterText.style.textAlign = 'center';
+    vennCenterText.style.zIndex = '10';
+    vennCenterText.innerHTML = '<div style="font-size: 1.4rem; font-weight: bold;">87%</div>';
+    document.getElementById('integrationVenn').appendChild(vennCenterText);
+    
+    // Add IM and CM labels
+    const imLabel = document.createElement('div');
+    imLabel.style.position = 'absolute';
+    imLabel.style.top = '50%';
+    imLabel.style.left = '25%';
+    imLabel.style.transform = 'translate(-50%, -50%)';
+    imLabel.style.fontWeight = 'bold';
+    imLabel.innerHTML = 'IM';
+    document.getElementById('integrationVenn').appendChild(imLabel);
+    
+    const cmLabel = document.createElement('div');
+    cmLabel.style.position = 'absolute';
+    cmLabel.style.top = '50%';
+    cmLabel.style.left = '75%';
+    cmLabel.style.transform = 'translate(-50%, -50%)';
+    cmLabel.style.fontWeight = 'bold';
+    cmLabel.innerHTML = 'CM';
+    document.getElementById('integrationVenn').appendChild(cmLabel);
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // AI Ops Score Gauge
+    const aiOpsGauge = document.createElement('canvas');
+    document.getElementById('aiOpsGauge').appendChild(aiOpsGauge);
+    
+    new Chart(aiOpsGauge, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [82, 18],
+          backgroundColor: [
+            '#3498db',
+            '#f5f7fa'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+    
+    // Vulnerability Score Gauge
+    const vulnerabilityGauge = document.createElement('canvas');
+    document.getElementById('vulnerabilityGauge').appendChild(vulnerabilityGauge);
+    
+    new Chart(vulnerabilityGauge, {
+      type: 'doughnut',
+      data: {
+        labels: ['Patched', 'Vulnerable'],
+        datasets: [{
+          data: [93, 7],
+          backgroundColor: [
+            '#27ae60',
+            '#e74c3c'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  });
 </script>
 {% endblock %}
