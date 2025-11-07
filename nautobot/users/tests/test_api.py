@@ -172,7 +172,6 @@ class TokenTest(APIViewTestCases.APIViewTestCase):
 
         self.tokens = [*tokens, self.token]
 
-        self.basic_auth_user_password = "abc123"  # noqa: S105  # hardcoded-password-string -- OK as this is test code
         self.basic_auth_user_granted = User.objects.create_user(
             username="basicusergranted", password=self.basic_auth_user_password
         )

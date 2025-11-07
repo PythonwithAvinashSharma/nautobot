@@ -235,8 +235,7 @@ class SeleniumTestCase(StaticLiveServerTestCase, testing.NautobotTestCaseMixin):
 
     def setUp(self):
         super().setUpNautobot(populate_status=True)
-
-        self.password = "testpassword"  # noqa: S105  # hardcoded-password-string
+        
         self.user.set_password(self.password)
         self.user.save()
 

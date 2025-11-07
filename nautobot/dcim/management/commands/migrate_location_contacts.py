@@ -193,9 +193,6 @@ class Command(BaseCommand):
         self.stdout.write(f"    contact phone: {phone!r}")
         self.stdout.write(f"    contact email: {email!r}")
 
-        while not name:
-            name = input(f"Name is required. Enter a name for the new {model._meta.model_name.title()}: ")
-
         try:
             contact = model(
                 name=name,
